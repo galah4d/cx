@@ -704,8 +704,8 @@ func runtimeErrorInfo (r interface{}, printStack bool) {
 	if DBG_GOLANG_STACK_TRACE {
 		debug.PrintStack()
 	}
-	
-	os.Exit(3)
+
+    os.Exit(CX_RUNTIME_ERROR)
 }
 
 func RuntimeError () {
@@ -724,7 +724,6 @@ func RuntimeError () {
 		default:
 			runtimeErrorInfo(r, true)
 		}
-        os.Exit(CX_RUNTIME_ERROR)
 	}
 }
 

@@ -335,6 +335,42 @@ func op_len(expr *CXExpression, fp int) {
 	}
 }
 
+func op_resize(expr *CXExpression, fp int) {
+    inp1 := expr.Inputs[0]
+    var count int32 = ReadI32(fp, expr.Inputs[1])
+    if count >= 0 {
+       elt := GetAssignmentElement(inp1)
+
+        if elt.IsSlice {
+            preInp1Offset := GetFinalOffset(fp, inp1)
+
+            var inp1Offset int32
+            encoder.DeserializeAtomic(PROGRAM.Memory[preInp1Offset : preInp1Offset + TYPE_POINTER_SIZE], &inp1Offset)
+            if inp1Offset == 0 {
+                panic(CX_RUNTIME_INVALID_ARGUMENT)
+            } else if inp1Offset > 0 {
+                copy(PROGRAM.Memory[inp1Offset + OBJECT_HEADER_SIZE: inp1Offset + OBJECT_HEADER_SIZE + 4], encoder.SerializeAtomic(count))
+            }
+        } else {
+            panic(CX_RUNTIME_INVALID_ARGUMENT)
+        }
+    } else {
+        panic(CX_RUNTIME_INVALID_ARGUMENT)
+    }
+}
+
+/*func op_copy(expr *CXExpression, fp int) {
+    dstInput = expr.Inputs[0]
+    srcInput = expr.Inputs[1]
+    dstElement = GetAssignmentElement(dstInput)
+    srcElement = GetAssignmentElement(srcInput)
+    if dstElement.IsSlice && srcElement.IsSlice {
+        
+    } else {
+        panic(CX_RUNTIME_INVALID_ARGUMENT)
+    }
+}*/
+
 func op_append (expr *CXExpression, fp int) {
 	inp1, inp2, out1 := expr.Inputs[0], expr.Inputs[1], expr.Outputs[0]
 	

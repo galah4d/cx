@@ -199,7 +199,7 @@ func serializeName (name string, s *sAll) (int32, int32) {
 	var size int
 	var err error
 	
-	size, err = encoder.Size(name)
+	size = encoder.Size(name)
 	
 	if err != nil {
 		panic(err)
@@ -771,15 +771,15 @@ func Serialize (prgrm *CXProgram) (byts []byte) {
 
 	// assigning relative offset
 
-	idxSize, _ := encoder.Size(s.Index)
-	prgrmSize, _ := encoder.Size(s.Program)
-	callSize, _ := encoder.Size(s.Calls)
-	pkgSize, _ := encoder.Size(s.Packages)
-	strctSize, _ := encoder.Size(s.Structs)
-	fnSize, _ := encoder.Size(s.Functions)
-	exprSize, _ := encoder.Size(s.Expressions)
-	argSize, _ := encoder.Size(s.Arguments)
-	intSize, _ := encoder.Size(s.Integers)
+	idxSize := encoder.Size(s.Index)
+	prgrmSize := encoder.Size(s.Program)
+	callSize := encoder.Size(s.Calls)
+	pkgSize := encoder.Size(s.Packages)
+	strctSize := encoder.Size(s.Structs)
+	fnSize := encoder.Size(s.Functions)
+	exprSize := encoder.Size(s.Expressions)
+	argSize := encoder.Size(s.Arguments)
+	intSize := encoder.Size(s.Integers)
 
 	// assigning absolute offset
 	sIdx.ProgramOffset += int32(idxSize)
@@ -1158,7 +1158,7 @@ func initDeserialization (prgrm *CXProgram, s *sAll) {
 
 func Deserialize (byts []byte) (prgrm *CXProgram) {
 	prgrm = &CXProgram{}
-	idxSize, _ := encoder.Size(sIndex{})
+	idxSize := encoder.Size(sIndex{})
 
 	var s sAll
 	

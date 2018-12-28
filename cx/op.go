@@ -290,6 +290,31 @@ func FromF64(in float64) []byte {
 // 	return offset, size
 // }
 
+func ReadF32Slice(fp int, inp *CXArgument) (out []float32) {
+	elt := GetAssignmentElement(inp)
+    if elt.IsSlice && inp.Type == TYPE_F32 {
+        var offset int32 = int32(GetFinalOffset(fp, inp))
+		var pointerOffset int32
+		encoder.DeserializeAtomic(PROGRAM.Memory[offset : offset + TYPE_POINTER_SIZE], &pointerOffset)
+		if pointerOffset > 0 {
+            var sliceHeaderOffset int32 = pointerOffset + OBJECT_HEADER_SIZE
+		    sliceHeader := PROGRAM.Memory[sliceHeaderOffset : sliceHeaderOffset + SLICE_HEADER_SIZE]
+            var sliceLen int32
+            encoder.DeserializeAtomic(sliceHeader[:4], &sliceLen)
+
+            if sliceLen > 0 {
+                var dataOffset int32 = sliceHeaderOffset + SLICE_HEADER_SIZE
+                sliceData := PROGRAM.Memory[dataOffset : dataOffset + sliceLen * int32(elt.TotalSize)]
+                sliceData = append(encoder.SerializeAtomic(int32(len(sliceData) / elt.TotalSize)), sliceData...)
+                encoder.DeserializeRaw(sliceData, &out)
+            }
+        }
+    } else {
+        panic(CX_RUNTIME_INVALID_ARGUMENT)
+    }
+    return
+}
+
 func ReadF32A(fp int, inp *CXArgument) (out []float32) {
 	offset := GetFinalOffset(fp, inp)
 	byts := ReadMemory(offset, inp)

@@ -2,17 +2,23 @@ package base
 
 import (
 	"fmt"
-	"github.com/satori/go.uuid"
+
+	uuid "github.com/satori/go.uuid"
 	"github.com/skycoin/skycoin/src/cipher/encoder"
 )
 
-var HeapOffset int
-var genSymCounter int
+// Var
+var (
+	HeapOffset    int
+	genSymCounter int
+)
 
-func MakeElementID () uuid.UUID {
+// MakeElementID ...
+func MakeElementID() uuid.UUID {
 	return uuid.NewV4()
 }
 
+// MakeGenSym ...
 func MakeGenSym(name string) string {
 	gensym := fmt.Sprintf("%s_%d", name, genSymCounter)
 	genSymCounter++
@@ -20,32 +26,34 @@ func MakeGenSym(name string) string {
 	return gensym
 }
 
+// MakeGlobal ...
 func MakeGlobal(name string, typ int, fileName string, fileLine int) *CXArgument {
 	size := GetArgSize(typ)
 	global := &CXArgument{
-		ElementID:  MakeElementID(),
-		Name:       name,
-		Type:       typ,
-		Size:       size,
-		Offset:     HeapOffset,
-		FileName:   fileName,
-		FileLine:   fileLine,
+		ElementID: MakeElementID(),
+		Name:      name,
+		Type:      typ,
+		Size:      size,
+		Offset:    HeapOffset,
+		FileName:  fileName,
+		FileLine:  fileLine,
 	}
 	HeapOffset += size
 	return global
 }
 
+// MakeField ...
 func MakeField(name string, typ int, fileName string, fileLine int) *CXArgument {
 	return &CXArgument{
 		ElementID: MakeElementID(),
-		Name: name,
-		Type: typ,
-		FileName: fileName,
-		FileLine: fileLine,
+		Name:      name,
+		Type:      typ,
+		FileName:  fileName,
+		FileLine:  fileLine,
 	}
 }
 
-// Used only for native types
+// MakeDefaultValue Used only for native types
 func MakeDefaultValue(typName string) *[]byte {
 	var zeroVal []byte
 	switch typName {
@@ -59,15 +67,17 @@ func MakeDefaultValue(typName string) *[]byte {
 	return &zeroVal
 }
 
+// MakeArgument ...
 func MakeArgument(name string, fileName string, fileLine int) *CXArgument {
 	return &CXArgument{
 		ElementID: MakeElementID(),
-		Name: name,
-		FileName: fileName,
-		FileLine: fileLine,}
+		Name:      name,
+		FileName:  fileName,
+		FileLine:  fileLine}
 }
 
-func MakeNative(opCode int, inputs []int, outputs []int) *CXFunction {
+// MakeNative ...
+func MakeNative(opCode int, inputs, outputs []*CXArgument) *CXFunction {
 	fn := &CXFunction{
 		ElementID: MakeElementID(),
 		OpCode:    opCode,
@@ -75,15 +85,18 @@ func MakeNative(opCode int, inputs []int, outputs []int) *CXFunction {
 	}
 
 	offset := 0
-	for _, typCode := range inputs {
-		inp := MakeArgument("", "", -1).AddType(TypeNames[typCode])
+	for _, inp := range inputs {
+		// for _, typCode := range inputs {
+		// inp := MakeArgument("", "", -1).AddType(TypeNames[typCode])
 		inp.Offset = offset
 		offset += inp.Size
 		fn.Inputs = append(fn.Inputs, inp)
 	}
-	for _, typCode := range outputs {
-		fn.Outputs = append(fn.Outputs, MakeArgument("", "", -1).AddType(TypeNames[typCode]))
-		out := MakeArgument("", "", -1).AddType(TypeNames[typCode])
+	for _, out := range outputs {
+		// for _, typCode := range outputs {
+		// fn.Outputs = append(fn.Outputs, MakeArgument("", "", -1).AddType(TypeNames[typCode]))
+		// out := MakeArgument("", "", -1).AddType(TypeNames[typCode])
+		fn.Outputs = append(fn.Outputs, out)
 		out.Offset = offset
 		offset += out.Size
 	}
@@ -91,28 +104,24 @@ func MakeNative(opCode int, inputs []int, outputs []int) *CXFunction {
 	return fn
 }
 
+// MakeValue ...
 func MakeValue(value string) *[]byte {
 	byts := encoder.Serialize(value)
 	return &byts
 }
 
+// MakeCall ...
 func MakeCall(op *CXFunction) CXCall {
 	return CXCall{
-		Operator:      op,
-		Line:          0,
-		FramePointer:  0,
+		Operator:     op,
+		Line:         0,
+		FramePointer: 0,
 		// Package:       pkg,
 		// Program:       prgrm,
 	}
 }
 
-// func MakeAffordance(desc string, action func()) *CXAffordance {
-// 	return &CXAffordance{
-// 		Description: desc,
-// 		Action:      action,
-// 	}
-// }
-
+// MakeIdentityOpName ...
 func MakeIdentityOpName(typeName string) string {
 	switch typeName {
 	case "str":
@@ -291,6 +300,7 @@ func MakeIdentityOpName(typeName string) string {
 // 	}
 // }
 
+// MakeCallStack ...
 func MakeCallStack(size int) []CXCall {
 	return make([]CXCall, 0)
 	// return &CXCallStack{

@@ -5,7 +5,7 @@ import (
 )
 
 func DeclareGlobal(declarator *CXArgument, declaration_specifiers *CXArgument,
-                   initializer []*CXExpression, doesInitialize bool) {
+	initializer []*CXExpression, doesInitialize bool) {
 	if pkg, err := PRGRM.GetCurrentPackage(); err == nil {
 		DeclareGlobalInPackage(pkg, declarator, declaration_specifiers, initializer, doesInitialize)
 	} else {
@@ -14,7 +14,7 @@ func DeclareGlobal(declarator *CXArgument, declaration_specifiers *CXArgument,
 }
 func DeclareGlobalInPackage(pkg *CXPackage, declarator *CXArgument, declaration_specifiers *CXArgument, initializer []*CXExpression, doesInitialize bool) {
 	declaration_specifiers.Package = pkg
-	
+
 	if glbl, err := PRGRM.GetGlobal(declarator.Name); err == nil {
 		// then it is already defined
 
@@ -22,11 +22,11 @@ func DeclareGlobalInPackage(pkg *CXPackage, declarator *CXArgument, declaration_
 			// then it was only added a reference to the symbol
 			var offExpr []*CXExpression
 			if declaration_specifiers.IsSlice {
-					offExpr = WritePrimary(declaration_specifiers.Type,
-							       make([]byte, declaration_specifiers.Size), true)
+				offExpr = WritePrimary(declaration_specifiers.Type,
+					make([]byte, declaration_specifiers.Size), true)
 			} else {
-					offExpr = WritePrimary(declaration_specifiers.Type,
-							       make([]byte, declaration_specifiers.TotalSize), true)
+				offExpr = WritePrimary(declaration_specifiers.Type,
+					make([]byte, declaration_specifiers.TotalSize), true)
 			}
 
 			glbl.Offset = offExpr[0].Outputs[0].Offset
@@ -43,10 +43,10 @@ func DeclareGlobalInPackage(pkg *CXPackage, declarator *CXArgument, declaration_
 
 				*glbl = *declaration_specifiers
 
-				initializer[len(initializer) - 1].AddInput(initializer[len(initializer) - 1].Outputs[0])
-				initializer[len(initializer) - 1].Outputs = nil
-				initializer[len(initializer) - 1].AddOutput(glbl)
-				initializer[len(initializer) - 1].Operator = Natives[OP_IDENTITY]
+				initializer[len(initializer)-1].AddInput(initializer[len(initializer)-1].Outputs[0])
+				initializer[len(initializer)-1].Outputs = nil
+				initializer[len(initializer)-1].AddOutput(glbl)
+				initializer[len(initializer)-1].Operator = Natives[OP_IDENTITY]
 
 				SysInitExprs = append(SysInitExprs, initializer...)
 			} else {
@@ -56,14 +56,14 @@ func DeclareGlobalInPackage(pkg *CXPackage, declarator *CXArgument, declaration_
 				declaration_specifiers.PassBy = glbl.PassBy
 
 				*glbl = *declaration_specifiers
-				
-				if initializer[len(initializer) - 1].IsStructLiteral {
+
+				if initializer[len(initializer)-1].IsStructLiteral {
 					initializer = StructLiteralAssignment([]*CXExpression{&CXExpression{Outputs: []*CXArgument{glbl}}}, initializer)
 				} else {
-					initializer[len(initializer) - 1].Outputs = nil
-					initializer[len(initializer) - 1].AddOutput(glbl)
+					initializer[len(initializer)-1].Outputs = nil
+					initializer[len(initializer)-1].AddOutput(glbl)
 				}
-				
+
 				SysInitExprs = append(SysInitExprs, initializer...)
 			}
 		} else {
@@ -86,32 +86,34 @@ func DeclareGlobalInPackage(pkg *CXPackage, declarator *CXArgument, declaration_
 				// then it's a literal
 
 				declaration_specifiers.Name = declarator.Name
+				declaration_specifiers.FileLine = declarator.FileLine
 				declaration_specifiers.Offset = offExpr[0].Outputs[0].Offset
 				declaration_specifiers.Size = offExpr[0].Outputs[0].Size
 				declaration_specifiers.TotalSize = offExpr[0].Outputs[0].TotalSize
 				declaration_specifiers.Package = pkg
 
-				initializer[len(initializer) - 1].Operator = Natives[OP_IDENTITY]
-				initializer[len(initializer) - 1].AddInput(initializer[len(initializer) - 1].Outputs[0])
-				initializer[len(initializer) - 1].Outputs = nil
-				initializer[len(initializer) - 1].AddOutput(declaration_specifiers)
-				
+				initializer[len(initializer)-1].Operator = Natives[OP_IDENTITY]
+				initializer[len(initializer)-1].AddInput(initializer[len(initializer)-1].Outputs[0])
+				initializer[len(initializer)-1].Outputs = nil
+				initializer[len(initializer)-1].AddOutput(declaration_specifiers)
+
 				pkg.AddGlobal(declaration_specifiers)
 
 				SysInitExprs = append(SysInitExprs, initializer...)
 			} else {
 				// then it's an expression
 				declaration_specifiers.Name = declarator.Name
+				declaration_specifiers.FileLine = declarator.FileLine
 				declaration_specifiers.Offset = offExpr[0].Outputs[0].Offset
 				declaration_specifiers.Size = offExpr[0].Outputs[0].Size
 				declaration_specifiers.TotalSize = offExpr[0].Outputs[0].TotalSize
 				declaration_specifiers.Package = pkg
 
-				if initializer[len(initializer) - 1].IsStructLiteral {
+				if initializer[len(initializer)-1].IsStructLiteral {
 					initializer = StructLiteralAssignment([]*CXExpression{&CXExpression{Outputs: []*CXArgument{declaration_specifiers}}}, initializer)
 				} else {
-					initializer[len(initializer) - 1].Outputs = nil
-					initializer[len(initializer) - 1].AddOutput(declaration_specifiers)
+					initializer[len(initializer)-1].Outputs = nil
+					initializer[len(initializer)-1].AddOutput(declaration_specifiers)
 				}
 
 				pkg.AddGlobal(declaration_specifiers)
@@ -122,17 +124,18 @@ func DeclareGlobalInPackage(pkg *CXPackage, declarator *CXArgument, declaration_
 			// exprOut := expr[0].Outputs[0]
 
 			declaration_specifiers.Name = declarator.Name
+			declaration_specifiers.FileLine = declarator.FileLine
 			declaration_specifiers.Offset = offExpr[0].Outputs[0].Offset
 			declaration_specifiers.Size = offExpr[0].Outputs[0].Size
 			declaration_specifiers.TotalSize = offExpr[0].Outputs[0].TotalSize
 			declaration_specifiers.Package = pkg
-			
+
 			pkg.AddGlobal(declaration_specifiers)
 		}
 	}
 }
 
-func DeclareStruct (ident string, strctFlds []*CXArgument) {
+func DeclareStruct(ident string, strctFlds []*CXArgument) {
 	if pkg, err := PRGRM.GetCurrentPackage(); err == nil {
 		if strct, err := PRGRM.GetStruct(ident, pkg.Name); err == nil {
 			strct.Fields = nil
@@ -163,10 +166,10 @@ func DeclarePackage(ident string) {
 	}
 }
 
-func DeclareImport (ident string, currentFile string, lineNo int) {
+func DeclareImport(ident string, currentFile string, lineNo int) {
 	if pkg, err := PRGRM.GetCurrentPackage(); err == nil {
 		if _, err := pkg.GetImport(ident); err != nil {
-			
+
 			if imp, err := PRGRM.GetPackage(ident); err == nil {
 				pkg.AddImport(imp)
 			} else {
@@ -190,7 +193,7 @@ func DeclareImport (ident string, currentFile string, lineNo int) {
 	}
 }
 
-func DeclareLocal (declarator *CXArgument, declaration_specifiers *CXArgument, initializer []*CXExpression, doesInitialize bool) []*CXExpression {
+func DeclareLocal(declarator *CXArgument, declaration_specifiers *CXArgument, initializer []*CXExpression, doesInitialize bool) []*CXExpression {
 	if FoundCompileErrors {
 		return nil
 	}
@@ -204,6 +207,7 @@ func DeclareLocal (declarator *CXArgument, declaration_specifiers *CXArgument, i
 				expr.Package = pkg
 
 				declaration_specifiers.Name = declarator.Name
+				declaration_specifiers.FileLine = declarator.FileLine
 				declaration_specifiers.Package = pkg
 				declaration_specifiers.PreviouslyDeclared = true
 
@@ -214,6 +218,7 @@ func DeclareLocal (declarator *CXArgument, declaration_specifiers *CXArgument, i
 			} else {
 				// then it's an expression (it has an operator)
 				declaration_specifiers.Name = declarator.Name
+				declaration_specifiers.FileLine = declarator.FileLine
 				declaration_specifiers.Package = pkg
 				declaration_specifiers.PreviouslyDeclared = true
 
@@ -237,6 +242,7 @@ func DeclareLocal (declarator *CXArgument, declaration_specifiers *CXArgument, i
 			expr.Package = pkg
 
 			declaration_specifiers.Name = declarator.Name
+			declaration_specifiers.FileLine = declarator.FileLine
 			declaration_specifiers.Package = pkg
 			declaration_specifiers.PreviouslyDeclared = true
 			expr.AddOutput(declaration_specifiers)
@@ -296,7 +302,7 @@ func DeclarationSpecifiers(declSpec *CXArgument, arraySize int, opTyp int) *CXAr
 		return arg
 	case DECL_BASIC:
 		arg := declSpec
-		arg.DeclarationSpecifiers = append(arg.DeclarationSpecifiers, DECL_BASIC)
+		// arg.DeclarationSpecifiers = append(arg.DeclarationSpecifiers, DECL_BASIC)
 		arg.TotalSize = arg.Size
 		return arg
 	}
@@ -315,11 +321,11 @@ func DeclarationSpecifiersBasic(typ int) *CXArgument {
 		// equivalent to slice of strings
 		return DeclarationSpecifiers(arg, 0, DECL_SLICE)
 	}
-	
+
 	return DeclarationSpecifiers(arg, 0, DECL_BASIC)
 }
 
-func DeclarationSpecifiersStruct (ident string, pkgName string, isExternal bool, currentFile string, lineNo int) *CXArgument {
+func DeclarationSpecifiersStruct(ident string, pkgName string, isExternal bool, currentFile string, lineNo int) *CXArgument {
 	if isExternal {
 		// custom type in an imported package
 		if pkg, err := PRGRM.GetCurrentPackage(); err == nil {

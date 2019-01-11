@@ -1,0 +1,103 @@
+package app
+
+import "argv"
+import "cx"
+import "os"
+
+func Help(name str, message str, exitCode i32) {
+	printf(message)
+	printf("%s usage:\n", name)
+	printf("++help   : Prints this message.\n")
+	printf("++width  : Width in pixels\n")
+	printf("++height : Height in pixels\n")
+	printf("++fps    : Target framerate, vsyng disabled when >= 0\n")
+	printf("++hints  : Window hint flags (fullscreen, resizable)\n")
+	printf("++resx   : Resource path\n")
+	os.Exit(exitCode)
+}
+
+type Options struct {
+	width i32
+	height i32
+	fps i32
+	hints i32
+	resx str
+}
+
+var APP_HINT_NONE i32       = 0
+var APP_HINT_DEBUG i32      = 1
+var APP_HINT_FULLSCREEN i32 = 2
+var APP_HINT_RESIZABLE i32  = 4
+
+func ParseOptions(name str) (out Options) {
+	argc := len(os.Args)
+
+	// >> tmp issue #214
+	var width i32
+	var height i32
+	var fps i32
+	var hints i32
+	var resx str
+	// << tmp issue #214
+
+	out.width = 800
+	out.height = 600
+	out.fps = 60
+	out.hints = APP_HINT_NONE
+	out.resx = ""
+
+	var helpMatch bool
+	var widthMatch bool
+	var heightMatch bool
+	var fpsMatch bool
+	var hintsMatch bool
+	var resxMatch bool
+
+	var hintNames []str
+	hintNames = []str {"fullscreen", "resizable" }
+	var hintValues []i32
+	hintValues = []i32 {APP_HINT_FULLSCREEN, APP_HINT_RESIZABLE}
+
+	for a := 0; a < argc; a++ {
+		arg := os.Args[a]
+
+		if argv.Match(arg, "++help", &helpMatch) {
+			Help(name, "", 0)
+		}
+
+		if argv.GetValueI32(arg, "++width=", &width, &widthMatch) {
+			if (width < 0 || width > 65536) {
+				 Help(name, sprintf("invalid value %s\n", arg), cx.PANIC)
+			}
+			out.width = width
+			continue
+		}
+
+		if argv.GetValueI32(arg, "++height=", &height, &heightMatch) {
+			if (height < 0 || height > 65536) {
+				 Help(name, sprintf("invalid value %s\n", arg), cx.PANIC)
+			}
+			out.height = height
+			continue
+		}
+
+		if argv.GetValueI32(arg, "++fps=", &fps, &fpsMatch) {
+			if (out.fps < 0 || out.fps > 65536) {
+				 Help(name, sprintf("invalid value %s\n", arg), cx.PANIC)
+			}
+			out.fps = fps
+			continue
+		}
+
+		if argv.GetValueStr(arg, "++resx=", &resx, &resxMatch) {
+			out.resx = resx
+			continue
+		}
+
+		if argv.GetFlags(arg, "++hints=", &hints, &hintsMatch, hintNames, hintValues) {
+			continue
+		}
+	}
+}
+
+

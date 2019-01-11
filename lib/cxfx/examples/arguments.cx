@@ -1,0 +1,14 @@
+package main
+
+import "app"
+import "argv"
+
+func main()() {
+	var o app.Options = app.ParseOptions("arguments.cx")
+	printf("width : %d\n", o.width)
+	printf("height : %d\n", o.height)
+	printf("fps : %d\n", o.fps)
+	printf("hints : %d\n", o.hints)
+	printf("resx : %s\n", o.resx)
+}
+

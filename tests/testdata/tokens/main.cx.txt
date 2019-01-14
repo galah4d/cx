@@ -1141,7 +1141,8 @@ LPAREN
 RPAREN 
  REFOP &
 LPAREN 
-INTLIT -1
+ SUBOP -
+INTLIT 1
 BXOROP 
  IDENT disabledTests
 RPAREN 
@@ -1747,7 +1748,7 @@ PERIOD
 STRLIT No compilation error when using an using an invalid identifier
 RPAREN 
 SCOLON 
- IDENT runTestEx
+ IDENT runTest
 LPAREN 
 STRLIT issue-51a.cx issue-51.cx
  COMMA 
@@ -1756,13 +1757,9 @@ PERIOD
  IDENT SUCCESS
  COMMA 
 STRLIT Silent name clash between packages
- COMMA 
- IDENT TEST_ISSUE
- COMMA 
-INTLIT 0
 RPAREN 
 SCOLON 
- IDENT runTestEx
+ IDENT runTest
 LPAREN 
 STRLIT issue-51.cx issue-51a.cx
  COMMA 
@@ -1771,13 +1768,9 @@ PERIOD
  IDENT SUCCESS
  COMMA 
 STRLIT Silent name clash between packages
- COMMA 
- IDENT TEST_ISSUE
- COMMA 
-INTLIT 0
 RPAREN 
 SCOLON 
- IDENT runTestEx
+ IDENT runTest
 LPAREN 
 STRLIT issue-52.cx
  COMMA 
@@ -1786,25 +1779,17 @@ PERIOD
  IDENT COMPILATION_ERROR
  COMMA 
 STRLIT Invalid implicit cast.
- COMMA 
- IDENT TEST_ISSUE
- COMMA 
-INTLIT 0
 RPAREN 
 SCOLON 
- IDENT runTestEx
+ IDENT runTest
 LPAREN 
 STRLIT issue-53.cx
  COMMA 
  IDENT cx
 PERIOD 
- IDENT SUCCESS
+ IDENT COMPILATION_ERROR
  COMMA 
 STRLIT Panic when using +* in an expression
- COMMA 
- IDENT TEST_ISSUE
- COMMA 
-INTLIT 0
 RPAREN 
 SCOLON 
  IDENT runTestEx
@@ -1822,7 +1807,7 @@ STRLIT No compilation error when defining a struct with duplicate fields.
 INTLIT 0
 RPAREN 
 SCOLON 
- IDENT runTestEx
+ IDENT runTest
 LPAREN 
 STRLIT issue-55.cx
  COMMA 
@@ -1831,10 +1816,6 @@ PERIOD
  IDENT SUCCESS
  COMMA 
 STRLIT Can't define struct with a single character identifier.
- COMMA 
- IDENT TEST_ISSUE
- COMMA 
-INTLIT 0
 RPAREN 
 SCOLON 
  IDENT runTest
@@ -2048,7 +2029,7 @@ PERIOD
  COMMA 
 STRLIT can't prefix a (f32) variable with minus to flip it's signedness
  COMMA 
- IDENT TEST_ISSUE
+ IDENT TEST_STABLE
  COMMA 
 INTLIT 0
 RPAREN 
@@ -2425,7 +2406,7 @@ PERIOD
  COMMA 
 STRLIT Parser gets confused with `2 -2`
  COMMA 
- IDENT TEST_ISSUE
+ IDENT TEST_STABLE
  COMMA 
 INTLIT 0
 RPAREN 
@@ -2618,6 +2599,17 @@ STRLIT Argument type deduction failed when passing address of an i32 struct fiel
  IDENT TEST_ISSUE
  COMMA 
 INTLIT 0
+RPAREN 
+SCOLON 
+ IDENT runTest
+LPAREN 
+STRLIT issue-218.cx
+ COMMA 
+ IDENT cx
+PERIOD 
+ IDENT COMPILATION_ERROR
+ COMMA 
+STRLIT Type checking is not working with receiving variables of unexpected types
 RPAREN 
 SCOLON 
    VAR 

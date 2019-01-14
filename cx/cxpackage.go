@@ -7,30 +7,36 @@ import (
 	. "github.com/satori/go.uuid" //nolint golint
 )
 
-/* The CXPackage struct contains information about a CX package.
- */
-
-// CXPackage ...
+// CXPackage is used to represent a CX package.
+//
 type CXPackage struct {
-	Imports         []*CXPackage
-	Functions       []*CXFunction
-	Structs         []*CXStruct
-	Globals         []*CXArgument
-	Name            string
+	// Metadata
+	Name      string // Name of the package
+	ElementID UUID
+
+	// Contents
+	Imports   []*CXPackage  // imported packages
+	Functions []*CXFunction // declared functions in this package
+	Structs   []*CXStruct   // declared structs in this package
+	Globals   []*CXArgument // declared global variables in this package
+
+	// Used by the REPL and parser
 	CurrentFunction *CXFunction
 	CurrentStruct   *CXStruct
-	ElementID       UUID
 }
 
-// MakePackage ...
+// MakePackage creates a new empty CXPackage.
+//
+// It can be filled in later with imports, structs, globals and functions.
+//
 func MakePackage(name string) *CXPackage {
 	return &CXPackage{
 		ElementID: MakeElementID(),
 		Name:      name,
 		Globals:   make([]*CXArgument, 0, 10),
 		Imports:   make([]*CXPackage, 0),
-		Functions: make([]*CXFunction, 0, 10),
 		Structs:   make([]*CXStruct, 0),
+		Functions: make([]*CXFunction, 0, 10),
 	}
 }
 
@@ -129,15 +135,6 @@ func (pkg *CXPackage) GetGlobal(defName string) (*CXArgument, error) {
 			break
 		}
 	}
-
-	// for _, imp := range pkg.Imports {
-	// 	for _, def := range imp.Globals {
-	// 		if def.Name == defName {
-	// 			foundDef = def
-	// 			break
-	// 		}
-	// 	}
-	// }
 
 	if foundDef != nil {
 		return foundDef, nil
@@ -276,7 +273,6 @@ func (pkg *CXPackage) RemoveStruct(strctName string) {
 
 // AddGlobal ...
 func (pkg *CXPackage) AddGlobal(def *CXArgument) *CXPackage {
-	// def.Program = pkg.Program
 	def.Package = pkg
 	found := false
 	for i, df := range pkg.Globals {
@@ -289,6 +285,7 @@ func (pkg *CXPackage) AddGlobal(def *CXArgument) *CXPackage {
 	if !found {
 		pkg.Globals = append(pkg.Globals, def)
 	}
+
 	return pkg
 }
 

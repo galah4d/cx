@@ -1,10 +1,19 @@
 package actions
 
 import (
+	"errors"
 	"fmt"
+	
 	. "github.com/skycoin/cx/cx"
 )
 
+// FunctionHeader takes a function name ('ident') and either creates the
+// function if it's not known before or returns the already existing function
+// if it is.
+//
+// If the function is a method (isMethod = true), then it adds the object that
+// it's called on as the first argument.
+//
 func FunctionHeader(ident string, receiver []*CXArgument, isMethod bool) *CXFunction {
 	if isMethod {
 		if len(receiver) > 1 {
@@ -202,7 +211,28 @@ func undOutputSize(expr *CXExpression) int {
 	}
 }
 
+// checkSameNativeType checks if all the inputs of an expression are of the same type.
+// It is used mainly to prevent implicit castings in arithmetic operations
+func checkSameNativeType (expr *CXExpression) error {
+	if len(expr.Inputs) < 1 {
+		return errors.New("cannot perform arithmetic without operands")
+	}
+	var typ int = expr.Inputs[0].Type
+	for _, inp := range expr.Inputs {
+		if inp.Type != typ {
+			return errors.New("operands are not of the same type")
+		}
+		typ = inp.Type
+	}
+	return nil
+}
+
 func ProcessUndExpression(expr *CXExpression) {
+	if expr.Operator != nil && IsUndOp(expr.Operator) {
+		if err := checkSameNativeType(expr); err != nil {
+			println(CompilationError(CurrentFile, LineNo), err.Error())
+		}
+	}
 	if expr.IsUndType {
 		for _, out := range expr.Outputs {
 			out.Size = undOutputSize(expr)
@@ -361,6 +391,38 @@ func GetFormattedType (arg *CXArgument) string {
 	return typ
 }
 
+func checkMatchParamTypes (expr *CXExpression, expected, received []*CXArgument, isInputs bool) {
+	for i, inp := range expected {
+		expectedType := GetFormattedType(expected[i])
+		receivedType := GetFormattedType(received[i])
+
+		if expr.IsMethodCall && expected[i].IsPointer && i == 0 {
+			// if method receiver is pointer, remove *
+			if expectedType[0] == '*' {
+				// we need to check if it's not an `str`
+				// otherwise we end up removing the `s` instead of a `*`
+				expectedType = expectedType[1:]
+			}
+		}
+
+		if expectedType != receivedType && inp.Type != TYPE_UNDEFINED {
+			var opName string
+			if expr.Operator.IsNative {
+				opName = OpNames[expr.Operator.OpCode]
+			} else {
+				opName = expr.Operator.Name
+			}
+
+			if isInputs {
+				println(CompilationError(received[i].FileName, received[i].FileLine), fmt.Sprintf("function '%s' expected input argument of type '%s'; '%s' was provided", opName, expectedType, receivedType))
+			} else {
+				println(CompilationError(expr.Outputs[i].FileName, expr.Outputs[i].FileLine), fmt.Sprintf("function '%s' expected receiving variable of type '%s'; '%s' was provided", opName, expectedType, receivedType))
+			}
+			
+		}
+	}
+}
+
 func CheckTypes(expr *CXExpression) {
 	if expr.Operator != nil {
 		opName := ExprOpName(expr)
@@ -387,7 +449,7 @@ func CheckTypes(expr *CXExpression) {
 			}
 		}
 
-		// checking if number of expr.Outputs match number of Operator.Outputs
+		// checking if number of expr.Outputs matches number of Operator.Outputs
 		if len(expr.Outputs) != len(expr.Operator.Outputs) {
 			var plural1 string
 			var plural2 string = "s"
@@ -403,6 +465,7 @@ func CheckTypes(expr *CXExpression) {
 		}
 	}
 
+	// assignments
 	if expr.Operator != nil && expr.Operator.IsNative && expr.Operator.OpCode == OP_IDENTITY {
 		for i, _ := range expr.Inputs {
 			var expectedType string
@@ -435,29 +498,14 @@ func CheckTypes(expr *CXExpression) {
 		}
 	}
 
-	// checking inputs matching operator's inputs
 	if expr.Operator != nil {
 		// then it's a function call and not a declaration
-		for i, inp := range expr.Operator.Inputs {
-			expectedType := GetFormattedType(expr.Operator.Inputs[i])
-			receivedType := GetFormattedType(expr.Inputs[i])
 
-			if expr.IsMethodCall && expr.Operator.Inputs[i].IsPointer && i == 0 {
-				// if method receiver is pointer, remove *
-				expectedType = expectedType[1:]
-			}
+		// checking inputs matching operator's inputs
+		checkMatchParamTypes(expr, expr.Operator.Inputs, expr.Inputs, true)
 
-			if expectedType != receivedType && inp.Type != TYPE_UNDEFINED {
-				var opName string
-				if expr.Operator.IsNative {
-					opName = OpNames[expr.Operator.OpCode]
-				} else {
-					opName = expr.Operator.Name
-				}
-
-				println(CompilationError(expr.Inputs[i].FileName, expr.Inputs[i].FileLine), fmt.Sprintf("function '%s' expected input argument of type '%s'; '%s' was provided", opName, expectedType, receivedType))
-			}
-		}
+		// checking outputs matching operator's outputs
+		checkMatchParamTypes(expr, expr.Operator.Outputs, expr.Outputs, false)
 	}
 }
 

@@ -12,7 +12,7 @@ func Help(name str, message str, exitCode i32) {
 	printf("++height : Height in pixels\n")
 	printf("++fps    : Target framerate, vsyng disabled when >= 0\n")
 	printf("++hints  : Window hint flags (fullscreen, resizable)\n")
-	printf("++resx   : Resource path\n")
+	printf("++data   : Resource path\n")
 	os.Exit(exitCode)
 }
 
@@ -21,7 +21,7 @@ type Options struct {
 	height i32
 	fps i32
 	hints i32
-	resx str
+	dataDir str
 }
 
 var APP_HINT_NONE i32       = 0
@@ -29,29 +29,23 @@ var APP_HINT_DEBUG i32      = 1
 var APP_HINT_FULLSCREEN i32 = 2
 var APP_HINT_RESIZABLE i32  = 4
 
-func ParseOptions(name str) (out Options) {
-	argc := len(os.Args)
+func (this *Options) ParseOptions(name str) {
+	var argc i32 = len(os.Args) // ISSUE : doubious compilation error : function 'len' expected receiving variable of type 'i32'; 'str' was provided
 
 	// >> tmp issue #214
 	var width i32
 	var height i32
 	var fps i32
 	var hints i32
-	var resx str
+	var dataDir str
 	// << tmp issue #214
-
-	out.width = 800
-	out.height = 600
-	out.fps = 60
-	out.hints = APP_HINT_NONE
-	out.resx = ""
 
 	var helpMatch bool
 	var widthMatch bool
 	var heightMatch bool
 	var fpsMatch bool
 	var hintsMatch bool
-	var resxMatch bool
+	var dataDirMatch bool
 
 	var hintNames []str
 	hintNames = []str {"fullscreen", "resizable" }
@@ -69,7 +63,7 @@ func ParseOptions(name str) (out Options) {
 			if (width < 0 || width > 65536) {
 				 Help(name, sprintf("invalid value %s\n", arg), cx.PANIC)
 			}
-			out.width = width
+			this.width = width
 			continue
 		}
 
@@ -77,20 +71,20 @@ func ParseOptions(name str) (out Options) {
 			if (height < 0 || height > 65536) {
 				 Help(name, sprintf("invalid value %s\n", arg), cx.PANIC)
 			}
-			out.height = height
+			this.height = height
 			continue
 		}
 
 		if argv.GetValueI32(arg, "++fps=", &fps, &fpsMatch) {
-			if (out.fps < 0 || out.fps > 65536) {
+			if (this.fps < 0 || this.fps > 65536) {
 				 Help(name, sprintf("invalid value %s\n", arg), cx.PANIC)
 			}
-			out.fps = fps
+			this.fps = fps
 			continue
 		}
 
-		if argv.GetValueStr(arg, "++resx=", &resx, &resxMatch) {
-			out.resx = resx
+		if argv.GetValueStr(arg, "++data=", &dataDir, &dataDirMatch) {
+			this.dataDir = dataDir
 			continue
 		}
 

@@ -1,0 +1,28 @@
+package main
+
+import "app"
+import "fps"
+
+func main()() {
+	var o app.Options
+	o.fps = 60
+	o.ParseOptions("framerate.cx")
+
+	printf("width : %d\n", o.width)
+	printf("height : %d\n", o.height)
+	printf("fps : %d\n", o.fps)
+	printf("hints : %d\n", o.hints)
+	printf("data : %s\n", o.dataDir)
+
+	var f fps.Framerate
+	f.Init(i32.f64(o.fps))
+
+	var running bool = true
+	for running == true {
+		f.BeginUpdate(1.0D)
+
+		// ...
+
+		f.EndUpdate()
+	}
+}

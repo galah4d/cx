@@ -1,0 +1,80 @@
+package fps
+
+import "time"
+
+//-----------------------------------------------------------------------------
+// Framerate ...
+//-----------------------------------------------------------------------------
+type Framerate struct {
+	currentTime f64
+	previousTime f64
+	deltaTime f64
+	fpsTime f64
+	frameTime f64
+	fps f64
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func DeltaTime(f *Framerate) (value f64) { // ##2 issue workaround
+	value = (*f).deltaTime
+}
+
+//-----------------------------------------------------------------------------
+// Init ...
+//-----------------------------------------------------------------------------
+func (this *Framerate) Init(targetFps f64) {
+	this.currentTime = i64.f64(time.UnixNano()) / 1000000000.0D
+	this.previousTime = this.currentTime
+	this.deltaTime = 0.0D
+	this.fpsTime = 0.0D
+	this.frameTime = 0.0D
+	if targetFps > 0.0D {
+		this.frameTime = 1.0D / targetFps
+	}
+	this.fps = 0.0D
+}
+
+//-----------------------------------------------------------------------------
+// BeginUpdate ...
+//-----------------------------------------------------------------------------
+func (this *Framerate) BeginUpdate(elapsed f64) {
+	var tmp i64 = time.UnixNano()
+	this.currentTime = i64.f64(tmp) / 1000000000.0D
+
+	this.deltaTime = this.currentTime - this.previousTime
+	if this.deltaTime == this.currentTime {
+		this.deltaTime = this.frameTime
+	}
+
+	var full bool = false
+	if (this.currentTime - this.fpsTime > elapsed) {
+		this.fpsTime = this.currentTime
+		printf("fps : %d, dt : %fms\n", f64.i32((this.fps + 1.0D) / elapsed), f64.f32(this.deltaTime * 1000.0D))
+		this.fps = 0.0D
+		full = true
+		PrintProfiles() // ISSUE : garbage value when : len(g_profiles)
+	} else {
+		this.fps = this.fps + 1.0D
+	}
+
+	ClearProfiles(full) // ISSUE : garbage value when : len(g_profiles)
+}
+
+//-----------------------------------------------------------------------------
+// EndUpdate ...
+//-----------------------------------------------------------------------------
+func (this *Framerate) EndUpdate() {
+	if this.frameTime > 0.0 {
+		var updateTime f64 = i64.f64(time.UnixNano()) / 1000000000.0D
+
+		var deltaUpdateTime f64 = updateTime - this.currentTime
+		if (deltaUpdateTime < this.frameTime) {
+			var sleepTime f64 = 1000.0D * (this.frameTime - deltaUpdateTime)
+			time.Sleep(f64.i32(sleepTime))
+		}
+	}
+
+	this.previousTime = this.currentTime
+}
+

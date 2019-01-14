@@ -1,0 +1,42 @@
+package main
+
+import "app"
+import "fps"
+
+func main()() {
+	var o app.Options
+	o.fps = 60
+	o.ParseOptions("framerate.cx")
+
+	printf("width : %d\n", o.width)
+	printf("height : %d\n", o.height)
+	printf("fps : %d\n", o.fps)
+	printf("hints : %d\n", o.hints)
+	printf("data : %s\n", o.dataDir)
+
+	var f fps.Framerate
+	f.Init(i32.f64(o.fps))
+
+	var prfFrame fps.ProfileId = fps.CreateProfile("frame")
+	var prfUpdate fps.ProfileId = fps.CreateProfile("update")
+	var prfRender fps.ProfileId = fps.CreateProfile("render")
+
+	var running bool = true
+	for running == true {
+		f.BeginUpdate(2.0D)
+
+		fps.Start(prfFrame)
+
+		fps.Start(prfUpdate)
+		// Update ...
+		fps.Stop(prfUpdate)
+
+		fps.Start(prfRender)
+		// Render ...
+		fps.Stop(prfRender)
+
+		fps.Stop(prfFrame)
+
+		f.EndUpdate()
+	}
+}

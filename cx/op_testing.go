@@ -2,7 +2,6 @@ package base
 
 import (
 	"fmt"
-	"os"
 	// "github.com/skycoin/skycoin/src/cipher/encoder"
 )
 
@@ -70,7 +69,22 @@ func opTest(expr *CXExpression, fp int) {
 
 func opPanic(expr *CXExpression, fp int) {
 	if assert(expr, fp) == false {
-		os.Exit(CX_ASSERT)
+		fmt.Printf("%s : %d, %s\n", expr.FileName, expr.FileLine, ReadStr(fp, expr.Inputs[1]))
+		panic(CX_ASSERT)
+	}
+}
+
+func opPanicIf(expr *CXExpression, fp int) {
+	if ReadBool(fp, expr.Inputs[0]) {
+		fmt.Printf("%s : %d, %s\n", expr.FileName, expr.FileLine, ReadStr(fp, expr.Inputs[1]))
+		panic(CX_ASSERT)
+	}
+}
+
+func opPanicIfNot(expr *CXExpression, fp int) {
+	if ReadBool(fp, expr.Inputs[0]) == false {
+		fmt.Printf("%s : %d, %s\n", expr.FileName, expr.FileLine, ReadStr(fp, expr.Inputs[1]))
+		panic(CX_ASSERT)
 	}
 }
 

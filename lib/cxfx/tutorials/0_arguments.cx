@@ -4,7 +4,7 @@ import "app"
 
 func main()() {
 	var o app.Options
-	o.ParseOptions("arguments.cx")
+	o.Parse()
 
 	printf("width : %d\n", o.width)
 	printf("height : %d\n", o.height)

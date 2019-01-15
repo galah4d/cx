@@ -6,7 +6,7 @@ import "fps"
 func main()() {
 	var o app.Options
 	o.fps = 60
-	o.ParseOptions("framerate.cx")
+	o.Parse()
 
 	printf("width : %d\n", o.width)
 	printf("height : %d\n", o.height)
@@ -22,10 +22,10 @@ func main()() {
 	var prfRender fps.ProfileId = fps.CreateProfile("render")
 
 	var running bool = true
-	for running == true {
+	for running == true { // ISSUE : can't use 1, can't use true
 		f.BeginUpdate(2.0D)
 
-		fps.Start(prfFrame)
+		fps.Start(prfFrame) // ISSUE : can't use member function
 
 		fps.Start(prfUpdate)
 		// Update ...

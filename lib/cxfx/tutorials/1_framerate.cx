@@ -6,7 +6,7 @@ import "fps"
 func main()() {
 	var o app.Options
 	o.fps = 60
-	o.ParseOptions("framerate.cx")
+	o.Parse()
 
 	printf("width : %d\n", o.width)
 	printf("height : %d\n", o.height)

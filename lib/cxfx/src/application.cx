@@ -2,11 +2,34 @@ package app
 
 import "argv"
 import "cx"
+import "glfw"
 import "os"
 
-func Help(name str, message str, exitCode i32) {
+//-----------------------------------------------------------------------------
+// HINTS ...
+//-----------------------------------------------------------------------------
+var APP_HINT_NONE i32       = 0
+var APP_HINT_DEBUG i32      = 1
+var APP_HINT_FULLSCREEN i32 = 2
+var APP_HINT_RESIZABLE i32  = 4
+
+//-----------------------------------------------------------------------------
+// Options ...
+//-----------------------------------------------------------------------------
+type Options struct {
+	width i32
+	height i32
+	fps i32
+	hints i32
+	dataDir str
+}
+
+//-----------------------------------------------------------------------------
+// Help ...
+//-----------------------------------------------------------------------------
+func Help(message str, exitCode i32) {
 	printf(message)
-	printf("%s usage:\n", name)
+	printf("Usage:\n")
 	printf("++help   : Prints this message.\n")
 	printf("++width  : Width in pixels\n")
 	printf("++height : Height in pixels\n")
@@ -16,20 +39,10 @@ func Help(name str, message str, exitCode i32) {
 	os.Exit(exitCode)
 }
 
-type Options struct {
-	width i32
-	height i32
-	fps i32
-	hints i32
-	dataDir str
-}
-
-var APP_HINT_NONE i32       = 0
-var APP_HINT_DEBUG i32      = 1
-var APP_HINT_FULLSCREEN i32 = 2
-var APP_HINT_RESIZABLE i32  = 4
-
-func (this *Options) ParseOptions(name str) {
+//-----------------------------------------------------------------------------
+// Parse ...
+//-----------------------------------------------------------------------------
+func (this *Options) Parse() {
 	var argc i32 = len(os.Args) // ISSUE : doubious compilation error : function 'len' expected receiving variable of type 'i32'; 'str' was provided
 
 	// >> tmp issue #214
@@ -56,12 +69,12 @@ func (this *Options) ParseOptions(name str) {
 		arg := os.Args[a]
 
 		if argv.Match(arg, "++help", &helpMatch) {
-			Help(name, "", 0)
+			Help("", 0)
 		}
 
 		if argv.GetValueI32(arg, "++width=", &width, &widthMatch) {
 			if (width < 0 || width > 65536) {
-				 Help(name, sprintf("invalid value %s\n", arg), cx.PANIC)
+				 Help(sprintf("invalid value %s\n", arg), cx.PANIC)
 			}
 			this.width = width
 			continue
@@ -69,7 +82,7 @@ func (this *Options) ParseOptions(name str) {
 
 		if argv.GetValueI32(arg, "++height=", &height, &heightMatch) {
 			if (height < 0 || height > 65536) {
-				 Help(name, sprintf("invalid value %s\n", arg), cx.PANIC)
+				 Help(sprintf("invalid value %s\n", arg), cx.PANIC)
 			}
 			this.height = height
 			continue
@@ -77,7 +90,7 @@ func (this *Options) ParseOptions(name str) {
 
 		if argv.GetValueI32(arg, "++fps=", &fps, &fpsMatch) {
 			if (this.fps < 0 || this.fps > 65536) {
-				 Help(name, sprintf("invalid value %s\n", arg), cx.PANIC)
+				 Help(sprintf("invalid value %s\n", arg), cx.PANIC)
 			}
 			this.fps = fps
 			continue
@@ -94,4 +107,97 @@ func (this *Options) ParseOptions(name str) {
 	}
 }
 
+//-----------------------------------------------------------------------------
+// Application ...
+//-----------------------------------------------------------------------------
+type Application struct {
+	options Options
+	exit bool
+	name str
+	window str
+	major i32
+	minor i32
+}
 
+//-----------------------------------------------------------------------------
+// Init ...
+//-----------------------------------------------------------------------------
+func (this *Application) Init(options Options, name str, window str, major i32, minor i32) {
+
+	this.options = options
+	this.exit = false
+	this.window = window
+	this.name = name
+	this.major = major
+	this.minor = minor
+
+	printf("starting %s...\n", this.name)
+
+	glfw.Init() // ##0 terminate
+	glfw.WindowHint(glfw.Resizable, glfw.False)
+	glfw.WindowHint(glfw.ContextVersionMajor, this.major)
+	glfw.WindowHint(glfw.ContextVersionMinor, this.minor)
+	glfw.CreateWindow(this.window, this.options.width, this.options.height, this.name)
+	glfw.MakeContextCurrent(this.window)
+
+	var swapInterval i32 = 0
+	if this.options.fps > 0 {
+		swapInterval = 1 // should be based on targetFps
+	}
+
+	glfw.SwapInterval(swapInterval)
+
+	//glfw.SetWindowPos(window, 100, 100) //1500, 100)
+	// xPos, yPos := glfw.GetCursorPos("window")
+}
+
+//-----------------------------------------------------------------------------
+// Exit ...
+//-----------------------------------------------------------------------------
+func (this *Application) Exit() {
+	printf("exiting %s...\n", this.name)
+	this.exit = true
+}
+
+//-----------------------------------------------------------------------------
+// Running ...
+//-----------------------------------------------------------------------------
+func Running(this *Application) (out bool) { // ISSUE : member function does not contain expressions
+	out = (glfw.ShouldClose(this.window) == false && this.exit == false)
+}
+
+//-----------------------------------------------------------------------------
+// BeginFrame ...
+//-----------------------------------------------------------------------------
+func (this *Application) BeginFrame() {
+	glfw.MakeContextCurrent(this.window)
+}
+
+//-----------------------------------------------------------------------------
+// EndFrame ...
+//-----------------------------------------------------------------------------
+func (this *Application) EndFrame() {
+	glfw.PollEvents()
+	glfw.SwapBuffers(this.window)
+}
+
+//-----------------------------------------------------------------------------
+// SetKeyboardCallback ...
+//-----------------------------------------------------------------------------
+func (this *Application) SetKeyboardCallback(packageName str, functionName str) {
+	glfw.SetKeyCallbackEx(this.window, functionName, packageName)
+}
+
+//-----------------------------------------------------------------------------
+// SetMouseButtonCallback ...
+//-----------------------------------------------------------------------------
+func (this *Application) SetMouseButtonCallback(packageName str, functionName str) {
+	glfw.SetMouseButtonCallbackEx(this.window, functionName, packageName)
+}
+
+//-----------------------------------------------------------------------------
+// SetMousePositionCallback ...
+//-----------------------------------------------------------------------------
+func (this *Application) SetMousePositionCallback(packageName str, functionName str) {
+	glfw.SetCursorPosCallbackEx(this.window, functionName, packageName)
+}

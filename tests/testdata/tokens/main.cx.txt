@@ -1929,7 +1929,7 @@ STRLIT No compilation error when dereferencing an i32 var.
 INTLIT 0
 RPAREN 
 SCOLON 
- IDENT runTestEx
+ IDENT runTest
 LPAREN 
 STRLIT issue-63.cx
  COMMA 
@@ -1938,10 +1938,6 @@ PERIOD
  IDENT SUCCESS
  COMMA 
 STRLIT Wrong pointer behaviour.
- COMMA 
- IDENT TEST_ISSUE
- COMMA 
-INTLIT 0
 RPAREN 
 SCOLON 
  IDENT runTestEx

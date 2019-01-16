@@ -1,0 +1,1863 @@
+//-----------------------------------------------------------------------------
+// gfx
+//-----------------------------------------------------------------------------
+package gfx
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+import "gl"
+import "gltext"
+import "mat"
+import "os"
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+var g_vaos []i32
+var g_vbos []i32
+//var g_shaders[]i32
+var g_programs []i32
+var g_textures []i32
+var g_framebuffers []i32
+
+var g_sizeofFloat i32 = 4
+
+var g_colorMaskRed bool = true
+var g_colorMaskGreen bool = true
+var g_colorMaskBlue bool = true
+var g_colorMaskAlpha bool = true
+
+var g_blend bool = false
+var g_srcBlend i32 = 0
+var g_dstBlend i32 = 0
+
+var g_depthTest bool = false
+var g_depthFunc i32 = gl.LESS
+var g_depthMask bool = true
+
+var g_stencilTest bool = false
+var g_stencilWrite i32 = 256
+var g_stencilFunc i32 = gl.ALWAYS
+var g_stencilFuncRef i32 = 0
+var g_stencilFuncMask i32 = 256
+var g_stencilOpFail i32 = gl.KEEP
+var g_stencilOpDepthFail i32 = gl.KEEP
+var g_stencilOpDepthPass i32 = gl.KEEP
+
+var g_clearColor mat.v4
+var g_clearDepth f64
+var g_clearStencil i32
+
+var gfx_width f32 = 0.0
+var gfx_height f32 = 0.0
+var gfx_viewportSize mat.v2 = mat.v2_zero
+var gfx_viewportBounds mat.v4 = mat.v4_zero
+var gfx_ratio_x f32 = 1.0
+var gfx_ratio_y  f32 = 1.0
+var gfx_red mat.v4
+var gfx_green mat.v4
+var gfx_blue mat.v4
+var gfx_pink mat.v4
+var gfx_white mat.v4
+var gfx_black mat.v4
+var gfx_zero mat.v4
+
+var gfx_viewportX i32 = 0
+var gfx_viewportY i32 = 0
+var gfx_viewportWidth i32 = 0
+var gfx_viewportHeight i32 = 0
+
+var gfx_scissor bool = false
+var gfx_scissorX i32 = 0
+var gfx_scissorY i32 = 0
+var gfx_scissorWidth i32 = 0
+var gfx_scissorHeight i32 = 0
+
+var g_scissors[]mat.v4
+
+var g_vertexColorAttributes []i32
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func glerror() (error bool) {
+	error = false
+	var glerr i32 = -1
+	for glerr != 0  {
+		glerr = gl.GetError()
+		if  glerr != 0 {
+			error = true
+			if glerr == gl.INVALID_ENUM {
+				printf("GL_INVALID_ENUM\n")
+			} else if glerr == gl.INVALID_VALUE {
+				printf("GL_INVALID_VALUE\n")
+			} else if glerr == gl.INVALID_OPERATION {
+				printf("GL_INVALID_OPERATION\n")
+			} else if glerr == gl.STACK_OVERFLOW {
+				printf("GL_STACK_OVERFLOW\n")
+			} else if glerr == gl.STACK_UNDERFLOW {
+				printf("GL_STACK_UNDERFLOW\n")
+			} else if glerr == gl.OUT_OF_MEMORY {
+				printf("GL_OUT_OF_MEMORY\n")
+			} else if glerr != 0 {
+				panicIfNot(false, "invalid glError\n")
+			}
+		}
+	}
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func no_glerror() (noerror bool) {
+	var error bool = glerror()
+	noerror = error == false // panic if noerror = (glerror() == false)
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func glstatus() (error bool) {
+	error = false
+	var glstat i32
+	glstat = gl.CheckFramebufferStatus(gl.FRAMEBUFFER)
+	panicIf(glerror(), "CheckFramebufferStatus")
+	if (glstat != gl.FRAMEBUFFER_COMPLETE) {
+		error = true;
+		if (glstat == gl.FRAMEBUFFER_UNDEFINED) {
+			printf("GL_FRAMEBUFFER_UNDEFINED\n")
+		} else if (glstat == gl.FRAMEBUFFER_INCOMPLETE_ATTACHMENT) {
+			printf("GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT\n")
+		} else if (glstat == gl.FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT) {
+			printf("GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT\n")
+		} else if (glstat == gl.FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER) {
+			printf("GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER\n")
+		} else if (glstat == gl.FRAMEBUFFER_INCOMPLETE_READ_BUFFER) {
+			printf("GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER\n")
+		} else if (glstat == gl.FRAMEBUFFER_UNSUPPORTED) {
+			printf("GL_FRAMEBUFFER_UNSUPPORTED\n")
+		} else if (glstat == gl.FRAMEBUFFER_INCOMPLETE_MULTISAMPLE) {
+			printf("GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE\n")
+		} else if (glstat == gl.FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS) {
+			printf("GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS\n")
+		} else {
+			panicIfNot(false, "invalid glFramebufferStatus")
+		}
+	}
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func no_glstatus() (nostatus bool) {
+	var status bool = glstatus()
+	nostatus = status == false // panic if nostatus = (glstatus() == false)
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+type attribute_s struct {
+	location i32
+	name str
+}
+
+func attribute_(location i32, name str) (out attribute_s) {
+	out.location = location
+	out.name = name
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+type sampler_s struct {
+	location i32
+	name str
+}
+
+func sampler_(location i32, name str) (out sampler_s) {
+	out.location = location
+	out.name = name
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+type uniform_s struct {
+	location i32
+	name str
+	Type i32
+}
+
+func uniform_(location i32, name str) (out uniform_s) {
+	out.location = location
+	out.name = name
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func create_program(vertex str, pixel str)(program i32) {
+	// vertex shader
+	var vertexShader i32 = gl.CreateShader(gl.VERTEX_SHADER)
+	panicIf(glerror(), "gl.CreateShader")
+	//shaders = append(shaders, vertexShader) // cache shader creationg
+	//++shaderCount
+
+	gl.ShaderSource(vertexShader, 1, vertex)
+	panicIf(glerror(), "gl.ShaderSource")
+
+	gl.CompileShader(vertexShader)
+	panicIf(glerror(), "gl.CompileShader")
+
+	// pixel shader
+	var pixelShader i32 = gl.CreateShader(gl.FRAGMENT_SHADER)
+	panicIf(glerror(), "gl.CreateShader")
+	//shaders = append(shaders, pixelShader) // cache shader creation
+	//++shaderCount
+
+	gl.ShaderSource(pixelShader, 1, pixel)
+	panicIf(glerror(), "gl.ShaderSource")
+
+	gl.CompileShader(pixelShader)
+	panicIf(glerror(), "gl.CompileShader")
+
+	// program
+	program = gl.CreateProgram()
+	panicIf(glerror(), "gl.CreateProgram")
+	g_programs = append(g_programs, program)
+
+	gl.AttachShader(program, vertexShader)
+	panicIf(glerror(), "gl.AttachShader")
+
+	gl.AttachShader(program, pixelShader)
+	panicIf(glerror(), "gl.AttachShader")
+
+	gl.LinkProgram(program)
+	panicIf(glerror(), "gl.LinkProgram")
+
+	gl.DetachShader(program, vertexShader)
+	panicIf(glerror(), "gl.LinkProgram")
+
+	gl.DetachShader(program, pixelShader)
+	panicIf(glerror(), "gl.DetachShader")
+
+	gl.DeleteShader(vertexShader)
+	panicIf(glerror(), "gl.DeleteShader")
+
+	gl.DeleteShader(pixelShader)
+	panicIf(glerror(), "gl.DeleteShader")
+
+	return program
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func use_program(program i32) {
+	//printf("use_program(%d)\n", program)
+	gl.UseProgram(program)
+	panicIf(glerror(), "gl.UseProgram")
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func bind_attribute(program i32, location i32, name str) () {
+
+	gl.BindAttribLocation(program, location, name)
+	panicIf(glerror(), "gl.BindAttribute")
+
+	var newLocation i32 = gl.GetAttribLocation(program, name)
+	panicIf(glerror(), "gl.GetAttribLocation")
+	panicIfNot(newLocation == location, "attribute not found\n")
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func bind_texture(program i32, name str) (sampler i32) {
+	sampler = bind_uniform(program, name)
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func bind_uniform(program i32, name str) (uniform i32) {
+	uniform = gl.GetUniformLocation(program, name) // ##2 crash find a way to test if str is present in gl.Strs
+	panicIf(glerror(), "gl.GetUniformLocation")
+	panicIfNot(uniform >= 0, "uniform>= 0")
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func assign_texture(slot i32, sampler i32, texture i32) () {
+	gl.ActiveTexture(gl.TEXTURE0 + slot)
+	panicIf(glerror(), "gl.ActiveTexture")
+
+	gl.BindTexture(gl.TEXTURE_2D, texture)
+	panicIf(glerror(), "gl.BindTexture")
+
+	gl.Uniform1i(sampler, slot)
+	panicIf(glerror(), "gl.Uniform1i")
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func assign_float(slot i32, value f32) {
+	gl.Uniform1f(slot, value)
+	panicIf(glerror(), "gl.Uniform1f")
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+type effect_id struct {
+	effect i32
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+type effect_s struct {
+	id effect_id
+	program i32
+	vertex str
+	pixel str
+	attributes []attribute_s
+	samplers []sampler_s
+	uniforms []uniform_s
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+var g_effects[] effect_s
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func invalid_effect() (out effect_id) {
+	out.effect = -1
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func is_valid_effect(id effect_id) (out bool) {
+	out = id.effect >= 0 && id.effect < len(g_effects)// && is_valid_program(id.program) ##2 program id ??
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func create_effect(vertex str, pixel str) (out effect_id) {
+	out.effect = len(g_effects)
+
+	var effect effect_s
+	effect.id = out
+	effect.program = create_program(vertex, pixel)
+	effect.vertex = vertex
+	effect.pixel = pixel
+
+	g_effects = append(g_effects, effect)
+
+	panicIfNot(is_valid_effect(out), "create_effect : invalid effect id")
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func effect_is_valid_sampler_slot(id effect_id, slot i32) (out bool) {
+	panicIfNot(is_valid_effect(id), "effect_is_valid_sampler_slot : invalid effect id")
+	out = slot >= 0 && slot < len(g_effects[id.effect].samplers)
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func effect_is_valid_uniform_slot(id effect_id, slot i32) (out bool) {
+	panicIfNot(is_valid_effect(id), "effect_is_valid_uniform : invalid effect id")
+	out = slot >= 0 && slot < len(g_effects[id.effect].uniforms)
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func effect_use(id effect_id) () {
+	panicIfNot(is_valid_effect(id), "effect_use : invalid id")
+	use_program(g_effects[id.effect].program)
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func effect_assign_texture(id effect_id, slot i32, texture i32) () {
+	panicIfNot(is_valid_effect(id), "effect_assign_texture : invalid id")
+	panicIfNot(effect_is_valid_sampler_slot(id, slot), "effect_assign_texture : invalid sampler slot")
+	assign_texture(slot, g_effects[id.effect].samplers[slot].location, texture)
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func effect_assign_float(id effect_id, slot i32, value f32) {
+	panicIfNot(is_valid_effect(id), "effect_assign_float : invalid id")
+	panicIfNot(effect_is_valid_uniform_slot(id, slot), "effect_assign_float : invalid uniform slot")
+	assign_float(g_effects[id.effect].uniforms[slot].location, value)
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func effect_bind_attribute(id effect_id, location i32, name str) {
+	panicIfNot(is_valid_effect(id), "effect_bind_attribute : invalid id")
+	//printf("BIND_ATTRIBUTE %d, %d\n", id.effect, len(g_effects))
+	var p i32 = g_effects[id.effect].program
+	bind_attribute(g_effects[id.effect].program, location, name)
+	g_effects[id.effect].attributes = append(g_effects[id.effect].attributes, attribute_(location, name))
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func effect_bind_sampler(id effect_id, name str) {
+	panicIfNot(is_valid_effect(id), "effect_bind_sampler : invalid id")
+	var location i32 = bind_texture(g_effects[id.effect].program, name)
+	g_effects[id.effect].samplers = append(g_effects[id.effect].samplers, sampler_(location, name))
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func effect_bind_uniform(id effect_id, name str) {
+	panicIfNot(is_valid_effect(id), "effect_bind_uniform : invalid_id")
+	var location i32 = bind_uniform(g_effects[id.effect].program, name)
+	g_effects[id.effect].uniforms = append(g_effects[id.effect].uniforms, uniform_(location, name))
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+var g_fxVertexColor effect_id = invalid_effect()
+var g_fxTexture	 effect_id = invalid_effect()
+//var g_fxFont		effect_id = invalid_effect()
+var g_fxTrans_0	 effect_id = invalid_effect()
+var g_fxTrans_1	 effect_id = invalid_effect()
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+type texture_s struct {
+	name i32
+	width i32
+	height i32
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func invalid_texture() (out texture_s) {
+	out.name = -1
+	out.width = 0
+	out.height = 0
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+type target_s struct {
+	framebuffer i32
+	texture texture_s
+}
+
+func invalid_target()(out target_s) {
+	out.framebuffer = -1
+	out.texture = invalid_texture()
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func is_valid_target(t target_s) (out bool) {
+	out = t.framebuffer > -1
+}
+
+//var g_targets [64]target_s
+//var g_targetCount i32 = 0
+
+var g_freeTargets []target_s
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+type mesh_id struct {
+	mesh i32
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+type mesh_s struct {
+	id mesh_id
+	vertices []f32
+	attributes []i32
+	primitive i32
+	vao i32
+	vbo i32
+	stride i32
+	floatCount i32
+	vertexCount i32
+	dataSize i32
+	bufferSize i32
+	index i32
+}
+
+var g_meshes []mesh_s
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func is_valid_mesh(id mesh_id) (out bool) {
+	out = id.mesh >= 0 && id.mesh < len(g_meshes)
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func mesh_print(message str, id mesh_id) {
+	panicIfNot(is_valid_mesh(id), "mesh_print : invalid id")
+	var index i32 = id.mesh
+	printf("id %d, vertices %d, attributes %d, primitive %d, vao %d, vbo %d, stride %d, floatCount %d, vertexCount %d, dataSize %d, bufferSize %d, index %d\n",
+		index,
+		len(g_meshes[index].vertices),
+		len(g_meshes[index].attributes),
+		g_meshes[index].primitive,
+		g_meshes[index].vao,
+		g_meshes[index].vbo,
+		g_meshes[index].stride,
+		g_meshes[index].floatCount,
+		g_meshes[index].vertexCount,
+		g_meshes[index].dataSize,
+		g_meshes[index].bufferSize,
+		len(g_meshes[index].vertices))
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+var g_freeMeshes []mesh_id
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func invalid_mesh() (out mesh_id) {
+	out.mesh = -1
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func mesh_is_empty(id mesh_id) (out bool) {
+	panicIfNot(is_valid_mesh(id), "mesh_is_empty : invalid id")
+	var mesh i32 = id.mesh
+	var index i32 = len(g_meshes[mesh].vertices)
+	out = index <= 0
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func lock_mesh(primitive i32, attributes []i32, vertexCount i32) (out mesh_id) {
+	var freeMeshCount i32 = len(g_freeMeshes)
+	if (freeMeshCount > 0) {
+		var newFreeMeshCount i32 = freeMeshCount - 1
+		out.mesh = g_freeMeshes[newFreeMeshCount].mesh
+		g_freeMeshes = resize(g_freeMeshes, newFreeMeshCount)
+	} else {
+		out = create_mesh(primitive, attributes, vertexCount)
+	}
+	panicIfNot(is_valid_mesh(out), "lock_mesh : invalid id")
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func unlock_mesh(id mesh_id) {
+	panicIfNot(is_valid_mesh(id), "unlock_mesh : invalid id")
+	g_freeMeshes = append(g_freeMeshes, id)
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func create_mesh(primitive i32, Xattributes []i32, vertexCount i32) (out mesh_id) { // make it work with slices
+	out.mesh = len(g_meshes)
+
+	//printf("create_mesh %d, primitive %d, vertexCount %d\n", out.mesh, primitive, vertexCount)
+	panicIfNot((primitive == gl.TRIANGLES || primitive == gl.LINES), "(primitive == gl.TRIANGLES || primitive == gl.LINES)")
+	panicIfNot(vertexCount > 0, "vertexCount > 0")
+
+	if primitive == gl.TRIANGLES {
+		panicIfNot((vertexCount % 3) == 0, "(vertexCount % 3) == 0")
+	} else if primitive == gl.LINES {
+		panicIfNot((vertexCount % 2) == 0, "(vertexCount % 2) == 0")
+	}
+
+	var mesh mesh_s
+	mesh.attributes = Xattributes
+	mesh.primitive = primitive
+	mesh.vao = 0
+	mesh.vbo = 0
+	mesh.stride = 0
+	mesh.floatCount = 0
+	mesh.vertexCount = 0
+	mesh.dataSize = 0
+	mesh.bufferSize = 0
+
+	// stride
+	var i i32 = 0
+	var attributeCount i32 = len(Xattributes)
+	var stride i32 = 0
+	printf("attributeCount %d\n", attributeCount)
+	for i = 0; i < attributeCount; i = i + 1 {
+		var size i32 = Xattributes[i]
+		stride = stride + size
+		//printf("mesh.stride %d, stride %d, attributes[i] %d\n", mesh.stride, stride, attributes[i])
+	}
+	mesh.stride = stride
+	panicIfNot(stride > 0, "mesh.stride > 0")
+
+	var floatCount i32 = stride * vertexCount
+	panicIfNot(floatCount > 0, "floatCount > 0")
+
+	var bufferSize i32 = floatCount * g_sizeofFloat
+	panicIfNot(bufferSize > 0, "bufferSize > 0")
+
+	panicIfNot((floatCount  % stride) == 0, "(floatCount % (*mesh).stride) == 0")
+	mesh.bufferSize = bufferSize
+
+	// vbo
+	mesh.vbo = gl.GenBuffers(1, mesh.vbo)
+	panicIf(glerror(), "gl.GenBuffers")
+	g_vbos = append(g_vbos, mesh.vbo)
+
+	gl.BindBuffer(gl.ARRAY_BUFFER, mesh.vbo)
+	panicIf(glerror(), "gl.BindBuffer")
+
+	// vao
+	mesh.vao = gl.GenVertexArrays(1, mesh.vao)
+	panicIf(glerror(), "gl.GenVertexArrays")
+	g_vaos = append(g_vaos, mesh.vao)
+
+	gl.BindVertexArray(mesh.vao)
+	panicIf(glerror(), "gl.BindVertexArray")
+
+	gl.BindBuffer(gl.ARRAY_BUFFER, mesh.vbo)
+	panicIf(glerror(), "gl.BindBuffer")
+
+	//printf("bufferSize %d\n", bufferSize)
+	var null []f32
+	gl.BufferData(gl.ARRAY_BUFFER, bufferSize, null, gl.DYNAMIC_DRAW)
+	panicIf(glerror(), "gl.BufferData")
+
+	var offset i32 = 0
+	for i = 0; i < attributeCount; i = i + 1 {
+		var floatStride i32 = stride * g_sizeofFloat
+		//printf("VertexAttribPointerI32 %d, %d, %d, %d\n", i, Xattributes[i], floatStride, offset)
+
+		gl.EnableVertexAttribArray(i)
+		panicIf(glerror(), "gl.EnableVertexAttribArray")
+
+		gl.VertexAttribPointerI32(i, Xattributes[i], gl.FLOAT, false, floatStride, offset)
+		panicIf(glerror(), "gl.VertexAttribPointerI32")
+
+		offset = offset + g_sizeofFloat * Xattributes[i]
+	}
+
+	g_meshes = append(g_meshes, mesh)
+	panicIfNot(is_valid_mesh(out), "create_mesh : invalid id")
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func begin_mesh(id mesh_id) () {
+	panicIfNot(is_valid_mesh(id), "begin_mesh : invalid id")
+	var mesh i32 = id.mesh
+	g_meshes[mesh].vertices = resize(g_meshes[mesh].vertices, 0)
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func end_mesh(id mesh_id) () {
+	panicIfNot(is_valid_mesh(id), "end_mesh : invalid id")
+
+	//mesh_print("end_mesh : ", id)
+
+	var mesh i32 = id.mesh
+	var floatCount i32 = len(g_meshes[mesh].vertices)
+	if floatCount > 0 {
+		g_meshes[mesh].floatCount = floatCount //len(g_vertices)
+		//printf("floatCount %d\n", g_meshes[mesh].floatCount)
+
+		g_meshes[mesh].dataSize = floatCount * g_sizeofFloat
+		//printf("dataSize %d\n", g_meshes[mesh].dataSize)
+
+		//printf("stride %d\n", (*mesh).stride)
+		var stride i32 = g_meshes[mesh].stride
+		panicIfNot(stride > 0, "end_mesh : invalid stride")
+		panicIfNot((floatCount % stride) == 0, "((*mesh).floatCount % (*mesh).stride)) == 0")
+
+		g_meshes[mesh].vertexCount = floatCount / stride
+		//printf("vertexCount %d\n", g_meshes[mesh].vertexCount)
+
+		//printf("(*mesh).vbo %d\n", g_meshes[mesh].vbo)
+		gl.BindBuffer(gl.ARRAY_BUFFER, g_meshes[mesh].vbo)
+		panicIf(glerror(), "gl.BindBuffer")
+
+		gl.BufferSubData(gl.ARRAY_BUFFER, 0, g_meshes[mesh].dataSize, g_meshes[mesh].vertices)
+		panicIf(glerror(), "gl.BufferSubData")
+	}
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func render_mesh(id mesh_id) {
+	panicIfNot(is_valid_mesh(id), "render_mesh : invalid id")
+	var mesh i32 = id.mesh
+	gl.BindVertexArray(g_meshes[mesh].vao)
+	panicIf(glerror(), "gl.BindVertexArray")
+
+	//printf("MESH %d, VERTEX COUNT %d\n", mesh, g_meshes[mesh].vertexCount)
+	gl.DrawArrays(g_meshes[mesh].primitive, 0, g_meshes[mesh].vertexCount)
+	panicIf(glerror(), "gl.DrawArrays")
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func append_line(id mesh_id, line mat.v4, color mat.v4, clip mat.v4, depth f32) () {
+	if (clip.z > 0.0 && clip.w > 0.0) {
+		panicIfNot(is_valid_mesh(id), "append_line : invalid id")
+		var mesh i32 = id.mesh
+
+		var clipLeft f32 = clip.x
+		var clipRight f32 = clip.x + clip.z
+		var clipBottom f32 = clip.y
+		var clipTop f32 = clip.y + clip.w
+
+		var index i32 = len(g_meshes[mesh].vertices)
+
+		var x0 f32 = line.x
+		var y0 f32 = line.y
+		var x1 f32 = line.z
+		var y1 f32 = line.w
+
+		var cRight bool = x0 > clipRight && x1 > clipRight // ##0 AABB clipping...
+		var cLeft bool = x0 < clipLeft && x1 < clipLeft
+		var cBottom bool = y0  < clipBottom && y1 < clipBottom
+		var cTop bool = y0 > clipTop && y1 > clipTop
+		if (cLeft == false && cBottom == false && //cRight == false &&
+		cTop == false) {
+
+			var r f32 = color.x
+			var g f32 = color.y
+			var b f32 = color.z
+			var a f32 = color.w
+
+			if (x0 < clipLeft) {
+				x0 = clipLeft
+			} else if (x0 > clipRight) {
+				x0 = clipRight
+			}
+
+			if (x1 < clipLeft) {
+				x1 = clipLeft
+			} else if (x1 > clipRight) {
+				x1 = clipRight
+			}
+
+			if (y0 < clipBottom) {
+				y0 = clipBottom
+			} else if (y0 > clipTop) {
+				y0 = clipTop
+			}
+
+			if (y1 < clipBottom) {
+				y1 = clipBottom
+			} else if (y1 > clipTop) {
+				y1 = clipTop
+			}
+
+			x0 = 2.0 * x0 / gfx_width - 1.0
+			y0 = 2.0 * y0 / gfx_height - 1.0
+			x1 = 2.0 * x1 / gfx_width - 1.0
+			y1 = 2.0 * y1 / gfx_height - 1.0
+
+			var vertices []f32 = g_meshes[mesh].vertices
+
+			vertices = append(vertices, x0)
+			vertices = append(vertices, y0)
+			vertices = append(vertices, depth)
+			vertices = append(vertices, r)
+			vertices = append(vertices, g)
+			vertices = append(vertices, b)
+			vertices = append(vertices, a)
+			vertices = append(vertices, 0.0)
+			vertices = append(vertices, 0.0)
+
+			vertices = append(vertices, x1)
+			vertices = append(vertices, y1)
+			vertices = append(vertices, depth)
+			vertices = append(vertices, r)
+			vertices = append(vertices, g)
+			vertices = append(vertices, b)
+			vertices = append(vertices, a)
+			vertices = append(vertices, 0.0)
+			vertices = append(vertices, 0.0)
+
+			g_meshes[mesh].vertices = vertices
+		}
+	}
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func append_rect(id mesh_id, rect mat.v4, left mat.v4, right mat.v4, bottom mat.v4, top mat.v4, clip mat.v4, depth f32) () {
+	panicIfNot(is_valid_mesh(id), "append_rect : invalid id")
+	var x0 f32 = rect.x
+	var y0 f32 = rect.y
+	var x1 f32 = x0 + rect.z
+	var y1 f32 = y0 + rect.w
+
+	append_line(id, mat.v4_(x0, y0, x0, y1), left, clip, depth)
+	append_line(id, mat.v4_(x1, y0, x1, y1), right, clip, depth)
+	append_line(id, mat.v4_(x0, y0, x1, y0), bottom, clip, depth)
+	append_line(id, mat.v4_(x0, y1, x1, y1), top, clip, depth)
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func append_quad(id mesh_id, rect mat.v4, uv mat.v4, color mat.v4, clip mat.v4, depth f32) {
+	if (clip.z > 0.0 && clip.w > 0.0) {
+		panicIfNot(is_valid_mesh(id), "append_quad : invalid id")
+
+		var clipLeft f32 = clip.x
+		var clipRight f32 = clip.x + clip.z
+		var clipBottom f32 = clip.y
+		var clipTop f32 = clip.y + clip.w
+
+		var mesh i32 = id.mesh
+		var index i32 = len(g_meshes[mesh].vertices)
+
+		var primitive i32 = g_meshes[mesh].primitive
+		panicIfNot(primitive == gl.TRIANGLES, "(*mesh).primitive == gl.TRIANGLES")
+
+		var x f32 = rect.x
+		var y f32 = rect.y
+		var w f32 = rect.z
+		var h f32 = rect.w
+
+		var x1 f32 = x + w
+		var y1 f32 = y + h
+
+		var cLeft bool = x < clipLeft && x1 < clipLeft
+		var cBottom bool = y  < clipBottom && y1 < clipBottom
+		var cRight bool = x > clipRight && x1 > clipRight // ##0 AABB clipping...
+		var cTop bool = y > clipTop && y1 > clipTop
+
+		if (cLeft == false && cBottom == false && cRight == false && cTop == false) {
+			var r f32 = color.x
+			var g f32 = color.y
+			var b f32 = color.z
+			var a f32 = color.w
+
+			var u0 f32 = uv.x
+			var v0 f32 = uv.y
+			var u1 f32 = uv.z
+			var v1 f32 = uv.w
+
+			var deltaLeft f32 = mat.max(0.0, clipLeft - x)
+			var deltaRight f32 = mat.min(0.0, clipRight - x1)
+
+			var deltaBottom f32 = mat.max(0.0, clipBottom - y)
+			var deltaTop f32 = mat.min(0.0, clipTop - y1)
+
+			x = mat.max(x, clipLeft)
+			y = mat.max(y, clipBottom)
+
+			x1 = mat.min(x1, clipRight)
+			y1 = mat.min(y1, clipTop)
+
+			var nw f32 = x1 - x
+			var nh f32 = y1 - y
+
+			var du f32 = u1 - u0
+			var dv f32 = v0 - v1
+
+			u0 = u0 + du * deltaLeft / w
+			u1 = u1 + du * deltaRight / w
+			v1 = v1 + dv * deltaBottom / h
+			v0 = v0 + dv * deltaTop /h
+
+			x = 2.0 * i32.f32(f32.i32(x)) / gfx_width - 1.0
+			y = 2.0 * i32.f32(f32.i32(y)) / gfx_height - 1.0
+			x1 = 2.0 * i32.f32(f32.i32(x1)) / gfx_width - 1.0
+			y1 = 2.0 * i32.f32(f32.i32(y1)) / gfx_height - 1.0
+
+			var vertices []f32 = g_meshes[mesh].vertices
+
+			vertices = append(vertices, x)
+			vertices = append(vertices, y)
+			vertices = append(vertices, depth)
+			vertices = append(vertices, r)
+			vertices = append(vertices, g)
+			vertices = append(vertices, b)
+			vertices = append(vertices, a)
+			vertices = append(vertices, u0)
+			vertices = append(vertices, v1)
+
+			vertices = append(vertices, x1)
+			vertices = append(vertices, y)
+			vertices = append(vertices, depth)
+			vertices = append(vertices, r)
+			vertices = append(vertices, g)
+			vertices = append(vertices, b)
+			vertices = append(vertices, a)
+			vertices = append(vertices, u1)
+			vertices = append(vertices, v1)
+
+			vertices = append(vertices, x)
+			vertices = append(vertices, y1)
+			vertices = append(vertices, depth)
+			vertices = append(vertices, r)
+			vertices = append(vertices, g)
+			vertices = append(vertices, b)
+			vertices = append(vertices, a)
+			vertices = append(vertices, u0)
+			vertices = append(vertices, v0)
+
+			vertices = append(vertices, x)
+			vertices = append(vertices, y1)
+			vertices = append(vertices, depth)
+			vertices = append(vertices, r)
+			vertices = append(vertices, g)
+			vertices = append(vertices, b)
+			vertices = append(vertices, a)
+			vertices = append(vertices, u0)
+			vertices = append(vertices, v0)
+
+			vertices = append(vertices, x1)
+			vertices = append(vertices, y)
+			vertices = append(vertices, depth)
+			vertices = append(vertices, r)
+			vertices = append(vertices, g)
+			vertices = append(vertices, b)
+			vertices = append(vertices, a)
+			vertices = append(vertices, u1)
+			vertices = append(vertices, v1)
+
+			vertices = append(vertices, x1)
+			vertices = append(vertices, y1)
+			vertices = append(vertices, depth)
+			vertices = append(vertices, r)
+			vertices = append(vertices, g)
+			vertices = append(vertices, b)
+			vertices = append(vertices, a)
+			vertices = append(vertices, u1)
+			vertices = append(vertices, v0)
+
+			g_meshes[mesh].vertices = vertices
+		}
+	}
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func invalid_mesh() (out mesh_id) {
+	out.mesh = -1
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func enable_blending(srcBlend i32, dstBlend i32) () {
+	if (g_blend == false) {
+		g_blend = true
+		gl.Enable(gl.BLEND)
+		panicIf(glerror(), "gl.Enable(gl.BLEND)")
+		if ((g_srcBlend != srcBlend) || (g_dstBlend != dstBlend)) {
+			g_srcBlend = srcBlend
+			g_dstBlend = dstBlend
+			gl.BlendFunc(g_srcBlend, g_dstBlend)
+			panicIf(glerror(), "gl.BlendFunc")
+		}
+	}
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func disable_blending() () {
+	if (g_blend == true) {
+		g_blend = false
+		gl.Disable(gl.BLEND)
+		panicIf(glerror(), "gl.Disable(gl.BLEND)")
+	}
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func depth_state(test bool, compare i32, write bool) {
+	depth_test(test)
+	depth_func(compare)
+	depth_write(write)
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func depth_test(value bool) {
+	if (value) {
+		enable_depth()
+	} else {
+		disable_depth()
+	}
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func enable_depth() () {
+	if (g_depthTest == false) {
+		g_depthTest = true
+		gl.Enable(gl.DEPTH_TEST)
+		panicIf(glerror(), "gl.Enable(gl.DEPTH_TEST)")
+	}
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func disable_depth() () {
+	if (g_depthTest == true) {
+		g_depthTest = false
+		gl.Disable(gl.DEPTH_TEST)
+		panicIf(glerror(), "gl.Disable(gl.DEPTH_TEST)")
+	}
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func depth_func(value i32) {
+	if (g_depthFunc != value) {
+		g_depthFunc = value
+		gl.DepthFunc(g_depthFunc)
+		panicIf(glerror(), "gl.DepthFunc")
+	}
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func depth_write(value bool) {
+	if (g_depthMask != value) {
+		g_depthMask = value
+		gl.DepthMask(g_depthMask)
+		panicIf(glerror(), "gl.DepthWrite")
+	}
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func stencil_state(test bool, compare i32, ref i32, mask i32, sfail i32, dpfail i32, dppass i32, write i32) {
+	stencil_test(test)
+	stencil_func(compare, ref, mask)
+	stencil_op(sfail, dpfail, dppass)
+	stencil_write(write)
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func stencil_test(value bool) {
+	if (value) {
+		enable_stencil()
+	} else {
+		disable_stencil()
+	}
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func enable_stencil() () {
+	if (g_stencilTest == false) {
+		g_stencilTest = true
+		gl.Enable(gl.STENCIL_TEST)
+		panicIf(glerror(), "gl.Enable(gl.STENCIL_TEST)")
+	}
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func disable_stencil() () {
+	if (g_stencilTest == true) {
+		g_stencilTest = false
+		gl.Disable(gl.STENCIL_TEST)
+		panicIf(glerror(), "gl.Disable(gl.STENCIL_TEST")
+	}
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func stencil_func(compare i32, ref i32, mask i32) {
+	if (g_stencilFunc != compare ||
+		g_stencilFuncRef != ref ||
+		g_stencilFuncMask != mask) {
+		g_stencilFunc = compare
+		g_stencilFuncRef = ref
+		g_stencilFuncMask = mask
+		gl.StencilFunc(g_stencilFunc, g_stencilFuncRef, g_stencilFuncMask)
+		panicIf(glerror(), "gl.StencilFunc")
+	}
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func stencil_op(sfail i32, dpfail i32, dppass i32) {
+	if (g_stencilOpFail != sfail ||
+		g_stencilOpDepthFail != dpfail ||
+		g_stencilOpDepthPass != dppass) {
+		g_stencilOpFail = sfail
+		g_stencilOpDepthFail = dpfail
+		g_stencilOpDepthPass = dppass
+		gl.StencilOp(g_stencilOpFail, g_stencilOpDepthFail, g_stencilOpDepthPass)
+		panicIf(glerror(), "gl.StencilOp")
+	}
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func stencil_write(write i32) {
+	if (g_stencilWrite != write) {
+		g_stencilWrite = write
+		gl.StencilMask(g_stencilWrite)
+		panicIf(glerror(), "gl.StencilMask")
+	}
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func clear(buffers i32, color mat.v4, depth f64, stencil i32) () {
+	if ((g_clearColor.x != color.x) ||
+		(g_clearColor.y != color.y) ||
+		(g_clearColor.z != color.z) ||
+		(g_clearColor.w != color.w)) {
+		g_clearColor = color
+		gl.ClearColor(g_clearColor.x, g_clearColor.y, g_clearColor.z, g_clearColor.w)
+		panicIf(glerror(), "gl.ClearColor")
+	}
+	if (g_clearDepth != depth) {
+		g_clearDepth = depth
+		gl.ClearDepth(g_clearDepth)
+	}
+	if (g_clearStencil != stencil) {
+		g_clearStencil = stencil
+		gl.ClearStencil(g_clearStencil)
+	}
+	gl.Clear(buffers)
+	panicIf(glerror(), "gl.Clear")
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func color_write(red bool, green bool, blue bool, alpha bool) {
+	if (g_colorMaskRed != red ||
+		g_colorMaskGreen != green ||
+		g_colorMaskBlue != blue ||
+		g_colorMaskAlpha != alpha) {
+		g_colorMaskRed = red
+		g_colorMaskGreen = green
+		g_colorMaskBlue = blue
+		g_colorMaskAlpha = alpha
+		gl.ColorMask(g_colorMaskRed, g_colorMaskGreen, g_colorMaskBlue, g_colorMaskAlpha)
+		panicIf(glerror(), "gl.ColorMask")
+	}
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func init(width i32, height i32)() {
+
+	g_vertexColorAttributes = []i32{3, 4, 2}
+
+	gfx_width = i32.f32(width)
+	gfx_height = i32.f32(height)
+	gfx_viewportSize = mat.v2_(gfx_width, gfx_height)
+	gfx_viewportBounds = mat.v4_(0.0, 0.0, gfx_width, gfx_height)
+
+	gfx_ratio_y = gfx_width / gfx_height
+	gfx_ratio_x = gfx_height / gfx_width
+
+	gfx_red   = mat.v4_(1.0, 0.0, 0.0, 1.0)
+	gfx_green = mat.v4_(0.0, 1.0, 0.0, 1.0)
+	gfx_blue  = mat.v4_(0.0, 0.0, 1.0, 1.0)
+	gfx_pink  = mat.v4_(1.0, 0.0, 1.0, 1.0)
+	gfx_white = mat.v4_(1.0, 1.0, 1.0, 1.0)
+	gfx_zero  = mat.v4_(0.0, 0.0, 0.0, 0.0)
+
+	g_clearColor = gfx_pink
+
+	gl.Strs("i_v3Position", "i_v3Position")
+	gl.Strs("i_v4Albedo", "i_v4Albedo")
+	gl.Strs("i_v2Texcoord", "i_v2Texcoord")
+	gl.Strs("u_t2Albedo", "u_t2Albedo")
+	gl.Strs("u_t2Src", "u_t2Src")
+	gl.Strs("u_t2Dst", "u_t2Dst")
+	gl.Strs("u_fTime", "u_fTime")
+
+	//-----------------------------------------------------------------------------
+	// vsPassThrough
+	//-----------------------------------------------------------------------------
+	gl.Strs(
+	`
+	#version 130
+	in vec3 i_v3Position;
+	in vec4 i_v4Albedo;
+	in vec2 i_v2Texcoord;
+	out vec4 v_v4Albedo;
+	out vec2 v_v2Texcoord;
+	void main()
+	{
+		gl_Position = vec4(i_v3Position, 1);
+		v_v4Albedo = i_v4Albedo;
+		v_v2Texcoord = i_v2Texcoord;
+	}`, "vsPassThrough")
+
+	//-----------------------------------------------------------------------------
+	// psVertexColor
+	//-----------------------------------------------------------------------------
+	gl.Strs(
+	`
+	#version 130
+	in vec4 v_v4Albedo;
+	out vec4 o_v4Color;
+	void main()
+	{
+		o_v4Color = v_v4Albedo;
+	}
+	`, "psVertexColor")
+
+	//-----------------------------------------------------------------------------
+	// psFont
+	//-----------------------------------------------------------------------------
+	//gl.Strs(
+	//`
+	//#version 130
+	//uniform sampler2D u_t2Albedo;
+	//in vec4 v_v4Albedo;
+	//in vec2 v_v2Texcoord;
+	//out vec4 o_v4Color;
+	//void main()
+	//{
+	//	o_v4Color = vec4(vec3(0.4, 0.0, 0.4) + texture2D(u_t2Albedo, v_v2Texcoord).rgb + v_v4Albedo.xxx * 0.00001, 1);
+	//}
+	//`, "psFont")
+
+	//-----------------------------------------------------------------------------
+	// psVertexTexture
+	//-----------------------------------------------------------------------------
+	gl.Strs(
+	`
+	#version 130
+	uniform sampler2D u_t2Albedo;
+	in vec4 v_v4Albedo;
+	in vec2 v_v2Texcoord;
+	out vec4 o_v4Color;
+	void main()
+	{
+		o_v4Color = v_v4Albedo * texture2D(u_t2Albedo, v_v2Texcoord);
+	}
+	`, "psTexture")
+
+	//-----------------------------------------------------------------------------
+	// psTransition_0
+	//-----------------------------------------------------------------------------
+	gl.Strs(
+	`
+	#version 130
+	uniform sampler2D u_t2Src;
+	uniform sampler2D u_t2Dst;
+	uniform float u_fTime;
+	in vec2 v_v2Texcoord;
+	out vec4 o_v4Color;
+	void main()
+	{
+		o_v4Color = mix(texture2D(u_t2Src, v_v2Texcoord), texture2D(u_t2Dst, v_v2Texcoord), u_fTime);
+	}
+	`, "psTransition_0")
+
+	//-----------------------------------------------------------------------------
+	// psTransition_1
+	//-----------------------------------------------------------------------------
+	gl.Strs(
+	`
+	#version 130
+	uniform sampler2D u_t2Src;
+	uniform sampler2D u_t2Dst;
+	uniform float u_fTime;
+	in vec2 v_v2Texcoord;
+	out vec4 o_v4Color;
+	void main()
+	{
+		vec4 color_0 = texture2D(u_t2Src, v_v2Texcoord);
+		vec4 color_1 = texture2D(u_t2Dst, v_v2Texcoord);
+
+		float alpha = color_1.w;
+		float time = u_fTime * alpha;
+
+		o_v4Color = vec4(mix(color_0.rgb, color_1.rgb, time), 1.0);
+	}
+	`, "psTransition_1")
+
+	//-----------------------------------------------------------------------------
+	//-----------------------------------------------------------------------------
+	gl.Init()
+	panicIf(glerror(), "gl.Init")
+
+	gl.Disable(gl.BLEND)
+	panicIf(glerror(), "gl.Disable(gl.BLEND)")
+
+	gl.Disable(gl.CULL_FACE)
+	panicIf(glerror(), "gl.Disable(gl.CULL_FACE)")
+
+	gl.Disable(gl.DEPTH_TEST)
+	panicIf(glerror(), "gl.Disable(gl.DEPTH_TEST)")
+
+	gl.ClearColor(g_clearColor.x, g_clearColor.y, g_clearColor.z, g_clearColor.w)
+	panicIf(glerror(), "gl.ClearColor")
+
+	set_viewport(gfx_viewportBounds)
+
+	//-----------------------------------------------------------------------------
+	//-----------------------------------------------------------------------------
+	g_fxVertexColor = create_effect("vsPassThrough", "psVertexColor")
+	effect_bind_attribute(g_fxVertexColor, 0, "i_v3Position")
+	effect_bind_attribute(g_fxVertexColor, 1, "i_v4Albedo")
+
+	g_fxTexture = create_effect("vsPassThrough", "psTexture")
+	effect_bind_attribute(g_fxTexture, 0, "i_v3Position")
+	effect_bind_attribute(g_fxTexture, 1, "i_v4Albedo")
+	effect_bind_attribute(g_fxTexture, 2, "i_v2Texcoord")
+	effect_bind_sampler(g_fxTexture, "u_t2Albedo")
+
+	//g_fxFont = create_effect("vsPassThrough", "psFont")
+	//effect_bind_attribute(g_fxFont, 0, "i_v3Position")
+	//effect_bind_attribute(g_fxFont, 1, "i_v4Albedo")
+	//effect_bind_attribute(g_fxFont, 2, "i_v2Texcoord")
+	//effect_bind_sampler(g_fxFont, "u_t2Albedo")
+
+	g_fxTrans_0 = create_effect("vsPassThrough", "psTransition_0")
+	effect_bind_attribute(g_fxTrans_0, 0, "i_v3Position")
+	effect_bind_attribute(g_fxTrans_0, 2, "i_v2Texcoord")
+	effect_bind_sampler(g_fxTrans_0, "u_t2Src")
+	effect_bind_sampler(g_fxTrans_0, "u_t2Dst")
+	effect_bind_uniform(g_fxTrans_0, "u_fTime")
+
+	g_fxTrans_1 = create_effect("vsPassThrough", "psTransition_1")
+	effect_bind_attribute(g_fxTrans_1, 0, "i_v3Position")
+	effect_bind_attribute(g_fxTrans_1, 2, "i_v2Texcoord")
+	effect_bind_sampler(g_fxTrans_1, "u_t2Src")
+	effect_bind_sampler(g_fxTrans_1, "u_t2Dst")
+	effect_bind_uniform(g_fxTrans_1, "u_fTime")
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func free()() {
+
+	//pop_scissor()
+
+	gl.Free("vsPassThrough")
+	gl.Free("psVertexColor")
+	gl.Free("psTexture")
+	//gl.Free("psFont")
+	gl.Free("psTransition_0")
+	gl.Free("psTransition_1")
+	gl.Free("i_v3Position")
+	gl.Free("i_v4Albedo")
+	gl.Free("i_v2Texcoord")
+	gl.Free("u_t2Albedo")
+	gl.Free("u_t2Src")
+	gl.Free("u_t2Dst")
+	gl.Free("u_fTime")
+
+	use_program(0)
+
+	var i i32
+	for i = 0; i < len(g_programs); i = i + 1 {
+		//printf("gl.DeleteProgram(%d)\n", g_programs[i])
+		gl.DeleteProgram(g_programs[i]) // ##0 crash
+		panicIf(glerror(), "gl.DeleteProgram")
+	}
+
+	for i = 0; i < len(g_vbos); i = i + 1 {
+		//printf("gl.DeleteBuffers(%d)\n", g_vbos[i])
+		gl.DeleteBuffers(1, g_vbos[i])
+		panicIf(glerror(), "glDeleteBuffers")
+	}
+
+	for i = 0; i < len(g_vaos); i = i + 1 {
+		//printf("gl.DeleteVertexArrays(%d)\n", g_vaos[i])
+		gl.DeleteVertexArrays(1, g_vaos[i])
+		panicIf(glerror(), "g_DeleteVertexArrays")
+	}
+
+	for i = 0; i < len(g_framebuffers); i = i + 1 {
+		//printf("gl.DeleteFramebuffers(%d)\n", g_framebuffers[i])
+		gl.DeleteFramebuffers(1, g_framebuffers[i])
+		panicIf(glerror(), "g.DeleteFramebuffers")
+	}
+
+	for i = 0; i < len(g_textures); i = i + 1 {
+		//printf("gl.DeleteTextures(%d)\n", g_textures[i])
+		gl.DeleteTextures(1, g_textures[i])
+		panicIf(glerror(), "g.DeleteTextures")
+	}
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func set_viewport(bounds mat.v4) {
+
+	var x i32 = f32.i32(bounds.x)
+	var y i32 = f32.i32(bounds.y)
+	var width i32 = f32.i32(bounds.z)
+	var height i32 = f32.i32(bounds.w)
+
+	if (gfx_viewportX != x ||
+		gfx_viewportY != y ||
+		gfx_viewportWidth != width ||
+		gfx_viewportHeight != height) {
+		gfx_viewportX = x
+		gfx_viewportY = y
+		gfx_viewportWidth = width
+		gfx_viewportHeight = height
+		gl.Viewport(x, y, width, height)
+		panicIf(glerror(), "gl.Viewport")
+	}
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func set_scissor(bounds mat.v4) {
+
+	if (gfx_scissor == false) {
+		gfx_scissor = true
+		//printf("ENABLE SCISSOR %d\n", gl.SCISSOR_TEST)
+		gl.Enable(gl.SCISSOR_TEST)
+		panicIf(glerror(), "gl.Scissor")
+	}
+
+	var x i32 = f32.i32(bounds.x)
+	var y i32 = f32.i32(bounds.y)
+	var width i32 = f32.i32(bounds.z)
+	var height i32 = f32.i32(bounds.w)
+
+	if (gfx_scissorX != x ||
+		gfx_scissorY != y ||
+		gfx_scissorWidth != width ||
+		gfx_scissorHeight != height) {
+		gfx_scissorX = x
+		gfx_scissorY = y
+		gfx_scissorWidth = width
+		gfx_scissorHeight = height
+		//printf("#####################################################gl.Scissor %d, %d, %d, %d\n", x, y, width, height)
+		gl.Scissor(x, y, width, height)
+		panicIf(glerror(), "gl.Scissor")
+	}
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func push_scissor(name str, bounds mat.v4) (out mat.v4) {
+	// panicIfNot(bounds.z > 0 && bounds.w > 0, "push_scissor : invalid bounds")
+	out = bounds
+	var scissorCount i32 = len(g_scissors)
+	if (scissorCount > 0) {
+		var previousScissor i32 = scissorCount - 1
+		var scissor mat.v4 = g_scissors[previousScissor]
+		var x0 f32 = scissor.x
+		var y0 f32 = scissor.y
+		var x1 f32 = x0 + scissor.z
+		var y1 f32 = y0 + scissor.w
+
+		var x2 f32 = bounds.x
+		var y2 f32 = bounds.y
+		var x3 f32 = x2 + bounds.z
+		var y3 f32 = y2 + bounds.w
+
+		var maxX f32 = mat.max(x0, x2)
+		var maxY f32 = mat.max(y0, y2)
+
+		var minX f32 = mat.min(x1, x3)
+		var minY f32 = mat.min(y1, y3)
+
+		out.x = maxX
+		out.y = maxY
+		var width f32 = minX - maxX
+		var height f32 = minY - maxY
+
+		out.z = mat.max(0.0, width)
+		out.w = mat.max(0.0, height)
+		var i i32 = 0
+		//for i = 0; i < scissorCount; i = i + 1 {
+		//	printf("----")
+		//}
+		//printf("x0 %f, y0 %f, x1 %f, y1 %f, x2 %f, y2 %f, x3 %f, y3 %f\n", x0, y0, x1, y1, x2, y2, x3, y3)
+		//for i = 0; i < scissorCount; i = i + 1 {
+		//	printf("----")
+		//}
+		//printf("max %f, %f, min %f, %f\n", maxX, maxY, minX, minY)
+		//for i = 0; i < scissorCount; i = i + 1 {
+		//	printf("----")
+		//}
+		var scissorW f32 = scissor.x + scissor.z
+		var scissorH f32 = scissor.y + scissor.w
+		//printf("%s old scissor %f, %f, %f, %f\n", name, scissor.x, scissor.y, scissorW, scissorH)
+		//for i = 0; i < scissorCount; i = i + 1 {
+		//	printf("----")
+		//}
+//		printf("%s bounds  %f, %f, %f, %f\n", name, bounds.x, bounds.y, bounds.z, bounds.w)
+//		for i = 0; i < scissorCount; i = i + 1 {
+  //		  printf("----")
+		//}
+		var outW f32 = out.x + out.z
+		var outH f32 = out.y + out.w
+		//printf("%s new scissor %f, %f, %f, %f\n", name, out.x, out.y, outW, outH)
+	} else {
+		out = bounds
+		//var i i32 = 0
+		//for i = 0; i < scissorCount; i = i + 1 {
+		//	printf("----")
+		//}
+		//printf("%s bounds %f, %f, %f, %f\n", name, bounds.x, bounds.y, bounds.z, bounds.w)
+		//for i = 0; i < scissorCount; i = i + 1 {
+		//	printf("----")
+		//}
+		//printf("%s out first %f, %f, %f, %f\n", name, out.x, out.y, out.z, out.w)
+
+	}
+	g_scissors = append(g_scissors, out)
+	//if (out.x == 0.0 && out.y == 0.0 && out.z == 0 && out.w == 0) {
+	//	printf("%s thostuhsth \n", name)
+	//	panicIfNot(false, "fuck")
+	//}
+
+	//var tmp mat.v4 =  g_scissors[scissorCount]
+	//printf("%d, tmp readback %f, %f, %f, %f\n", scissorCount, tmp.x, tmp.y, tmp.z, tmp.w)
+
+	//set_scissor(bounds)
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func pop_scissor() {
+	var scissorCount i32 = len(g_scissors)
+	panicIfNot(scissorCount > 0, "pop_scissor : underflow")
+	g_scissors = resize(g_scissors, scissorCount - 1)
+	//if (scissorCount > 0) {
+	//	var scissor i32 = scissorCount - 1
+		//set_scissor(g_scissors[scissor])
+	//}
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func create_texture(path str, mag i32, min i32, s i32, t i32, r i32, w i32, h i32) (texture texture_s) {
+	if (path == "") {
+		texture.name = gl.GenTextures(1, texture.name)
+		panicIf(glerror(), "gl.GenTextures")
+	} else {
+		texture.name = gl.NewTexture(path)
+		panicIf(glerror(), "gl.NewTexture")
+	}
+
+	g_textures = append(g_textures, texture.name)
+
+	gl.BindTexture(gl.TEXTURE_2D, texture.name)
+	panicIf(glerror(), "gl.BindTexture")
+
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+	panicIf(glerror(), "gl.TexParameteri")
+
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+	panicIf(glerror(), "gl.TexParameteri")
+
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+	panicIf(glerror(), "gl.TexParameteri")
+
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+	panicIf(glerror(), "gl.TexParameteri")
+
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE)
+	panicIf(glerror(), "gl.TexParameteri")
+
+	if (path == "") {
+		gl.TexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE)
+		panicIf(glerror(), "gl.Image2D")
+	}
+
+	texture.width = gl.GetTexLevelParameteriv(gl.TEXTURE_2D, 0, gl.TEXTURE_WIDTH);
+	panicIf(glerror(), "gl.GetTexLevelParameteriv")
+
+	texture.height = gl.GetTexLevelParameteriv(gl.TEXTURE_2D, 0, gl.TEXTURE_HEIGHT);
+	panicIf(glerror(), "gl.GetTexLevelParameteriv")
+
+	//printf("TEXTURE W %d, H %d\n", texture.width, texture.height)
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func lock_target(w i32, h i32) (target target_s) {
+	var freeTargetCount i32 = len(g_freeTargets)
+	if (freeTargetCount > 0) {
+		var i i32 = 0
+		for i = 0; i < freeTargetCount; i = i + 1 {
+			var t target_s = g_freeTargets[i]
+			if (t.texture.width == w &&
+				t.texture.height == h) {
+				target = t
+				if ((i + 1) < freeTargetCount) {
+					g_freeTargets[i] = g_freeTargets[freeTargetCount - 1]
+				}
+				g_freeTargets = resize(g_freeTargets, freeTargetCount - 1)
+				return;
+			}
+		}
+   }
+
+	target = create_target(w, h)
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func unlock_target(target target_s) {
+	panicIfNot(is_valid_target(target), "unlock_target : invalid target")
+	var i i32 = 0
+	var freeTargetCount i32 = len(g_freeTargets)
+	for i = 0; i < freeTargetCount; i = i + 1 {
+		var t target_s = g_freeTargets[i]
+		panicIfNot(t.framebuffer != target.framebuffer, "target unlocked twice")
+		if (t.framebuffer == target.framebuffer) {
+			return;
+		}
+	}
+
+	g_freeTargets = append(g_freeTargets, target)
+}
+
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func create_target(w i32, h i32) (target target_s) {
+	var framebuffer i32 = -1
+
+	framebuffer = gl.GenFramebuffers(1, framebuffer)
+	panicIf(glerror(), "gl.GenFramebuffers")
+
+	g_framebuffers = append(g_framebuffers, framebuffer)
+
+	bind_framebuffer(framebuffer)
+	target.texture = create_texture("", gl.LINEAR, gl.LINEAR, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, w, h)
+
+	gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, target.texture.name, 0)
+	panicIf(glerror(), "gl.FramebufferTexture2D")
+
+	panicIfNot(no_glstatus(), "gl.CheckFramebufferStatus")
+
+	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+	panicIf(glerror(), "gl.BindFramebuffer")
+	panicIfNot(no_glstatus(), "gl.CheckFramebufferStatus")
+
+	target.framebuffer = framebuffer
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func create_depth_buffer(format i32, w i32, h i32) (out i32) {
+	//panicIfNot(format == gl.DEPTH24 || format == gl.DEPTH24_STENCIL_8, "create_depth_buffer : untested format")
+	var renderbuffer i32 = -1
+
+	renderbuffer = gl.GenRenderbuffers(1, renderbuffer)
+	panicIf(glerror(), "gl.GenRenderbuffers")
+
+	gl.BindRenderbuffer(gl.RENDERBUFFER, renderbuffer)
+	panicIf(glerror(), "gl.BindRenderbuffer")
+
+	gl.RenderbufferStorage(gl.RENDERBUFFER, format, w, h)
+	panicIf(glerror(), "gl.RenderbufferStorage")
+
+	out = renderbuffer
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func bind_depthbuffer(depthbuffer i32) {
+	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthbuffer)
+	panicIf(glerror(), "gl.FramebufferRenderbuffer")
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func bind_stencilbuffer(stencilbuffer i32) {
+	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.STENCIL_ATTACHMENT, gl.RENDERBUFFER, stencilbuffer)
+	panicIf(glerror(), "glFramebufferRenderbuffer")
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func bind_framebuffer(framebuffer i32) {
+	gl.BindFramebuffer(gl.FRAMEBUFFER, framebuffer)
+	panicIf(glerror(), "gl.BindFramebuffer")
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func create_font_texture(name str, path str, scale i32, min i32, max i32, dir i32) (texture texture_s) {
+	os.Open(path)
+//	if (range == true) {
+  //  var min i32 = ui32.i32(runes[0])
+	//var max i32 = ui32.i32(runes[1])
+		gltext.LoadTrueType(name, path, scale, min, max, dir) // ##0 release
+	//}// else {
+	 //   gltext.LoadTrueTypeEx(name, path, scale, runes, dir) // ##0 release
+   // }
+	os.Close(path)
+	texture.name = gltext.Texture(name)
+
+	gl.BindTexture(gl.TEXTURE_2D, texture.name)
+	panicIf(glerror(), "gl.BindTexture")
+
+	texture.width = gl.GetTexLevelParameteriv(gl.TEXTURE_2D, 0, gl.TEXTURE_WIDTH)
+	panicIf(glerror(), "gl.GetTexLevelParameteriv")
+
+	texture.height = gl.GetTexLevelParameteriv(gl.TEXTURE_2D, 0, gl.TEXTURE_HEIGHT)
+	panicIf(glerror(), "gl.GetTexLevelParameteriv")
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+var g_debugMesh mesh_id
+
+func append_glyph(id mesh_id, texture texture_s, name str, position mat.v2, scale mat.v2, color mat.v4, glyph i32, debug bool, color0 mat.v4, color1 mat.v4, clip mat.v4, depth f32) {
+//	printf("NAME %s\n", name)
+	panicIfNot(is_valid_mesh(id), "append_text : invalid id")
+	var index i32 = 0
+	var size i32 = 0
+
+	var maxGlyphW i32 = 0;
+	var maxGlyphH i32 = 0;
+	maxGlyphW, maxGlyphH = gltext.GlyphBounds(name)
+	var maxGlyphWidth f32 = i32.f32(maxGlyphW)
+	var maxGlyphHeight f32 = i32.f32(maxGlyphH)
+	maxGlyphWidth = scale.x * maxGlyphWidth
+	maxGlyphHeight = scale.y * maxGlyphHeight
+
+	var textW i32
+	var textH i32
+	textW, textH = measure_glyph(name, glyph)
+
+	var textWidth f32 = scale.x * i32.f32(textW)
+	var textHeight f32 = scale.y * i32.f32(textH)
+
+	var quadX f32 = position.x
+	var quadY f32 = position.y - (maxGlyphHeight - textHeight) // - ratio * i32.f32(textH) / gfx_height
+	//if (center == true) {
+	//	quadX = -1.0 + (2.0 - textWidth / gfx_width) / 2.0 // / gfx_width
+	//	quadY =  0.0 - textHeight / (gfx_height * 2.0) // / gfx_height
+	//}
+
+	var tw f32 = i32.f32(texture.width)
+	var th f32 = i32.f32(texture.height)
+	var index i32 = 0
+	var dummyIndex i32 = 0
+	var debugColor mat.v4
+
+	var rune i32
+	var glyphX i32
+	var glyphY i32
+	var glyphWidth i32
+	var glyphHeight i32
+	var glyphAdvance i32
+
+	glyphX, glyphY, glyphWidth, glyphHeight, glyphAdvance = gltext.GlyphInfo(name, glyph)
+//	printf("RUNE\n")
+	var quadAdvance f32 = scale.x * i32.f32(glyphAdvance)// / gfx_width
+	var quadWidth f32 = scale.x * i32.f32(glyphWidth)// / gfx_width
+	var quadHeight f32 = textHeight //scale.y * i32.f32(glyphHeight)// / gfx_height
+	var qu0 f32 = i32.f32(glyphX) / tw
+	var qv0 f32 = i32.f32(glyphY) / th
+
+ //   printf("U %f, V %f, GH %f, MGH %f, TH %f\n", qu0, qv0, i32.f32(glyphHeight), maxGlyphHeight, textHeight)
+	var qu1 f32 = qu0 + i32.f32(glyphAdvance) / tw
+	var qv1 f32 = qv0 + i32.f32(glyphHeight) / th
+
+	if (debug == true) {
+		color = color0
+		debugColor = color1
+		if ((dummyIndex % 2) == 0) {
+			color = color1
+			debugColor = color0
+		}
+	}
+
+	//append_quad(g_debugMesh, mat.v4_(quadX, quadY, quadAdvance, quadHeight), mat.v4_(qu0, qv0, qu1, qv1), red, clip, depth)
+	append_quad(id, mat.v4_(quadX, quadY, quadAdvance, quadHeight), mat.v4_(qu0, qv0, qu1, qv1),  color, clip, depth)
+	index = index + size
+	quadX = quadX + quadAdvance
+	dummyIndex = dummyIndex + 1
+}
+
+func append_text(id mesh_id, texture texture_s, name str, position mat.v2, scale mat.v2, color mat.v4, text str, debug bool, color0 mat.v4, color1 mat.v4, clip mat.v4, depth f32) {
+//	printf("NAME %s\n", name)
+//	if (name == "awesomeBold_25") {
+	panicIfNot(is_valid_mesh(id), "append_text : invalid id")
+	var index i32 = 0
+	var size i32 = 0
+
+	var maxGlyphW i32 = 0;
+	var maxGlyphH i32 = 0;
+	maxGlyphW, maxGlyphH = gltext.GlyphBounds(name)
+	var maxGlyphWidth f32 = scale.x * i32.f32(maxGlyphW)
+	var maxGlyphHeight f32 = scale.y * i32.f32(maxGlyphH)
+
+	var textW i32
+	var textH i32
+	textW, textH = measure_text(name, text)
+
+	var textWidth f32 = scale.x * i32.f32(textW)
+	var textHeight f32 = scale.y * i32.f32(textH)
+
+	var quadX f32 = position.x
+	var quadY f32 = position.y - (maxGlyphHeight - textHeight) // - ratio * i32.f32(textH) / gfx_height
+	//if (center == true) {
+	//	quadX = -1.0 + (2.0 - textWidth / gfx_width) / 2.0 // / gfx_width
+	//	quadY =  0.0 - textHeight / (gfx_height * 2.0) // / gfx_height
+	//}
+
+	var tw f32 = i32.f32(texture.width)
+	var th f32 = i32.f32(texture.height)
+	var index i32 = 0
+	var dummyIndex i32 = 0
+	var debugColor mat.v4
+
+//	printf("TEXT : %s\n", text)
+
+	for (size >= 0) {
+
+		var rune i32
+		var glyphX i32
+		var glyphY i32
+		var glyphWidth i32
+		var glyphHeight i32
+		var glyphAdvance i32
+
+		rune, size, glyphX, glyphY, glyphWidth, glyphHeight, glyphAdvance = gltext.NextGlyph(name, text, index)
+		if (size >= 0) {
+
+//			printf("RUNE\n")
+			var quadAdvance f32 = scale.x * i32.f32(glyphAdvance)// / gfx_width
+			var quadWidth f32 = scale.x * i32.f32(glyphWidth)// / gfx_width
+			var quadHeight f32 = textHeight //scale.y * i32.f32(glyphHeight)// / gfx_height
+			var qu0 f32 = i32.f32(glyphX) / tw
+			var qv0 f32 = i32.f32(glyphY) / th
+
+  //		  printf("U %f, V %f, GH %f, MGH %f, TH %f\n", qu0, qv0, i32.f32(glyphHeight), maxGlyphHeight, textHeight)
+			var qu1 f32 = qu0 + i32.f32(glyphAdvance) / tw
+			var qv1 f32 = qv0 + i32.f32(glyphHeight) / th
+
+			panicIfNot(rune >= 0, "invalid rune")
+			if (debug == true) {
+				color = color0
+				debugColor = color1
+				if ((dummyIndex % 2) == 0) {
+					color = color1
+					debugColor = color0
+				}
+			}
+
+			//append_quad(g_debugMesh, mat.v4_(quadX, quadY, quadAdvance, quadHeight), mat.v4_(qu0, qv0, qu1, qv1), red, clip, depth)
+			append_quad(id, mat.v4_(quadX, quadY, quadAdvance, quadHeight), mat.v4_(qu0, qv0, qu1, qv1),  color, clip, depth)
+			index = index + size
+			quadX = quadX + quadAdvance
+			dummyIndex = dummyIndex + 1
+		}// else {
+		  //  printf("no rune")
+		//}
+	}
+  //  }
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func measure_glyph(name str, glyph i32) (w i32, h i32) {
+	w, h = gltext.GlyphMetrics(name, glyph)
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func measure_text(name str, text str) (w i32, h i32) {
+	w, h = gltext.Metrics(name, text)
+}
+

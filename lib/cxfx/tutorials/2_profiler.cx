@@ -8,12 +8,6 @@ func main()() {
 	o.fps = 60
 	o.Parse()
 
-	printf("width : %d\n", o.width)
-	printf("height : %d\n", o.height)
-	printf("fps : %d\n", o.fps)
-	printf("hints : %d\n", o.hints)
-	printf("data : %s\n", o.dataDir)
-
 	var f fps.Framerate
 	f.Init(i32.f64(o.fps))
 

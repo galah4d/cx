@@ -2,6 +2,9 @@ package main
 
 import "app"
 import "fps"
+import "mat"
+import "gfx"
+import "gl" // ##1 remove gl dependency
 
 var exit bool // ISSUE : panic when Application is global
 
@@ -41,6 +44,14 @@ func main()() {
 	a.SetMouseButtonCallback("main", "MouseButtonCallback")
 	a.SetMousePositionCallback("main", "MousePositionCallback")
 
+	gfx.init(o.width, o.height)
+
+	var width f32 = i32.f32(o.width)
+	var height f32 = i32.f32(o.height)
+
+	var texture gfx.texture_s = gfx.create_texture(sprintf("%s/textures/Skycoin-Cloud-BW-Vertical-on_black@2x.png", o.dataDir),
+			gl.LINEAR, gl.LINEAR, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, 0, 0)
+
 	for app.Running(&a) { // ISSUE : can't use member function
 		f.BeginUpdate(2.0D)
 		fps.Start(prfSwap)
@@ -53,10 +64,30 @@ func main()() {
 				if exit {
 					a.Exit()
 				}
-				fps.Stop(prfUpdate)
+				var mesh gfx.mesh_id = gfx.lock_mesh(gl.TRIANGLES, gfx.g_vertexColorAttributes, 6)
+
+				var w f32 = i32.f32(texture.width) / 10.0 // ISSUE : can't declare using :=, compilation errors follows when f32 arguments are expected
+				var h f32 = i32.f32(texture.height) / 10.0
+				var x f32 =  (width - w) / 2.0
+				var y f32 = (height - h) / 2.0
+
+				gfx.begin_mesh(mesh)
+				gfx.append_quad(mesh,
+						mat.v4_(x, y, w, h),
+						mat.v4_(0.0, 0.0, 1.0, 1.0),
+						mat.v4_(1.0, 1.0, 1.0, 1.0),
+						mat.v4_(0.0, 0.0, width, height),
+						0.0)
+
+				gfx.end_mesh(mesh)
+ 				fps.Stop(prfUpdate)
 
 				// Render ...
 				fps.Start(prfRender)
+				gfx.effect_use(gfx.g_fxTexture)
+				gfx.effect_assign_texture(gfx.g_fxTexture, 0, texture.name)
+				gfx.render_mesh(mesh)
+				gfx.unlock_mesh(mesh)
 				fps.Stop(prfRender)
 			}
 			fps.Stop(prfFrame)
@@ -65,4 +96,6 @@ func main()() {
 		fps.Stop(prfSwap)
 		f.EndUpdate()
 	}
+
+	gfx.free()
 }

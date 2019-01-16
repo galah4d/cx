@@ -39,7 +39,7 @@ func main()() {
 	var prfRender fps.ProfileId = fps.CreateProfile("render")
 
 	var a app.Application
-	a.Init(o, "Window Tutorial", "mainWindow", 2, 1)
+	a.Init(o, "Colored Quad Tutorial", "mainWindow", 2, 1)
 	a.SetKeyboardCallback("main", "KeyboardCallback")
 	a.SetMouseButtonCallback("main", "MouseButtonCallback")
 	a.SetMousePositionCallback("main", "MousePositionCallback")

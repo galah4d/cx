@@ -1,0 +1,128 @@
+package gfx
+
+//-----------------------------------------------------------------------------
+// Globals ...
+//-----------------------------------------------------------------------------
+var g_effects[] Effect
+
+//-----------------------------------------------------------------------------
+// EffectId ...
+//-----------------------------------------------------------------------------
+type EffectId struct {
+	effect i32
+}
+
+//-----------------------------------------------------------------------------
+// Effect ...
+//-----------------------------------------------------------------------------
+type Effect struct {
+	id EffectId
+	program Program
+	vertex str
+	pixel str
+	attributes []Attribute
+	samplers []Sampler
+	uniforms []Uniform
+}
+
+//-----------------------------------------------------------------------------
+// InvalidEffect ...
+//-----------------------------------------------------------------------------
+func InvalidEffect() (out EffectId) {
+	out.effect = -1
+}
+
+//-----------------------------------------------------------------------------
+// IsValidEffect ...
+//-----------------------------------------------------------------------------
+func IsValidEffect(id EffectId) (out bool) {
+	out = id.effect >= 0 && id.effect < len(g_effects)// && is_valid_program(id.program) ##2 program id ??
+}
+
+//-----------------------------------------------------------------------------
+// CreateEffect ...
+//-----------------------------------------------------------------------------
+func CreateEffect(vertex str, pixel str) (out EffectId) {
+	out.effect = len(g_effects)
+
+	var effect Effect
+	effect.id = out
+	effect.program = CreateProgram(vertex, pixel)
+	effect.vertex = vertex
+	effect.pixel = pixel
+
+	g_effects = append(g_effects, effect)
+
+	panicIfNot(IsValidEffect(out), "invalid id")
+}
+
+//-----------------------------------------------------------------------------
+// EffectIsValidSamplerSlot ...
+//-----------------------------------------------------------------------------
+func EffectIsValidSamplerSlot(id EffectId, slot i32) (out bool) {
+	panicIfNot(IsValidEffect(id), "invalid id")
+	out = slot >= 0 && slot < len(g_effects[id.effect].samplers)
+}
+
+//-----------------------------------------------------------------------------
+// EffectIsValidUniformSlot ...
+//-----------------------------------------------------------------------------
+func EffectIsValidUniformSlot(id EffectId, slot i32) (out bool) {
+	panicIfNot(IsValidEffect(id), "invalid id")
+	out = slot >= 0 && slot < len(g_effects[id.effect].uniforms)
+}
+
+//-----------------------------------------------------------------------------
+// EffectUse ...
+//-----------------------------------------------------------------------------
+func EffectUse(id EffectId) () {
+	panicIfNot(IsValidEffect(id), "invalid id")
+	UseProgram(g_effects[id.effect].program)
+}
+
+//-----------------------------------------------------------------------------
+// EffectBindAttribute ...
+//-----------------------------------------------------------------------------
+func EffectBindAttribute(id EffectId, location i32, name str) {
+	panicIfNot(IsValidEffect(id), "invalid id")
+	BindAttribute(g_effects[id.effect].program, location, name)
+	g_effects[id.effect].attributes = append(g_effects[id.effect].attributes, NewAttribute(location, name))
+}
+
+//-----------------------------------------------------------------------------
+// EffectBindSampler ...
+//-----------------------------------------------------------------------------
+func EffectBindSampler(id EffectId, name str) {
+	panicIfNot(IsValidEffect(id), "invalid id")
+	var location i32 = BindTexture(g_effects[id.effect].program, name)
+	g_effects[id.effect].samplers = append(g_effects[id.effect].samplers, NewSampler(location, name))
+}
+
+//-----------------------------------------------------------------------------
+// EffectBindUniform ...
+//-----------------------------------------------------------------------------
+func EffectBindUniform(id EffectId, name str) {
+	panicIfNot(IsValidEffect(id), "invalid_id")
+	var location i32 = BindUniform(g_effects[id.effect].program, name)
+	g_effects[id.effect].uniforms = append(g_effects[id.effect].uniforms, NewUniform(location, name))
+}
+
+//-----------------------------------------------------------------------------
+// EffectAssignTexture ...
+//-----------------------------------------------------------------------------
+func EffectAssignTexture(id EffectId, slot i32, texture i32) () {
+	panicIfNot(IsValidEffect(id), "invalid id")
+	panicIfNot(EffectIsValidSamplerSlot(id, slot), "invalid sampler slot")
+	assignTexture(slot, g_effects[id.effect].samplers[slot].location, texture)
+}
+
+//-----------------------------------------------------------------------------
+// EffectAssignFloat ...
+//-----------------------------------------------------------------------------
+func EffectAssignFloat(id EffectId, slot i32, value f32) {
+	panicIfNot(IsValidEffect(id), "invalid id")
+	panicIfNot(EffectIsValidUniformSlot(id, slot), "invalid uniform slot")
+	assignFloat(g_effects[id.effect].uniforms[slot].location, value)
+}
+
+

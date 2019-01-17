@@ -61,29 +61,29 @@ func main()() {
 				if exit {
 					a.Exit()
 				}
-				var mesh gfx.mesh_id = gfx.lock_mesh(gl.TRIANGLES, gfx.g_vertexColorAttributes, 6)
+				var mesh gfx.MeshId = gfx.MeshLock(gl.TRIANGLES, gfx.g_vertexColorAttributes, 6)
 
 				var w f32 = 200.0 // ISSUE : can't declare using :=, compilation errors follows when f32 arguments are expected
 				var h f32 = 200.0
 				var x f32 =  (width - w) / 2.0
 				var y f32 = (height - h) / 2.0
 
-				gfx.begin_mesh(mesh)
-				gfx.append_quad(mesh,
+				gfx.MeshBegin(mesh)
+				gfx.MeshAppendQuad(mesh,
 						mat.v4_(x, y, w, h),
 						mat.v4_(0.0, 0.0, 1.0, 1.0),
 						mat.v4_(0.0, 1.0, 0.0, 1.0),
 						mat.v4_(0.0, 0.0, width, height),
 						0.0)
 
-				gfx.end_mesh(mesh)
+				gfx.MeshEnd(mesh)
  				fps.Stop(prfUpdate)
 
 				// Render ...
 				fps.Start(prfRender)
-				gfx.effect_use(gfx.g_fxVertexColor)
-				gfx.render_mesh(mesh)
-				gfx.unlock_mesh(mesh)
+				gfx.EffectUse(gfx.g_fxVertexColor)
+				gfx.MeshRender(mesh)
+				gfx.MeshUnlock(mesh)
 				fps.Stop(prfRender)
 			}
 			fps.Stop(prfFrame)

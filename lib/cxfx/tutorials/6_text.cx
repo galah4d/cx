@@ -53,7 +53,7 @@ func main()() {
 	var fontName str
 	fontName = "skycoinRegular"
 
-	var fontTexture texture_s = gfx.create_font_texture(fontName, sprintf("%s/fonts/Skycoin-Regular.ttf", o.dataDir), 64, 32, 127, gltext.LeftToRight)
+	var fontTexture Texture = gfx.TextureCreateFont(fontName, sprintf("%s/fonts/Skycoin-Regular.ttf", o.dataDir), 64, 32, 127, gltext.LeftToRight)
 
 	for app.Running(&a) { // ISSUE : can't use member function
 		f.BeginUpdate(2.0D)
@@ -67,7 +67,7 @@ func main()() {
 				if exit {
 					a.Exit()
 				}
-				var mesh gfx.mesh_id = gfx.lock_mesh(gl.TRIANGLES, gfx.g_vertexColorAttributes, 7 * 6)
+				var mesh gfx.MeshId = gfx.MeshLock(gl.TRIANGLES, gfx.g_vertexColorAttributes, 7 * 6)
 
 				var textWidth i32
 				var textHeight i32
@@ -78,8 +78,8 @@ func main()() {
 				var x f32 =  (width - w) / 2.0
 				var y f32 = (height - h) / 2.0
 
-				gfx.begin_mesh(mesh)
-				gfx.append_text(mesh, fontTexture, fontName,
+				gfx.MeshBegin(mesh)
+				gfx.MeshAppendText(mesh, fontTexture, fontName,
 						mat.v2_(x, y), mat.v2_(1.0, 1.0),
 						mat.v4_(1.0, 0.0, 0.0, 1.0),
 						"Skycoin",
@@ -87,15 +87,15 @@ func main()() {
 						mat.v4_(0.0, 0.0, width, height),
 						0.0)
 
-				gfx.end_mesh(mesh)
+				gfx.MeshEnd(mesh)
  				fps.Stop(prfUpdate)
 
 				// Render ...
 				fps.Start(prfRender)
-				gfx.effect_use(gfx.g_fxTexture)
-				gfx.effect_assign_texture(gfx.g_fxTexture, 0, fontTexture.name)
-				gfx.render_mesh(mesh)
-				gfx.unlock_mesh(mesh)
+				gfx.EffectUse(gfx.g_fxTexture)
+				gfx.EffectAssignTexture(gfx.g_fxTexture, 0, fontTexture.name)
+				gfx.MeshRender(mesh)
+				gfx.MeshUnlock(mesh)
 				fps.Stop(prfRender)
 			}
 			fps.Stop(prfFrame)

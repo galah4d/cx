@@ -1,0 +1,116 @@
+package gfx
+
+//-----------------------------------------------------------------------------
+// Globals ...
+//-----------------------------------------------------------------------------
+//var g_targets [64]Target
+//var g_targetCount i32 = 0
+var g_freeTargets []Target
+
+//-----------------------------------------------------------------------------
+// Target ...
+//-----------------------------------------------------------------------------
+type Target struct {
+	framebuffer i32
+	texture Texture
+}
+
+//-----------------------------------------------------------------------------
+// InvalidTarget ...
+//-----------------------------------------------------------------------------
+func InvalidTarget()(out Target) {
+	out.framebuffer = -1
+	out.texture = InvalidTexture()
+}
+
+//-----------------------------------------------------------------------------
+// IsValidTarget ...
+//-----------------------------------------------------------------------------
+func IsValidTarget(t Target) (out bool) {
+	out = t.framebuffer > -1
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func lock_target(w i32, h i32) (target Target) {
+	var freeTargetCount i32 = len(g_freeTargets)
+	if (freeTargetCount > 0) {
+		var i i32 = 0
+		for i = 0; i < freeTargetCount; i = i + 1 {
+			var t Target = g_freeTargets[i]
+			if (t.texture.width == w &&
+				t.texture.height == h) {
+				target = t
+				if ((i + 1) < freeTargetCount) {
+					g_freeTargets[i] = g_freeTargets[freeTargetCount - 1]
+				}
+				g_freeTargets = resize(g_freeTargets, freeTargetCount - 1)
+				return;
+			}
+		}
+   }
+
+	target = create_target(w, h)
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func unlock_target(target Target) {
+	panicIfNot(IsValidTarget(target), "unlock_target : invalid target")
+	var i i32 = 0
+	var freeTargetCount i32 = len(g_freeTargets)
+	for i = 0; i < freeTargetCount; i = i + 1 {
+		var t Target = g_freeTargets[i]
+		panicIfNot(t.framebuffer != target.framebuffer, "target unlocked twice")
+		if (t.framebuffer == target.framebuffer) {
+			return;
+		}
+	}
+
+	g_freeTargets = append(g_freeTargets, target)
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func create_target(w i32, h i32) (target Target) {
+	var framebuffer i32 = -1
+
+	framebuffer = gl.GenFramebuffers(1, framebuffer)
+	panicIf(GlError(), "gl.GenFramebuffers")
+
+	g_framebuffers = append(g_framebuffers, framebuffer)
+
+	bind_framebuffer(framebuffer)
+	target.texture = TextureCreate("", gl.LINEAR, gl.LINEAR, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, w, h)
+
+	gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, target.texture.name, 0)
+	panicIf(GlError(), "gl.FramebufferTexture2D")
+
+	panicIf(GlStatus(), "gl.CheckFramebufferStatus")
+
+	gl.BindFramebuffer(gl.FRAMEBUFFER, 0)
+	panicIf(GlError(), "gl.BindFramebuffer")
+	panicIf(GlStatus(), "gl.CheckFramebufferStatus")
+
+	target.framebuffer = framebuffer
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func create_depth_buffer(format i32, w i32, h i32) (out i32) {
+	//panicIfNot(format == gl.DEPTH24 || format == gl.DEPTH24_STENCIL_8, "create_depth_buffer : untested format")
+	var renderbuffer i32 = -1
+
+	renderbuffer = gl.GenRenderbuffers(1, renderbuffer)
+	panicIf(GlError(), "gl.GenRenderbuffers")
+
+	gl.BindRenderbuffer(gl.RENDERBUFFER, renderbuffer)
+	panicIf(GlError(), "gl.BindRenderbuffer")
+
+	gl.RenderbufferStorage(gl.RENDERBUFFER, format, w, h)
+	panicIf(GlError(), "gl.RenderbufferStorage")
+
+	out = renderbuffer
+}
+
+

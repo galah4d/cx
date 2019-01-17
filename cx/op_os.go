@@ -27,15 +27,9 @@ const (
 
 var openFiles map[string]*os.File = make(map[string]*os.File, 0)
 
-func op_os_ReadFile(expr *CXExpression, fp int) {
-	inp1, out1 := expr.Inputs[0], expr.Outputs[0]
-
-	_ = out1
-
-	if byts, err := ioutil.ReadFile(ReadStr(fp, inp1)); err == nil {
-		_ = byts
-		// sByts := encoder.Serialize(byts)
-		// assignOutput(0, sByts, "[]byte", expr, call)
+func op_os_ReadAllText(expr *CXExpression, fp int) {
+	if byts, err := ioutil.ReadFile(ReadStr(fp, expr.Inputs[0])); err == nil {
+		WriteObject(GetFinalOffset(fp, expr.Outputs[0]), encoder.Serialize(string(byts)))
 	} else {
 		panic(err)
 	}

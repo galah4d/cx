@@ -17,6 +17,7 @@ const (
 	OP_OS_GET_WORKING_DIRECTORY
 	OP_OS_OPEN
 	OP_OS_CLOSE
+	OP_OS_READ_ALL_TEXT
 	OP_OS_RUN
 	OP_OS_EXIT
 
@@ -58,6 +59,9 @@ func init() {
 	AddOpCode(OP_OS_CLOSE, "os.Close",
 		[]*CXArgument{newOpPar(TYPE_STR, false)},
 		[]*CXArgument{})
+	AddOpCode(OP_OS_READ_ALL_TEXT, "os.ReadAllText",
+		[]*CXArgument{newOpPar(TYPE_STR, false)},
+		[]*CXArgument{newOpPar(TYPE_STR, false)})
 	AddOpCode(OP_OS_RUN, "os.Run",
 		[]*CXArgument{newOpPar(TYPE_STR, false), newOpPar(TYPE_I32, false), newOpPar(TYPE_I32, false), newOpPar(TYPE_STR, false)},
 		[]*CXArgument{newOpPar(TYPE_I32, false), newOpPar(TYPE_I32, false), newOpPar(TYPE_STR, false)})
@@ -97,6 +101,8 @@ func init() {
 				op_os_Open(expr, fp)
 			case OP_OS_CLOSE:
 				op_os_Close(expr, fp)
+			case OP_OS_READ_ALL_TEXT:
+				op_os_ReadAllText(expr, fp)
 			case OP_OS_RUN:
 				op_os_Run(expr, fp)
 			case OP_OS_EXIT:

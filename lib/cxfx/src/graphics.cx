@@ -74,7 +74,6 @@ var g_vertexColorAttributes []i32
 //-----------------------------------------------------------------------------
 var g_fxVertexColor EffectId = InvalidEffect()
 var g_fxTexture	 EffectId = InvalidEffect()
-//var g_fxFont		EffectId = InvalidEffect()
 var g_fxTrans_0	 EffectId = InvalidEffect()
 var g_fxTrans_1	 EffectId = InvalidEffect()
 
@@ -426,7 +425,7 @@ func color_write(red bool, green bool, blue bool, alpha bool) {
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-func init(width i32, height i32)() {
+func Init(width i32, height i32, dataDir str)() {
 
 	g_vertexColorAttributes = []i32{3, 4, 2}
 
@@ -455,112 +454,12 @@ func init(width i32, height i32)() {
 	gl.Strs("u_t2Dst", "u_t2Dst")
 	gl.Strs("u_fTime", "u_fTime")
 
-	//-----------------------------------------------------------------------------
-	// vsPassThrough
-	//-----------------------------------------------------------------------------
-	gl.Strs(
-	`
-	#version 130
-	in vec3 i_v3Position;
-	in vec4 i_v4Albedo;
-	in vec2 i_v2Texcoord;
-	out vec4 v_v4Albedo;
-	out vec2 v_v2Texcoord;
-	void main()
-	{
-		gl_Position = vec4(i_v3Position, 1);
-		v_v4Albedo = i_v4Albedo;
-		v_v2Texcoord = i_v2Texcoord;
-	}`, "vsPassThrough")
+	gl.Strs(os.ReadAllText(sprintf("%s/shaders/pass_through.vsh", dataDir)), "vsPassThrough")
+	gl.Strs(os.ReadAllText(sprintf("%s/shaders/vertex_color.psh", dataDir)), "psVertexColor")
+	gl.Strs(os.ReadAllText(sprintf("%s/shaders/texture.psh", dataDir)), "psTexture")
+	gl.Strs(os.ReadAllText(sprintf("%s/shaders/transition_0.psh", dataDir)), "psTransition_0")
+	gl.Strs(os.ReadAllText(sprintf("%s/shaders/transition_1.psh", dataDir)), "psTransition_1")
 
-	//-----------------------------------------------------------------------------
-	// psVertexColor
-	//-----------------------------------------------------------------------------
-	gl.Strs(
-	`
-	#version 130
-	in vec4 v_v4Albedo;
-	out vec4 o_v4Color;
-	void main()
-	{
-		o_v4Color = v_v4Albedo;
-	}
-	`, "psVertexColor")
-
-	//-----------------------------------------------------------------------------
-	// psFont
-	//-----------------------------------------------------------------------------
-	//gl.Strs(
-	//`
-	//#version 130
-	//uniform sampler2D u_t2Albedo;
-	//in vec4 v_v4Albedo;
-	//in vec2 v_v2Texcoord;
-	//out vec4 o_v4Color;
-	//void main()
-	//{
-	//	o_v4Color = vec4(vec3(0.4, 0.0, 0.4) + texture2D(u_t2Albedo, v_v2Texcoord).rgb + v_v4Albedo.xxx * 0.00001, 1);
-	//}
-	//`, "psFont")
-
-	//-----------------------------------------------------------------------------
-	// psVertexTexture
-	//-----------------------------------------------------------------------------
-	gl.Strs(
-	`
-	#version 130
-	uniform sampler2D u_t2Albedo;
-	in vec4 v_v4Albedo;
-	in vec2 v_v2Texcoord;
-	out vec4 o_v4Color;
-	void main()
-	{
-		o_v4Color = v_v4Albedo * texture2D(u_t2Albedo, v_v2Texcoord);
-	}
-	`, "psTexture")
-
-	//-----------------------------------------------------------------------------
-	// psTransition_0
-	//-----------------------------------------------------------------------------
-	gl.Strs(
-	`
-	#version 130
-	uniform sampler2D u_t2Src;
-	uniform sampler2D u_t2Dst;
-	uniform float u_fTime;
-	in vec2 v_v2Texcoord;
-	out vec4 o_v4Color;
-	void main()
-	{
-		o_v4Color = mix(texture2D(u_t2Src, v_v2Texcoord), texture2D(u_t2Dst, v_v2Texcoord), u_fTime);
-	}
-	`, "psTransition_0")
-
-	//-----------------------------------------------------------------------------
-	// psTransition_1
-	//-----------------------------------------------------------------------------
-	gl.Strs(
-	`
-	#version 130
-	uniform sampler2D u_t2Src;
-	uniform sampler2D u_t2Dst;
-	uniform float u_fTime;
-	in vec2 v_v2Texcoord;
-	out vec4 o_v4Color;
-	void main()
-	{
-		vec4 color_0 = texture2D(u_t2Src, v_v2Texcoord);
-		vec4 color_1 = texture2D(u_t2Dst, v_v2Texcoord);
-
-		float alpha = color_1.w;
-		float time = u_fTime * alpha;
-
-		o_v4Color = vec4(mix(color_0.rgb, color_1.rgb, time), 1.0);
-	}
-	`, "psTransition_1")
-
-	//-----------------------------------------------------------------------------
-	//-----------------------------------------------------------------------------
 	gl.Init()
 	panicIf(GlError(), "gl.Init")
 
@@ -578,8 +477,6 @@ func init(width i32, height i32)() {
 
 	set_viewport(gfx_viewportBounds)
 
-	//-----------------------------------------------------------------------------
-	//-----------------------------------------------------------------------------
 	g_fxVertexColor = CreateEffect("vsPassThrough", "psVertexColor")
 	EffectBindAttribute(g_fxVertexColor, 0, "i_v3Position")
 	EffectBindAttribute(g_fxVertexColor, 1, "i_v4Albedo")
@@ -589,12 +486,6 @@ func init(width i32, height i32)() {
 	EffectBindAttribute(g_fxTexture, 1, "i_v4Albedo")
 	EffectBindAttribute(g_fxTexture, 2, "i_v2Texcoord")
 	EffectBindSampler(g_fxTexture, "u_t2Albedo")
-
-	//g_fxFont = CreateEffect("vsPassThrough", "psFont")
-	//EffectBindAttribute(g_fxFont, 0, "i_v3Position")
-	//EffectBindAttribute(g_fxFont, 1, "i_v4Albedo")
-	//EffectBindAttribute(g_fxFont, 2, "i_v2Texcoord")
-	//EffectBindSampler(g_fxFont, "u_t2Albedo")
 
 	g_fxTrans_0 = CreateEffect("vsPassThrough", "psTransition_0")
 	EffectBindAttribute(g_fxTrans_0, 0, "i_v3Position")
@@ -613,14 +504,13 @@ func init(width i32, height i32)() {
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-func free()() {
+func Free()() {
 
 	//pop_scissor()
 
 	gl.Free("vsPassThrough")
 	gl.Free("psVertexColor")
 	gl.Free("psTexture")
-	//gl.Free("psFont")
 	gl.Free("psTransition_0")
 	gl.Free("psTransition_1")
 	gl.Free("i_v3Position")

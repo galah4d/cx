@@ -44,7 +44,7 @@ func main()() {
 	a.SetMouseButtonCallback("main", "MouseButtonCallback")
 	a.SetMousePositionCallback("main", "MousePositionCallback")
 
-	gfx.init(o.width, o.height)
+	gfx.Init(o.width, o.height, o.dataDir)
 
 	var width f32 = i32.f32(o.width)
 	var height f32 = i32.f32(o.height)
@@ -97,5 +97,5 @@ func main()() {
 		f.EndUpdate()
 	}
 
-	gfx.free()
+	gfx.Free()
 }

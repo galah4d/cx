@@ -125,4 +125,13 @@ func EffectAssignFloat(id EffectId, slot i32, value f32) {
 	assignFloat(g_effects[id.effect].uniforms[slot].location, value)
 }
 
+//-----------------------------------------------------------------------------
+// EffectAssignMatrix4 ...
+//-----------------------------------------------------------------------------
+func EffectAssignMatrix4(id EffectId, slot i32, value []f32, transpose bool) {
+	panicIfNot(IsValidEffect(id), "invalid id")
+	panicIfNot(EffectIsValidUniformSlot(id, slot), "invalid uniform slot")
+	assignVector(g_effects[id.effect].uniforms[slot].location, value, transpose)
+}
+
 

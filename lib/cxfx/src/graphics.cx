@@ -8,11 +8,6 @@ import "os"
 //-----------------------------------------------------------------------------
 // Globals ...
 //-----------------------------------------------------------------------------
-var g_vaos []i32
-var g_vbos []i32
-//var g_shaders[]i32
-var g_framebuffers []i32
-
 var g_sizeofFloat i32 = 4
 
 var g_colorMaskRed bool = true
@@ -76,6 +71,7 @@ var g_fxVertexColor EffectId = InvalidEffect()
 var g_fxTexture	 EffectId = InvalidEffect()
 var g_fxTrans_0	 EffectId = InvalidEffect()
 var g_fxTrans_1	 EffectId = InvalidEffect()
+var g_fxPerspectiveTexture EffectId = InvalidEffect()
 
 //-----------------------------------------------------------------------------
 // GlError ...
@@ -221,6 +217,14 @@ func assignTexture(slot i32, sampler i32, texture i32) () {
 func assignFloat(slot i32, value f32) {
 	gl.Uniform1f(slot, value)
 	panicIf(GlError(), "gl.Uniform1f")
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func assignVector(slot i32, value []f32, transpose bool) {
+	panicIf(len(value) % 16 != 0, "invalid stride")
+	gl.UniformMatrix4fv(slot, len(value) / 16, transpose, value)
+	panicIf(GlError(), "gl.UniformMatrix4vf")
 }
 
 //-----------------------------------------------------------------------------
@@ -453,8 +457,13 @@ func Init(width i32, height i32, dataDir str)() {
 	gl.Strs("u_t2Src", "u_t2Src")
 	gl.Strs("u_t2Dst", "u_t2Dst")
 	gl.Strs("u_fTime", "u_fTime")
+	gl.Strs("u_m44World", "u_m44World")
+	gl.Strs("u_m44View", "u_m44View")
+	gl.Strs("u_m44Projection", "u_m44Projection")
 
 	gl.Strs(os.ReadAllText(sprintf("%s/shaders/pass_through.vsh", dataDir)), "vsPassThrough")
+	gl.Strs(os.ReadAllText(sprintf("%s/shaders/perspective.vsh", dataDir)), "vsPerspective")
+
 	gl.Strs(os.ReadAllText(sprintf("%s/shaders/vertex_color.psh", dataDir)), "psVertexColor")
 	gl.Strs(os.ReadAllText(sprintf("%s/shaders/texture.psh", dataDir)), "psTexture")
 	gl.Strs(os.ReadAllText(sprintf("%s/shaders/transition_0.psh", dataDir)), "psTransition_0")
@@ -500,6 +509,15 @@ func Init(width i32, height i32, dataDir str)() {
 	EffectBindSampler(g_fxTrans_1, "u_t2Src")
 	EffectBindSampler(g_fxTrans_1, "u_t2Dst")
 	EffectBindUniform(g_fxTrans_1, "u_fTime")
+
+	g_fxPerspectiveTexture = CreateEffect("vsPerspective", "psTexture")
+	EffectBindAttribute(g_fxPerspectiveTexture, 0, "i_v3Position")
+	EffectBindAttribute(g_fxPerspectiveTexture, 1, "i_v4Albedo")
+	EffectBindAttribute(g_fxPerspectiveTexture, 2, "i_v2Texcoord")
+	EffectBindSampler(g_fxPerspectiveTexture, "u_t2Albedo")
+	EffectBindUniform(g_fxPerspectiveTexture, "u_m44View")
+	EffectBindUniform(g_fxPerspectiveTexture, "u_m44World")
+	EffectBindUniform(g_fxPerspectiveTexture, "u_m44Projection")
 }
 
 //-----------------------------------------------------------------------------
@@ -520,6 +538,9 @@ func Free()() {
 	gl.Free("u_t2Src")
 	gl.Free("u_t2Dst")
 	gl.Free("u_fTime")
+	gl.Free("u_m44World")
+	gl.Free("u_m44View")
+	gl.Free("u_m44Projection")
 
 	UseProgram(NullProgram())
 

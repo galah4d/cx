@@ -23,6 +23,14 @@ var freeFns map[string]*func() = make(map[string]*func(), 0)
 var cSources map[string]**uint8 = make(map[string]**uint8, 0)
 var gifs map[string]*gif.GIF = make(map[string]*gif.GIF, 0)
 
+func readF32Ptr(fp int, inp *CXArgument) *float32 {
+	return (*float32)(gl.Ptr(ReadX32Data(fp, inp, TYPE_F32)))
+}
+
+func readI32Ptr(fp int, inp *CXArgument) *int32 {
+	return (*int32)(gl.Ptr(ReadX32Data(fp, inp, TYPE_I32)))
+}
+
 // gogl
 func op_gl_Init() {
 	gl.Init()
@@ -420,12 +428,12 @@ func op_gl_GenBuffers(expr *CXExpression, fp int) {
 
 func op_gl_BufferData(expr *CXExpression, fp int) {
 	inp1, inp2, inp3, inp4 := expr.Inputs[0], expr.Inputs[1], expr.Inputs[2], expr.Inputs[3]
-	gl.BufferData(uint32(ReadI32(fp, inp1)), int(ReadI32(fp, inp2)), gl.Ptr(ReadF32Data(fp, inp3)), uint32(ReadI32(fp, inp4)))
+	gl.BufferData(uint32(ReadI32(fp, inp1)), int(ReadI32(fp, inp2)), gl.Ptr(ReadX32Data(fp, inp3, -1)), uint32(ReadI32(fp, inp4)))
 }
 
 func op_gl_BufferSubData(expr *CXExpression, fp int) {
 	inp1, inp2, inp3, inp4 := expr.Inputs[0], expr.Inputs[1], expr.Inputs[2], expr.Inputs[3]
-	gl.BufferSubData(uint32(ReadI32(fp, inp1)), int(ReadI32(fp, inp2)), int(ReadI32(fp, inp3)), gl.Ptr(ReadF32Data(fp, inp4)))
+	gl.BufferSubData(uint32(ReadI32(fp, inp1)), int(ReadI32(fp, inp2)), int(ReadI32(fp, inp3)), gl.Ptr(ReadX32Data(fp, inp4, -1)))
 }
 
 // gl_2_0
@@ -541,13 +549,79 @@ func op_gl_UseProgram(expr *CXExpression, fp int) {
 }
 
 func op_gl_Uniform1f(expr *CXExpression, fp int) {
-	inp1, inp2 := expr.Inputs[0], expr.Inputs[1]
-	gl.Uniform1f(ReadI32(fp, inp1), ReadF32(fp, inp2))
+	gl.Uniform1f(ReadI32(fp, expr.Inputs[0]), ReadF32(fp, expr.Inputs[1]))
+}
+
+func op_gl_Uniform2f(expr *CXExpression, fp int) {
+	gl.Uniform2f(ReadI32(fp, expr.Inputs[0]), ReadF32(fp, expr.Inputs[1]), ReadF32(fp, expr.Inputs[2]))
+}
+
+func op_gl_Uniform3f(expr *CXExpression, fp int) {
+	gl.Uniform3f(ReadI32(fp, expr.Inputs[0]), ReadF32(fp, expr.Inputs[1]), ReadF32(fp, expr.Inputs[2]), ReadF32(fp, expr.Inputs[3]))
+}
+
+func op_gl_Uniform4f(expr *CXExpression, fp int) {
+	gl.Uniform4f(ReadI32(fp, expr.Inputs[0]), ReadF32(fp, expr.Inputs[1]), ReadF32(fp, expr.Inputs[2]), ReadF32(fp, expr.Inputs[3]), ReadF32(fp, expr.Inputs[4]))
 }
 
 func op_gl_Uniform1i(expr *CXExpression, fp int) {
-	inp1, inp2 := expr.Inputs[0], expr.Inputs[1]
-	gl.Uniform1i(ReadI32(fp, inp1), ReadI32(fp, inp2))
+	gl.Uniform1i(ReadI32(fp, expr.Inputs[0]), ReadI32(fp, expr.Inputs[1]))
+}
+
+func op_gl_Uniform2i(expr *CXExpression, fp int) {
+	gl.Uniform2i(ReadI32(fp, expr.Inputs[0]), ReadI32(fp, expr.Inputs[1]), ReadI32(fp, expr.Inputs[2]))
+}
+
+func op_gl_Uniform3i(expr *CXExpression, fp int) {
+	gl.Uniform3i(ReadI32(fp, expr.Inputs[0]), ReadI32(fp, expr.Inputs[1]), ReadI32(fp, expr.Inputs[2]), ReadI32(fp, expr.Inputs[3]))
+}
+
+func op_gl_Uniform4i(expr *CXExpression, fp int) {
+	gl.Uniform4i(ReadI32(fp, expr.Inputs[0]), ReadI32(fp, expr.Inputs[1]), ReadI32(fp, expr.Inputs[2]), ReadI32(fp, expr.Inputs[3]), ReadI32(fp, expr.Inputs[4]))
+}
+
+func op_gl_Uniform1fv(expr *CXExpression, fp int) {
+	gl.Uniform1fv(ReadI32(fp, expr.Inputs[0]), ReadI32(fp, expr.Inputs[1]), readF32Ptr(fp, expr.Inputs[2]))
+}
+
+func op_gl_Uniform2fv(expr *CXExpression, fp int) {
+	gl.Uniform2fv(ReadI32(fp, expr.Inputs[0]), ReadI32(fp, expr.Inputs[1]), readF32Ptr(fp, expr.Inputs[2]))
+}
+
+func op_gl_Uniform3fv(expr *CXExpression, fp int) {
+	gl.Uniform3fv(ReadI32(fp, expr.Inputs[0]), ReadI32(fp, expr.Inputs[1]), readF32Ptr(fp, expr.Inputs[2]))
+}
+
+func op_gl_Uniform4fv(expr *CXExpression, fp int) {
+	gl.Uniform4fv(ReadI32(fp, expr.Inputs[0]), ReadI32(fp, expr.Inputs[1]), readF32Ptr(fp, expr.Inputs[2]))
+}
+
+func op_gl_Uniform1iv(expr *CXExpression, fp int) {
+	gl.Uniform1iv(ReadI32(fp, expr.Inputs[0]), ReadI32(fp, expr.Inputs[1]), readI32Ptr(fp, expr.Inputs[2]))
+}
+
+func op_gl_Uniform2iv(expr *CXExpression, fp int) {
+	gl.Uniform2iv(ReadI32(fp, expr.Inputs[0]), ReadI32(fp, expr.Inputs[1]), readI32Ptr(fp, expr.Inputs[2]))
+}
+
+func op_gl_Uniform3iv(expr *CXExpression, fp int) {
+	gl.Uniform3iv(ReadI32(fp, expr.Inputs[0]), ReadI32(fp, expr.Inputs[1]), readI32Ptr(fp, expr.Inputs[2]))
+}
+
+func op_gl_Uniform4iv(expr *CXExpression, fp int) {
+	gl.Uniform4iv(ReadI32(fp, expr.Inputs[0]), ReadI32(fp, expr.Inputs[1]), readI32Ptr(fp, expr.Inputs[2]))
+}
+
+func op_gl_UniformMatrix2fv(expr *CXExpression, fp int) {
+	gl.UniformMatrix2fv(ReadI32(fp, expr.Inputs[0]), ReadI32(fp, expr.Inputs[1]), ReadBool(fp, expr.Inputs[2]), readF32Ptr(fp, expr.Inputs[3]))
+}
+
+func op_gl_UniformMatrix3fv(expr *CXExpression, fp int) {
+	gl.UniformMatrix3fv(ReadI32(fp, expr.Inputs[0]), ReadI32(fp, expr.Inputs[1]), ReadBool(fp, expr.Inputs[2]), readF32Ptr(fp, expr.Inputs[3]))
+}
+
+func op_gl_UniformMatrix4fv(expr *CXExpression, fp int) {
+	gl.UniformMatrix4fv(ReadI32(fp, expr.Inputs[0]), ReadI32(fp, expr.Inputs[1]), ReadBool(fp, expr.Inputs[2]), readF32Ptr(fp, expr.Inputs[3]))
 }
 
 func op_gl_VertexAttribPointer(expr *CXExpression, fp int) {

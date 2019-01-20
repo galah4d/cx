@@ -1,0 +1,257 @@
+package main
+
+import "app"
+import "fps"
+import "mat"
+import "gfx"
+import "gl" // ##1 hide gl dependency
+import "gltext" // ##1 hide gltext dependency
+import "gui"
+
+//-----------------------------------------------------------------------------
+// TODO
+//-----------------------------------------------------------------------------
+// TODO : centre buttons
+// TODO : fix black scren when exiting gameScreen
+//
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+var exit bool
+var gameScreen gui.ScreenId
+var exitScreen gui.ScreenId
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func onPlayButton(controlIndex i32, action i32) {
+	if action == gui.KEY_PRESS {
+		gui.ScreenShow(gameScreen)
+	} else if action != gui.KEY_RELEASE && action != gui.KEY_REPEAT {
+		panicIfNot(false, "invalid action")
+	}
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func onExitButton(controlIndex i32, action i32) {
+	if action == gui.KEY_PRESS {
+		gui.ScreenShow(exitScreen)
+	} else if action != gui.KEY_RELEASE && action != gui.KEY_REPEAT {
+		panicIfNot(false, "invalid action")
+	}
+}
+
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func onExitDialogNo(controlIndex i32, action i32) {
+	var id gui.ControlId = gui.NewControlId(controlIndex)
+
+	if (action == gui.KEY_PRESS) {
+		printf("NO PRESSED\n")
+	} else if (action == gui.KEY_RELEASE) {
+		printf("NO RELEASED\n")
+		gui.hide_modal(exitScreen)
+		printf("HERE\n")
+	} else if (action == gui.KEY_REPEAT) {
+		printf("NO REPEAT\n")
+	} else {
+		panicIfNot(false, "invalid action")
+	}
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func onExitDialogYes(controlIndex i32, action i32) {
+	var id gui.ControlId = gui.NewControlId(controlIndex)
+
+	if (action == gui.KEY_PRESS) {
+		printf("YES PRESSED\n")
+	} else if (action == gui.KEY_RELEASE) {
+		printf("YES RELEASED\n")
+		gui.hide_modal(exitScreen)
+		exit = true
+	} else if (action == gui.KEY_REPEAT) {
+		printf("YES REPEAT\n")
+	} else {
+		panicIfNot(false, "invalid action")
+	}
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func main()() {
+	var o app.Options
+	o.width = 800
+	o.height = 600
+	o.fps = 60
+	o.Parse()
+
+	var appName str
+	appName = "Dialog Tutorial"
+
+	var f fps.Framerate
+	f.Init(i32.f64(o.fps))
+
+	var prfSwap fps.ProfileId = fps.CreateProfile("swap")
+	var prfFrame fps.ProfileId = fps.CreateProfile("frame")
+	var prfUpdate fps.ProfileId = fps.CreateProfile("update")
+	var prfRender fps.ProfileId = fps.CreateProfile("render")
+
+	var a app.Application
+	a.Init(o, appName, "mainWindow", 2, 1)
+	a.SetKeyboardCallback("gui", "process_keyboard")
+	a.SetMouseButtonCallback("gui", "process_button")
+	a.SetMousePositionCallback("gui", "process_cursor")
+
+	gfx.Init(o.width, o.height, o.dataDir)
+	gui.Init(o.width, o.height, o.dataDir)
+
+	// exitScreen
+	exitScreen  = gui.ScreenCreate("exitScreen")
+	gui.ControlSetSkin(exitScreen.base, gui.g_modalSkin)
+	gui.ControlSetBounds(exitScreen.base, gfx.gfx_viewportBounds)
+	gui.ScreenSetDuration(exitScreen, -2.0D)
+	gui.ScreenSetModal(exitScreen, true)
+
+	{
+		var exitWindow gui.window_id = gui.window_create("exitWindow")
+		gui.ControlAddChild(exitScreen.base, exitWindow.base)
+		gui.ControlSetSkin(exitWindow.base, gui.g_windowSkin)
+		gui.ControlSetAutosize(exitWindow.base, gui.AUTOSIZE)
+		gui.ControlSetAlign(exitWindow.base, gui.ALIGN_CENTER)
+		gui.window_set_caption(exitWindow, "cxfx")
+		gui.window_add_button(exitWindow, "no", "No", "main", "onExitDialogNo")
+		gui.window_add_button(exitWindow, "yes", "Yes", "main", "onExitDialogYes")
+
+		{
+			var exitLabel gui.LabelId = gui.LabelCreate("exitLabel")
+			gui.window_set_containee(exitWindow, exitLabel.base)
+			gui.ControlSetDock(exitLabel.base, gui.DOCK_FILL)
+			gui.ControlSetAutosize(exitLabel.base, gui.AUTOSIZE)
+			gui.LabelSetFont(exitLabel, gui.g_regularFont)
+			gui.LabelSetText(exitLabel, "Do you want to quit ?")
+			gui.LabelSetSize(exitLabel, gui.g_fontSizeText)
+			gui.LabelSetColor(exitLabel, gui.g_white)
+			gui.LabelSetAlign(exitLabel, gui.ALIGN_CENTER)
+		}
+	}
+
+	// mainScreen
+	var mainScreen gui.ScreenId = gui.ScreenCreate("mainScreen")
+	gui.ControlSetSkin(mainScreen.base, gui.g_blackSkin)
+	gui.ControlSetSize(mainScreen.base, gfx.gfx_viewportSize)
+	gui.ControlSetPadding(mainScreen.base, mat.v4_(200.0, 150.0, 200.0, 150.0))
+	gui.ScreenSetDuration(mainScreen, -2.0D)
+	gui.ScreenSetOnExit(mainScreen, exitScreen)
+	{
+		var playButton gui.LabelId = gui.LabelCreate("playButton")
+		gui.ControlAddChild(mainScreen.base, playButton.base)
+		gui.ControlSetSkin(playButton.base, gui.g_blueSkin)
+		gui.ControlSetDock(playButton.base, gui.DOCK_TOP)
+		gui.ControlSetFocusable(playButton.base, 1)
+		gui.ControlSetPadding(playButton.base, mat.v4_(5.0, 5.0, 5.0, 5.0))
+		gui.ControlSetAutosize(playButton.base, gui.AUTOSIZE_Y)
+		gui.LabelSetFont(playButton, gui.g_boldFont)
+		gui.LabelSetText(playButton, "Play")
+		gui.LabelSetOnState(playButton, "main", "onPlayButton")
+		gui.LabelSetSize(playButton, gui.g_fontSizeButton)
+		gui.LabelSetColor(playButton, gui.g_white)
+		gui.LabelSetAlign(playButton, gui.ALIGN_CENTER)
+
+		var exitButton gui.LabelId = gui.LabelCreate("exitButton")
+		gui.ControlAddChild(mainScreen.base, exitButton.base)
+		gui.ControlSetSkin(exitButton.base, gui.g_blueSkin)
+		gui.ControlSetDock(exitButton.base, gui.DOCK_TOP)
+		gui.ControlSetFocusable(exitButton.base, 1)
+		gui.ControlSetPadding(exitButton.base, mat.v4_(5.0, 5.0, 5.0, 5.0))
+		gui.ControlSetAutosize(exitButton.base, gui.AUTOSIZE_Y)
+		gui.LabelSetFont(exitButton, gui.g_boldFont)
+		gui.LabelSetText(exitButton, "Exit")
+		gui.LabelSetOnState(exitButton, "main", "onExitButton")
+		gui.LabelSetSize(exitButton, gui.g_fontSizeButton)
+		gui.LabelSetColor(exitButton, gui.g_white)
+		gui.LabelSetAlign(exitButton, gui.ALIGN_CENTER)
+	}
+
+	// gameScreen
+	gameScreen = gui.ScreenCreate("gameScreen")
+	gui.ControlSetSkin(gameScreen.base, gui.g_blackSkin)
+	gui.ControlSetSize(gameScreen.base, gfx.gfx_viewportSize)
+	gui.ScreenSetDuration(gameScreen, -2.0D)
+	gui.ScreenSetOnExit(gameScreen, mainScreen)
+
+
+	// titleScreen
+	var titleScreen gui.ScreenId = gui.ScreenCreate("titleScreen")
+	gui.ControlSetSkin(titleScreen.base, gui.g_blackSkin)
+	gui.ControlSetBounds(titleScreen.base, gfx.gfx_viewportBounds)
+	gui.ScreenSetDuration(titleScreen, 2.0D)
+	gui.ScreenSetOnNext(titleScreen, mainScreen)
+	{
+		var label gui.LabelId= gui.LabelCreate("titleLabel")
+		gui.ControlAddChild(titleScreen.base, label.base)
+		gui.ControlSetBounds(label.base, mat.v4_(0.0, 0.0, gfx.gfx_width, gfx.gfx_height))
+		gui.ControlSetAlign(label.base, gui.ALIGN_CENTER)
+		gui.LabelSetFont(label, gui.g_boldFont)
+		gui.LabelSetText(label, appName)
+		gui.LabelSetSize(label, gui.g_fontSizeTitle)
+		gui.LabelSetAlign(label, gui.ALIGN_CENTER)
+		gui.LabelSetColor(label, gui.g_gold)
+	}
+
+	// skycoinScreen
+	var skycoinScreen gui.ScreenId = gui.ScreenCreate("skycoinScreen")
+	gui.ControlSetSkin(skycoinScreen.base, gui.g_blackSkin)
+	gui.ControlSetBounds(skycoinScreen.base, gfx.gfx_viewportBounds)
+	gui.ScreenSetDuration(skycoinScreen, 2.0D)
+	gui.ScreenSetOnNext(skycoinScreen, titleScreen)
+	{
+		var picture PictureId = gui.PictureCreate("skycoinPicture")
+		gui.ControlAddChild(skycoinScreen.base, picture.base)
+		gui.ControlSetBounds(picture.base, mat.v4_(0.0, 0.0, gfx.gfx_width / 2.0, gfx.gfx_height / 2.0))
+		gui.ControlSetAlign(picture.base, gui.ALIGN_CENTER)
+		gui.ControlSetAutoscale(picture.base, gui.AUTOSCALE)
+		gui.PictureSetAlign(picture, gui.ALIGN_CENTER)
+		gui.PictureSetAnimation(picture, gui.g_skycoinAnim)
+	}
+
+	// bootScreen
+	var bootScreen gui.ScreenId = gui.ScreenCreate("bootScreen")
+	gui.ControlSetSkin(bootScreen.base, gui.g_bootSkin)
+	gui.ControlSetSize(bootScreen.base, gfx.gfx_viewportSize)
+	gui.ScreenSetDuration(bootScreen, 2.0D)
+	gui.ScreenSetOnNext(bootScreen, skycoinScreen)
+
+	gui.ScreenShow(bootScreen)
+
+	for app.Running(&a) { // ISSUE : can't use member function
+		f.BeginUpdate(2.0D)
+		fps.Start(prfSwap)
+		{
+			a.BeginFrame()
+			fps.Start(prfFrame)
+			{
+				// Update ...
+				fps.Start(prfUpdate)
+				if exit {
+					a.Exit()
+				}
+				gui.update(f.deltaTime)
+				gui.resize()
+				fps.Stop(prfUpdate)
+
+				// Render ...
+				fps.Start(prfRender)
+				gui.render()
+				fps.Stop(prfRender)
+			}
+			fps.Stop(prfFrame)
+			a.EndFrame()
+		}
+		fps.Stop(prfSwap)
+		f.EndUpdate()
+	}
+
+	gfx.Free()
+}

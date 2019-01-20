@@ -1,0 +1,106 @@
+package main
+
+import "app"
+import "fps"
+import "mat"
+import "gfx"
+import "gl" // ##1 hide gl dependency
+import "gltext" // ##1 hide gltext dependency
+import "gui"
+
+func main()() {
+	var o app.Options
+	o.width = 800
+	o.height = 600
+	o.fps = 60
+	o.Parse()
+
+	var f fps.Framerate
+	f.Init(i32.f64(o.fps))
+
+	var prfSwap fps.ProfileId = fps.CreateProfile("swap")
+	var prfFrame fps.ProfileId = fps.CreateProfile("frame")
+	var prfUpdate fps.ProfileId = fps.CreateProfile("update")
+	var prfRender fps.ProfileId = fps.CreateProfile("render")
+
+	var a app.Application
+	a.Init(o, "Text Tutorial", "mainWindow", 2, 1)
+	a.SetKeyboardCallback("gui", "process_keyboard")
+	a.SetMouseButtonCallback("gui", "process_button")
+	a.SetMousePositionCallback("gui", "process_cursor")
+
+	gfx.Init(o.width, o.height, o.dataDir)
+	gui.Init(o.width, o.height, o.dataDir)
+
+	// titleScreen
+	var titleScreen gui.screen_id = gui.screen_create("title")
+	gui.ControlSetSkin(titleScreen.base, gui.g_blackSkin)
+	gui.ControlSetBounds(titleScreen.base, gfx.gfx_viewportBounds)
+	gui.screen_set_duration(titleScreen, 2.0D)
+	{
+		var label gui.LabelId= gui.LabelCreate("title")
+		gui.ControlAddChild(titleScreen.base, label.base)
+		gui.ControlSetBounds(label.base, mat.v4_(0.0, 0.0, gfx.gfx_width, gfx.gfx_height))
+		gui.ControlSetAlign(label.base, gui.ALIGN_CENTER)
+		gui.LabelSetFont(label, gui.g_boldFont)
+		gui.LabelSetText(label, "Menu Tutorial")
+		gui.LabelSetSize(label, gui.g_fontSizeTitle)
+		gui.LabelSetAlign(label, gui.ALIGN_CENTER)
+		gui.LabelSetColor(label, gui.g_gold)
+	}
+
+	// skycoinScreen
+	var skycoinScreen gui.screen_id = gui.screen_create("skycoin")
+	gui.ControlSetSkin(skycoinScreen.base, gui.g_blackSkin)
+	gui.ControlSetBounds(skycoinScreen.base, gfx.gfx_viewportBounds)
+	gui.screen_set_duration(skycoinScreen, 2.0D)
+	gui.screen_set_on_next(skycoinScreen, titleScreen)
+	{
+		var picture picture_id = gui.picture_create("skycoin")
+		gui.ControlAddChild(skycoinScreen.base, picture.base)
+		gui.ControlSetBounds(picture.base, mat.v4_(0.0, 0.0, gfx.gfx_width / 2.0, gfx.gfx_height / 2.0))
+		gui.ControlSetAlign(picture.base, gui.ALIGN_CENTER)
+		gui.ControlSetAutoscale(picture.base, gui.AUTOSCALE)
+		gui.picture_set_align(picture, gui.ALIGN_CENTER)
+		gui.picture_set_animation(picture, gui.g_skycoinAnim)
+	}
+
+	// bootScreen
+	var bootScreen gui.screen_id = gui.screen_create("boot")
+	gui.ControlSetSkin(bootScreen.base, gui.g_bootSkin)
+	gui.ControlSetSize(bootScreen.base, gfx.gfx_viewportSize)
+	gui.screen_set_duration(bootScreen, 2.0D)
+	gui.screen_set_on_next(bootScreen, skycoinScreen)
+
+	gui.show_screen(bootScreen)
+
+	var width f32 = i32.f32(o.width)
+	var height f32 = i32.f32(o.height)
+
+	for app.Running(&a) { // ISSUE : can't use member function
+		f.BeginUpdate(2.0D)
+		fps.Start(prfSwap)
+		{
+			a.BeginFrame()
+			fps.Start(prfFrame)
+			{
+				// Update ...
+				fps.Start(prfUpdate)
+				gui.update(f.deltaTime)
+				gui.resize()
+				fps.Stop(prfUpdate)
+
+				// Render ...
+				fps.Start(prfRender)
+				gui.render()
+				fps.Stop(prfRender)
+			}
+			fps.Stop(prfFrame)
+			a.EndFrame()
+		}
+		fps.Stop(prfSwap)
+		f.EndUpdate()
+	}
+
+	gfx.Free()
+}

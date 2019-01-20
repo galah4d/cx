@@ -1,0 +1,207 @@
+package gui
+
+//-----------------------------------------------------------------------------
+// Globals ...
+//-----------------------------------------------------------------------------
+var g_pictures []picture_s
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+type picture_id struct {
+	base ControlId
+	picture i32
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+type picture_s struct {
+	id picture_id
+	frame i32
+	animation animation_id
+	batch batch_id
+	pictureAlign i32
+	picturePosition mat.v2
+	alpha bool
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func picture_id_(base ControlId, picture i32) (out picture_id) {
+	out.base = base
+	out.picture = picture
+	panicIfNot(is_valid_picture(out), "picture_id_ : invalid id")
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func is_valid_picture(id picture_id) (out bool) {
+	out = id.picture >= 0 && id.picture < len(g_pictures) && IsValidControl(id.base)
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func picture_create(name str) (out picture_id) {
+	out.picture = len(g_pictures)
+	out.base = controlCreate(name, GUI_PICTURE, out.picture)
+
+	var picture picture_s
+	picture.id = out
+	picture.animation = invalid_animation()
+	picture.batch = invalid_batch()
+	picture.pictureAlign = ALIGN_NONE
+	picture.picturePosition = mat.v2_zero
+	picture.alpha = false
+
+	g_pictures = append(g_pictures, picture)
+	panicIfNot(is_valid_picture(out), "picture_create : invalid id")
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func picture_set_animation(id picture_id, animation animation_id) {
+	panicIfNot(is_valid_picture(id), "picture_set_animation : invalid id")
+	g_pictures[id.picture].animation = animation
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func picture_set_align(id picture_id, align i32) {
+	panicIfNot(is_valid_picture(id), "picture_set_align : invalid id")
+	g_pictures[id.picture].pictureAlign = align
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func picture_process_event(id picture_id, event *event_s) (out i32) {
+	panicIfNot(is_valid_picture(id), "picture_process_event : invalid id")
+	out = control_process_event(id.base, event)
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func picture_measure(id picture_id) (width f32, height f32) { // ##1 factorize with label_resize
+	panicIfNot(is_valid_picture(id), "picture_measure : invalid id")
+
+	var animation animation_id = g_pictures[id.picture].animation
+	panicIfNot(is_valid_animation(animation), "picture_measure : invalid animation")
+
+	var i32Width i32 = g_animations[animation.index].width
+	var i32Height i32 = g_animations[animation.index].height
+
+	width = i32.f32(i32Width)
+	height = i32.f32(i32Height)
+
+	var padding mat.v4 = g_controls[id.base.control].padding
+	var autoscale i32 = g_controls[id.base.control].autoscale
+	if ((autoscale & AUTOSCALE_X) == AUTOSCALE_X) {
+		width = g_controls[id.base.control].size.x// + padding.x + padding.z
+	}
+	if ((autoscale & AUTOSCALE_Y) == AUTOSCALE_Y) {
+		height = g_controls[id.base.control].size.y// + padding.y + padding.w
+	}
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func picture_resize(id picture_id) () {
+	panicIfNot(is_valid_picture(id), "picture_resize : invalid id")
+
+	var animation animation_id = g_pictures[id.picture].animation
+	panicIfNot(is_valid_animation(animation), "picture_resize : invalid animation")
+
+	var i32Width i32 = g_animations[animation.index].width
+	var i32Height i32 = g_animations[animation.index].height
+
+	var pixelBounds mat.v2 = mat.v2_(i32.f32(i32Width), i32.f32(i32Height))
+
+	control_resize_(id.base, pixelBounds, pixelBounds)
+	var controlIndex i32 = id.base.control
+	var position mat.v2 = g_controls[controlIndex].renderPosition
+	//var size mat.v2 = g_controls[controlIndex].renderSize
+	var size mat.v2 = g_controls[controlIndex].size
+	var scale mat.v2 = g_controls[controlIndex].scale
+	var padding mat.v4 = g_controls[controlIndex].padding
+	//printf("PICTURE_SCALE %f, %f, width %f, height %f, scale.x * width %f, scale.y * height %f\n", scale.x, scale.y, width, height, scale.x * width, scale.y * height)
+
+	var newSize mat.v2 = mat.v2_mul(scale, pixelBounds)
+	//printf("NEW SIZE %f, %f - %f, %f -> %f, %f\n", pixelBounds.x, pixelBounds.y, newSize.x, newSize.y, size.x, size.y)
+	position.x, position.y = align_control(id.base, g_pictures[id.picture].pictureAlign, 0.0, 0.0, newSize.x, newSize.y, position.x, position.y, size.x, size.y, padding)
+	//printf("PICTURE_POSITION %f, %f\n", position.x, position.y)
+	g_pictures[id.picture].picturePosition = position
+
+	var frame i32 = g_pictures[id.picture].frame
+	var texture gfx.Texture = g_animations[animation.index].textures[frame]
+	g_pictures[id.picture].batch = get_batch(texture, g_pictures[id.picture].alpha)
+	//ControlPrint("picture_resize : AFTER", id.base, false)
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func picture_render(id picture_id, clip mat.v4, stack i32) () {
+	panicIfNot(is_valid_picture(id), "picture_render : invalid id")
+
+	control_render(id.base, clip, stack)
+
+	var controlIndex i32 = id.base.control
+
+	var color mat.v4 = gfx.gfx_white
+	var skin skin_id = g_controls[controlIndex].skin
+	panicIfNot(is_valid_skin(skin) || skin.skin == -1, "picture_render : invalid id")
+	if is_valid_skin(skin) {
+		var backLayer layer_id = g_skins[skin.skin].back
+		panicIfNot(is_valid_layer(backLayer) || backLayer.layer == -1, "picture_render : invalid id")
+		if is_valid_layer(backLayer) {
+			color = g_layers[backLayer.layer].surface
+		}
+	}
+
+	var animation animation_id = g_pictures[id.picture].animation
+	panicIfNot(is_valid_animation(animation), "picture_render : invalid animation")
+
+	var i32Width i32 = g_animations[animation.index].width
+	var i32Height i32 = g_animations[animation.index].height
+
+	var frameCount i32 = g_animations[animation.index].frameCount
+
+	var frame i32 = g_pictures[id.picture].frame
+	var texture gfx.Texture = g_animations[animation.index].textures[frame]
+	var frameDelta i32 = frameCount / 8
+	if (frameDelta <= 0) {
+		frameDelta = 1
+	}
+	frame = frame + frameDelta
+	if (frame >= frameCount) {
+		frame = 0
+	}
+	g_pictures[id.picture].frame = frame
+
+	if texture.name > 0 {
+		//printf("RENDER_BOUNDS %f, %f, %f, %f\n",
+		//  g_controls[id.control].renderBounds.x,
+		//g_controls[id.control].renderBounds.y,
+		//g_controls[id.control].renderBounds.z,
+		//g_controls[id.control].renderBounds.w)
+
+		var scale mat.v2 = g_controls[controlIndex].scale
+
+		//ControlPrint("picture_render : ", id.base, false)
+		var width f32 = scale.x * i32.f32(i32Width)
+		var height f32 = scale.y * i32.f32(i32Height)
+
+		var renderPosition mat.v2 = g_pictures[id.picture].picturePosition
+		//var renderPosition mat.v2 = g_controls[controlIndex].renderPosition
+
+		var batch batch_id = g_pictures[id.picture].batch
+		panicIfNot(is_valid_batch(batch), "picture_render : invalid batch")
+
+		var renderBounds mat.v4 = mat.v4_v2v2(renderPosition, mat.v2_(width, height))
+		//ControlPrint("picture_render : renderBounds ", id.base, false)
+		//printf("renderBounds %f, %f, %f, %f\n", renderBounds.x, renderBounds.y, renderBounds.z, renderBounds.w)
+		var renderClips mat.v4 = gfx.push_scissor(g_controls[controlIndex].name, renderBounds)
+		var meshId gfx.MeshId = g_batches[batch.batch].mesh
+		gfx.MeshAppendQuad(meshId, renderBounds, mat.v4_(0.0, 0.0, 1.0, 1.0), color, renderClips, compute_depth(stack))
+		gfx.pop_scissor()
+	}
+}
+
+

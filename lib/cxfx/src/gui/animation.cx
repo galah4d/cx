@@ -1,0 +1,119 @@
+package gui
+
+//-----------------------------------------------------------------------------
+// ANIMATION
+//-----------------------------------------------------------------------------
+type animation_s struct {
+	id animation_id
+	path str
+	textures [] gfx.Texture
+	delays [] i32
+	disposals []i32
+	frameCount i32
+	loop i32
+	width i32
+	height i32
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+type animation_id struct {
+	index i32
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func is_valid_animation(id animation_id) (out bool) {
+	out = id.index >= 0 && id.index < len(g_animations)
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func invalid_animation() (out animation_id) {
+	out.index = -1
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+var g_animations []animation_s
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func animation_create() (out animation_id) {
+	out.index = len(g_animations)
+
+	var animation animation_s
+
+	animation.id = out
+	animation.path = ""
+	animation.frameCount = 0
+	animation.loop = 0
+	animation.width = 0
+	animation.height = 0
+
+	g_animations = append(g_animations, animation)
+	panicIfNot(is_valid_animation(out), "animation_create_from_texture : invalid_id")
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func animation_create_from_path(path str) (out animation_id) {
+	out = animation_create()
+
+	var index i32 = out.index
+	var frameCount i32 = 0
+	var loopCount i32 = 0
+	var width i32 = 0
+	var height i32 = 0
+	frameCount, loopCount, width, height = gl.NewGIF(path)
+
+	for i := 0; i < frameCount; i++ {
+		var texture gfx.Texture = gfx.TextureCreate("", gl.LINEAR, gl.LINEAR, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, width, height)
+
+		var delay i32 = 0
+		var disposal i32 = 0
+		delay, disposal = gl.GIFFrameToTexture(path, i, texture.name)
+
+		animation_add_frame(out, delay, disposal, texture)
+		//printf("FRAME %d/%d, %d, %d, %d, %d\n", i, frameCount, width, height, delay, disposal)
+	}
+
+	gl.FreeGIF(path)
+
+	g_animations[index].path = path
+	g_animations[index].loop = loopCount
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func animation_create_from_texture(texture gfx.Texture) (out animation_id) {
+	out = animation_create()
+	animation_add_frame(out, 0, 0, texture)
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func animation_add_frame(id animation_id, delay i32, disposal i32, texture gfx.Texture) {
+	panicIfNot(is_valid_animation(id), "animation_add_frame : invalid id")
+
+	var index i32 = id.index
+
+	g_animations[index].textures = append(g_animations[index].textures, texture)
+	g_animations[index].delays = append(g_animations[index].delays, delay)
+	g_animations[index].disposals = append(g_animations[index].disposals, 0)
+
+	var width i32 = g_animations[index].width
+	var height i32 = g_animations[index].height
+
+	if (texture.width > width) {
+		g_animations[index].width = texture.width
+	}
+	if (texture.height > height) {
+		g_animations[index].height = texture.height
+	}
+
+	var frameCount i32 = g_animations[index].frameCount
+	g_animations[index].frameCount = frameCount + 1
+}
+
+

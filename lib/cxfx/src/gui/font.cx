@@ -1,0 +1,120 @@
+package gui
+
+import "gfx"
+
+//-----------------------------------------------------------------------------
+// Globals ...
+//-----------------------------------------------------------------------------
+var g_fonts []font_s
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+type font_id struct {
+	font i32
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+type font_s struct {
+	id font_id
+	name str
+	path str
+//	range bool
+//	runes []ui32
+	min i32
+	max i32
+	direction i32
+	textureCount i32
+	textures []gfx.Texture
+	names []str
+	sizes []i32
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func invalid_font()(out font_id) {
+	out.font = -1
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func is_valid_font(id font_id) (out bool) {
+	out = id.font >= 0 && id.font < len(g_fonts)
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func create_font(name str, path str, min i32, max i32, direction i32) (out font_id) {
+	out.font = len(g_fonts)
+
+	var font font_s
+	font.id = out
+	font.min = min
+	font.max = max
+	font.name = name
+	font.path = path
+
+//	font.range = range
+  //  font.runes = runes
+	font.direction = direction
+	font.textureCount = 0
+
+	g_fonts = append(g_fonts, font)
+}
+
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func font_add_size(id font_id, size i32) {
+	panicIfNot(is_valid_font(id), "font_add_size : invalid id")
+
+	var index i32 = id.font
+
+	var name str
+	name = g_fonts[index].name
+
+	var path str
+	path = g_fonts[index].path
+
+//	var range bool = g_fonts[index].range
+ //   var runes []ui32 = g_fonts[index].runes
+	var dir i32 = g_fonts[index].direction
+	var min i32 = g_fonts[index].min
+	var max i32 = g_fonts[index].max
+	var textureName str
+	textureName = sprintf("%s_%d", name, size)
+
+	var textureCount i32 = g_fonts[index].textureCount
+	g_fonts[index].textures = append(g_fonts[index].textures, gfx.TextureCreateFont(textureName, path, size, min, max, dir))
+	g_fonts[index].names = append(g_fonts[index].names, textureName)
+	g_fonts[index].sizes = append(g_fonts[index].sizes, size)
+
+	g_fonts[index].textureCount = textureCount + 1
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func font_get_texture_index(id font_id, size i32) (out i32) {
+	panicIfNot(is_valid_font(id), "font_get_texture_index : invalid id")
+
+	var textureCount i32 = len(g_fonts[id.font].sizes)
+
+	out = -1
+	if (textureCount > 0) {
+		out = 0
+	}
+	var minSize i32 = size
+
+	var i i32 = 0
+	for i= 0 ; i < textureCount; i = i + 1 {
+		var fontSize i32 = g_fonts[id.font].sizes[i]
+		//printf("i %d, FONT_SIZE %d, size %d, minSize %d\n", i, fontSize, size, minSize)
+		if (fontSize >= size && fontSize <= minSize) {
+			out = i
+		}
+	}
+
+	//printf("TEXTURE_INDEX %d\n", out)
+}
+
+

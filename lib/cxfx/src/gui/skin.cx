@@ -1,0 +1,105 @@
+package gui
+
+import "mat"
+
+//-----------------------------------------------------------------------------
+// Globals ...
+//-----------------------------------------------------------------------------
+var g_skins []skin_s
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+type skin_id struct {
+	skin i32
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+type skin_s struct {
+	id skin_id
+	name str
+	back layer_id
+	front layer_id
+	hoverBack layer_id
+	hoverFront layer_id
+	disabled_back layer_id
+	disabled_front layer_id
+	focused_back layer_id
+	focused_front layer_id
+	selected_back layer_id
+	selected_front layer_id
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func invalid_skin() (out skin_id) {
+	out.skin = -1
+}
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func is_valid_skin(id skin_id) (out bool) {
+	out = (id.skin >= 0) && (id.skin < len(g_skins))
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func skin_create(name str, back layer_id, front layer_id, hoverBack layer_id, hoverFore layer_id, disabledBack layer_id, disabledFore layer_id, focusedBack layer_id, focusedFore layer_id, selectedBack layer_id, selectedFore layer_id)  (out skin_id) {
+	out.skin = len(g_skins)
+
+	var skin skin_s
+	skin.name = name
+	skin.id = out
+	skin.back = back
+	skin.front = front
+	skin.hoverBack = hoverBack
+	skin.hoverFront = hoverFore
+	skin.disabled_back = disabledBack
+	skin.disabled_front = disabledFore
+	skin.focused_back = focusedBack
+	skin.focused_front = focusedFore
+	skin.selected_back = selectedBack
+	skin.selected_front = selectedFore
+
+	g_skins = append(g_skins, skin)
+	panicIfNot(is_valid_skin(out), "skin_create : invalid id")
+	//skin_print("skin_create : ", out)
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func skin_print(message str, id skin_id) {
+	panicIfNot(is_valid_skin(id), "skin_print : invalid id")
+	var index i32 = id.skin
+	printf("%s CONTROL_SKIN %d - %s\n", message, g_skins[index].id.skin, g_skins[index].name)
+	if (is_valid_layer(g_skins[index].back)) {
+		layer_print("skin_print : ", g_skins[index].back)
+	}
+	if (is_valid_layer(g_skins[index].front)) {
+		layer_print("skin_print : ", g_skins[index].front)
+	}
+	if (is_valid_layer(g_skins[index].hoverBack)) {
+		layer_print("skin_print : ", g_skins[index].hoverBack)
+	}
+	if (is_valid_layer(g_skins[index].hoverFront)) {
+		layer_print("skin_print : ", g_skins[index].hoverFront)
+	}
+	if (is_valid_layer(g_skins[index].disabled_back)) {
+		layer_print("skin_print : ", g_skins[index].disabled_back)
+	}
+	if (is_valid_layer(g_skins[index].disabled_front)) {
+		layer_print("skin_print : ", g_skins[index].disabled_front)
+	}
+	if (is_valid_layer(g_skins[index].focused_back)) {
+		layer_print("skin_print : ", g_skins[index].focused_back)
+	}
+	if (is_valid_layer(g_skins[index].focused_front)) {
+		layer_print("skin_print : ", g_skins[index].focused_front)
+	}
+	if (is_valid_layer(g_skins[index].selected_front)) {
+		layer_print("skin_print : ", g_skins[index].selected_front)
+	}
+	if (is_valid_layer(g_skins[index].selected_front)) {
+		layer_print("skin_print : ", g_skins[index].selected_front)
+	}
+}
+

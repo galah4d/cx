@@ -1,0 +1,97 @@
+package gui
+
+import "gfx"
+
+// TODO : move to gfx ??
+
+//-----------------------------------------------------------------------------
+// Globals ...
+//-----------------------------------------------------------------------------
+var g_batches[] batch_s
+var g_renderBatches[] batch_id
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+type batch_id struct {
+	batch i32
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+type batch_s struct {
+	texture gfx.Texture
+	mesh MeshId
+	alpha bool
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func invalid_batch() (out batch_id) {
+	out.batch = -1
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func is_valid_batch(id batch_id) (out bool) {
+	out = id.batch >= 0 && id.batch < len(g_batches)
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func get_batch(texture gfx.Texture, alpha bool) (out batch_id) {
+
+	out.batch = -1
+	var i i32 = 0
+	var batchCount i32 = len(g_batches)
+	for i >= 0 {
+
+		if (i < batchCount) {
+			var textureName i32 = g_batches[i].texture.name
+			var textureAlpha bool = g_batches[i].alpha
+			if (textureName == texture.name && textureAlpha == alpha) {
+				out.batch = i
+			}
+			i = i + 1
+		} else {
+			i = -1
+		}
+	}
+	if (out.batch < 0) {
+
+		var attributes []i32 // ##0 harcode
+		attributes = []i32{3, 4, 2}
+
+		out.batch = batchCount
+
+		var batch batch_s
+		batch.texture = texture
+		batch.mesh = gfx.MeshLock(gl.TRIANGLES, attributes, 2048 * 3) // ##0 hardcode
+		batch.alpha = alpha
+		g_batches = append(g_batches, batch)
+	}
+
+	var renderBatchCount i32 = len(g_renderBatches)
+	i = 0
+	var found bool = false
+	for i >= 0 {
+		if (i < renderBatchCount) {
+			if (g_renderBatches[i].batch == out.batch) {
+				found = true
+				i = -1
+			} else {
+				i = i + 1
+			}
+		} else {
+			i = -1
+		}
+	}
+
+	if (found == false) {
+		//printf("BATCH_NOT FOUND %d\n", out.batch)
+		g_renderBatches = append(g_renderBatches, out)
+	}
+
+	panicIfNot(is_valid_batch(out), "get_batch : invalid index")
+}
+
+

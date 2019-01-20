@@ -1,0 +1,90 @@
+package gui
+
+import "mat"
+
+//-----------------------------------------------------------------------------
+// Globals
+//-----------------------------------------------------------------------------
+var g_layers []layer_s
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+type layer_id struct {
+	layer i32
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func invalid_layer() (out layer_id) {
+	out.layer = -1
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+type layer_s struct {
+	id layer_id
+	name str
+	surface     mat.v4
+	left        mat.v4
+	bottom      mat.v4
+	right       mat.v4
+	top         mat.v4
+}
+
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func is_valid_layer(id layer_id) (out bool) {
+	out = id.layer >= 0 && id.layer < len(g_layers)
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func layer_create(name str, surface mat.v4, left mat.v4, bottom mat.v4, right mat.v4, top mat.v4) (out layer_id) {
+	out.layer = len(g_layers)
+
+	var layer layer_s
+	layer.id  = out
+	layer.name    = name
+	layer.surface = surface
+	layer.left    = left
+	layer.bottom  = bottom
+	layer.right   = right
+	layer.top     = top
+
+	g_layers = append(g_layers, layer)
+	panicIfNot(is_valid_layer(out), "layer_create : invalid id")
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func layer_print(message str, id layer_id) {
+	panicIfNot(is_valid_layer(id), "layer_print : invalid id")
+	var index i32 = id.layer
+	printf("%s LAYER_SKIN %d - %s, SURFACE %f, %f, %f, %f, LEFT %f, %f, %f, %f, BOTTOM %f, %f, %f, %f, RIGHT %f, %f, %f, %f, TOP %f, %f, %f, %f\n",
+		message,
+		g_layers[index].id.layer,
+		g_layers[index].name,
+		g_layers[index].surface.x,
+		g_layers[index].surface.y,
+		g_layers[index].surface.z,
+		g_layers[index].surface.w,
+		g_layers[index].left.x,
+		g_layers[index].left.y,
+		g_layers[index].left.z,
+		g_layers[index].left.w,
+		g_layers[index].bottom.x,
+		g_layers[index].bottom.y,
+		g_layers[index].bottom.z,
+		g_layers[index].bottom.w,
+		g_layers[index].right.x,
+		g_layers[index].right.y,
+		g_layers[index].right.z,
+		g_layers[index].right.w,
+		g_layers[index].top.x,
+		g_layers[index].top.y,
+		g_layers[index].top.z,
+		g_layers[index].top.w)
+}
+
+

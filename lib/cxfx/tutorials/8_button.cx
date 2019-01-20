@@ -8,9 +8,40 @@ import "gl" // ##1 hide gl dependency
 import "gltext" // ##1 hide gltext dependency
 import "gui"
 
-// TODO : exit with escape key
+//-----------------------------------------------------------------------------
+// TODO
+//-----------------------------------------------------------------------------
+// TODO : centre buttons
+// TODO : fix black scren when exiting gameScreen
 //
 
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+var exit bool
+var gameScreen gui.ScreenId
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func onPlayButton(controlIndex i32, action i32) {
+	if action == gui.KEY_PRESS {
+		gui.ScreenShow(gameScreen)
+	} else if action != gui.KEY_RELEASE && action != gui.KEY_REPEAT {
+		panicIfNot(false, "invalid action")
+	}
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func onExitButton(controlIndex i32, action i32) {
+	if action == gui.KEY_PRESS {
+		exit = true
+	} else if action != gui.KEY_RELEASE && action != gui.KEY_REPEAT {
+		panicIfNot(false, "invalid action")
+	}
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 func main()() {
 	var o app.Options
 	o.width = 800
@@ -42,11 +73,45 @@ func main()() {
 	var mainScreen gui.ScreenId = gui.ScreenCreate("mainScreen")
 	gui.ControlSetSkin(mainScreen.base, gui.g_blackSkin)
 	gui.ControlSetSize(mainScreen.base, gfx.gfx_viewportSize)
+	gui.ControlSetPadding(mainScreen.base, mat.v4_(200.0, 150.0, 200.0, 150.0))
 	gui.ScreenSetDuration(mainScreen, -2.0D)
 	{
-		//var playButton gui.ButtonId = gui.ButtonCreate("playButton")
-		//var exitButton gui.ButtonId = gui.ButtonCreate("exitButton"
+		var playButton gui.LabelId = gui.LabelCreate("playButton")
+		gui.ControlAddChild(mainScreen.base, playButton.base)
+		gui.ControlSetSkin(playButton.base, gui.g_blueSkin)
+		gui.ControlSetDock(playButton.base, gui.DOCK_TOP)
+		gui.ControlSetFocusable(playButton.base, 1)
+		gui.ControlSetPadding(playButton.base, mat.v4_(5.0, 5.0, 5.0, 5.0))
+		gui.ControlSetAutosize(playButton.base, gui.AUTOSIZE_Y)
+		gui.LabelSetFont(playButton, gui.g_boldFont)
+		gui.LabelSetText(playButton, "Play")
+		gui.LabelSetOnState(playButton, "main", "onPlayButton")
+		gui.LabelSetSize(playButton, gui.g_fontSizeButton)
+		gui.LabelSetColor(playButton, gui.g_white)
+		gui.LabelSetAlign(playButton, gui.ALIGN_CENTER)
+
+		var exitButton gui.LabelId = gui.LabelCreate("exitButton")
+		gui.ControlAddChild(mainScreen.base, exitButton.base)
+		gui.ControlSetSkin(exitButton.base, gui.g_blueSkin)
+		gui.ControlSetDock(exitButton.base, gui.DOCK_TOP)
+		gui.ControlSetFocusable(exitButton.base, 1)
+		gui.ControlSetPadding(exitButton.base, mat.v4_(5.0, 5.0, 5.0, 5.0))
+		gui.ControlSetAutosize(exitButton.base, gui.AUTOSIZE_Y)
+		gui.LabelSetFont(exitButton, gui.g_boldFont)
+		gui.LabelSetText(exitButton, "Exit")
+		gui.LabelSetOnState(exitButton, "main", "onExitButton")
+		gui.LabelSetSize(exitButton, gui.g_fontSizeButton)
+		gui.LabelSetColor(exitButton, gui.g_white)
+		gui.LabelSetAlign(exitButton, gui.ALIGN_CENTER)
 	}
+
+	// gameScreen
+	gameScreen = gui.ScreenCreate("gameScreen")
+	gui.ControlSetSkin(gameScreen.base, gui.g_blackSkin)
+	gui.ControlSetSize(gameScreen.base, gfx.gfx_viewportSize)
+	gui.ScreenSetDuration(gameScreen, -2.0D)
+	gui.ScreenSetOnExit(gameScreen, mainScreen)
+
 
 	// titleScreen
 	var titleScreen gui.ScreenId = gui.ScreenCreate("titleScreen")
@@ -100,6 +165,9 @@ func main()() {
 			{
 				// Update ...
 				fps.Start(prfUpdate)
+				if exit {
+					a.Exit()
+				}
 				gui.update(f.deltaTime)
 				gui.resize()
 				fps.Stop(prfUpdate)

@@ -745,20 +745,25 @@ func force_focus(id ControlId) {
     if (IsValidScreen(g_hotScreen) && IsValidControl(id)) {
         //printf("FORCE_FOCUS_0\n")
         var screenPair i32 = get_focus_pair(g_hotScreen)
-        var currentFocus i32 = g_focused[screenPair].currentFocus
-        var focusCount i32 = len(g_focused[screenPair].focusList)
-        if (focusCount > 0 && currentFocus >= 0 && currentFocus < focusCount) {
-            var i i32 = 0
- //      printf("FORCE_FOCUS_1\n")
-            //ControlPrint("force_focuse TEST : ", id, false)
-            for i = 0; i < focusCount; i = i + 1 {
-                var focusedId ControlId = g_focused[screenPair].focusList[i]
-                //printf("test_focus %d, %d\n", focusedId.control, id.control)
-                if (focusedId.control == id.control) {
-//        printf("FORCE_FOCUS_2\n")
-                //ControlPrint("force_focuse DONE : ", focusedId, false)
-                    set_current_focus(g_hotScreen, screenPair, id, i, 1)
-                    i = focusCount
+        if screenPair >= 0 && screenPair < len(g_focused) {
+            //printf("screenPair %d\n", screenPair)
+            var currentFocus i32 = g_focused[screenPair].currentFocus
+            //printf("currentFocus %d\n", currentFocus)
+            var focusCount i32 = len(g_focused[screenPair].focusList)
+            //printf("focusCount %d\n", focusCount)
+            if (focusCount > 0 && currentFocus >= 0 && currentFocus < focusCount) {
+                var i i32 = 0
+                //printf("FORCE_FOCUS_1\n")
+                //ControlPrint("force_focuse TEST : ", id, false)
+                for i = 0; i < focusCount; i = i + 1 {
+                    var focusedId ControlId = g_focused[screenPair].focusList[i]
+                    //printf("test_focus %d, %d\n", focusedId.control, id.control)
+                    if (focusedId.control == id.control) {
+                        //printf("FORCE_FOCUS_2\n")
+                        ControlPrint("force_focuse DONE : ", focusedId, false)
+                        set_current_focus(g_hotScreen, screenPair, id, i, 1)
+                        i = focusCount
+                    }
                 }
             }
         }

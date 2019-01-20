@@ -3,6 +3,7 @@ package actions
 import (
 	"errors"
 	"fmt"
+	"os"
 	
 	. "github.com/skycoin/cx/cx"
 )
@@ -24,6 +25,7 @@ func FunctionHeader(ident string, receiver []*CXArgument, isMethod bool) *CXFunc
 
 			if fn, err := PRGRM.GetFunction(fnName, pkg.Name); err == nil {
 				fn.AddInput(receiver[0])
+				pkg.CurrentFunction = fn
 				return fn
 			} else {
 				fn := MakeFunction(fnName)
@@ -37,6 +39,7 @@ func FunctionHeader(ident string, receiver []*CXArgument, isMethod bool) *CXFunc
 	} else {
 		if pkg, err := PRGRM.GetCurrentPackage(); err == nil {
 			if fn, err := PRGRM.GetFunction(ident, pkg.Name); err == nil {
+				pkg.CurrentFunction = fn
 				return fn
 			} else {
 				fn := MakeFunction(ident)
@@ -463,6 +466,7 @@ func CheckTypes(expr *CXExpression) {
 			}
 			
 			println(CompilationError(expr.FileName, expr.FileLine), fmt.Sprintf("operator '%s' expects to return %d output%s, but %d receiving argument%s %s provided", opName, len(expr.Operator.Outputs), plural1, len(expr.Outputs), plural2, plural3))
+			os.Exit(CX_COMPILATION_ERROR)
 		}
 	}
 
@@ -559,7 +563,9 @@ func ProcessSliceAssignment(expr *CXExpression) {
 		for _, inp := range expr.Inputs {
 			assignElt := GetAssignmentElement(inp)
 
-			if assignElt.IsSlice && len(assignElt.Indexes) == 0 {
+			// we want to pass by value if we're sending the slice as a whole (no indexing)
+			// unless it's a pointer to the slice
+			if assignElt.IsSlice && len(assignElt.Indexes) == 0 && !hasDeclSpec(assignElt, DECL_POINTER) {
 				assignElt.PassBy = PASSBY_VALUE
 			}
 		}

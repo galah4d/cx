@@ -1899,7 +1899,7 @@ PERIOD
 STRLIT No compilation error when passing *i32 as an i32 arg and conversely
 RPAREN 
 SCOLON 
- IDENT runTestEx
+ IDENT runTest
 LPAREN 
 STRLIT issue-61a.cx
  COMMA 
@@ -1908,13 +1908,9 @@ PERIOD
  IDENT COMPILATION_ERROR
  COMMA 
 STRLIT No compilation error when passing *i32 as an i32 arg and conversely
- COMMA 
- IDENT TEST_ISSUE
- COMMA 
-INTLIT 0
 RPAREN 
 SCOLON 
- IDENT runTestEx
+ IDENT runTest
 LPAREN 
 STRLIT issue-62.cx
  COMMA 
@@ -1923,10 +1919,6 @@ PERIOD
  IDENT COMPILATION_ERROR
  COMMA 
 STRLIT No compilation error when dereferencing an i32 var.
- COMMA 
- IDENT TEST_ISSUE
- COMMA 
-INTLIT 0
 RPAREN 
 SCOLON 
  IDENT runTest
@@ -1940,7 +1932,7 @@ PERIOD
 STRLIT Wrong pointer behaviour.
 RPAREN 
 SCOLON 
- IDENT runTestEx
+ IDENT runTest
 LPAREN 
 STRLIT issue-65.cx
  COMMA 
@@ -1949,10 +1941,17 @@ PERIOD
  IDENT SUCCESS
  COMMA 
 STRLIT Return from a function doesnt work
+RPAREN 
+SCOLON 
+ IDENT runTest
+LPAREN 
+STRLIT issue-65b.cx
  COMMA 
- IDENT TEST_ISSUE
+ IDENT cx
+PERIOD 
+ IDENT COMPILATION_ERROR
  COMMA 
-INTLIT 0
+STRLIT Mismatched number of returning arguments is not throwing an error
 RPAREN 
 SCOLON 
  IDENT runTestEx
@@ -2224,7 +2223,7 @@ PERIOD
 STRLIT Argument list is not parsed correctly
 RPAREN 
 SCOLON 
- IDENT runTestEx
+ IDENT runTest
 LPAREN 
 STRLIT issue-104.cx
  COMMA 
@@ -2233,13 +2232,9 @@ PERIOD
  IDENT SUCCESS
  COMMA 
 STRLIT Dubious error message when indexing an array with a substraction expression
- COMMA 
- IDENT TEST_ISSUE
- COMMA 
-INTLIT 0
 RPAREN 
 SCOLON 
- IDENT runTestEx
+ IDENT runTest
 LPAREN 
 STRLIT issue-105.cx
  COMMA 
@@ -2248,10 +2243,6 @@ PERIOD
  IDENT SUCCESS
  COMMA 
 STRLIT Dubious error message when inline initializing a slice
- COMMA 
- IDENT TEST_ISSUE
- COMMA 
-INTLIT 0
 RPAREN 
 SCOLON 
  IDENT runTest
@@ -2429,7 +2420,7 @@ STRLIT Panic in when assigning an empty initializer list to a []i32 variable
 INTLIT 0
 RPAREN 
 SCOLON 
- IDENT runTestEx
+ IDENT runTest
 LPAREN 
 STRLIT issue-154.cx
  COMMA 
@@ -2438,10 +2429,6 @@ PERIOD
  IDENT SUCCESS
  COMMA 
 STRLIT Cx stack overflow when appending to a slice passed by address
- COMMA 
- IDENT TEST_ISSUE
- COMMA 
-INTLIT 0
 RPAREN 
 SCOLON 
  IDENT runTestEx

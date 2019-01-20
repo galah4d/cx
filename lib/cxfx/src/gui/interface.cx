@@ -306,7 +306,7 @@ func Init(width i32, height i32, dataDir str) {
 
     // layers
     g_blackLayer            = layer_create("black"            , g_black     , g_gray_3    , g_gray_3    , g_gray_3    , g_gray_3)
-    g_bootLayer             = layer_create("boot"             , gfx.gfx_zero, gfx.gfx_zero, gfx.gfx_zero, gfx.gfx_zero, gfx.gfx_zero)
+    g_bootLayer             = layer_create("boot"             , gfx.gfx_black, gfx.gfx_black, gfx.gfx_black, gfx.gfx_black, gfx.gfx_black)
     g_popupLayer            = layer_create("popup"            , g_black_a10 , gfx.gfx_zero, gfx.gfx_zero, gfx.gfx_zero, gfx.gfx_zero)
     g_modalLayer            = layer_create("modal"            , g_black_a50 , gfx.gfx_zero, gfx.gfx_zero, gfx.gfx_zero, gfx.gfx_zero)
     g_debugBlueLayer        = layer_create("debugBlue"        , g_blue      , g_gold      , g_gold      , g_gold      , g_gold  )
@@ -542,7 +542,7 @@ func alpha(color mat.v4, a f32) (out mat.v4) {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 type control_pair_s struct {
-    key screen_id
+    key ScreenId
     value ControlId
     focusList []ControlId
     currentFocus i32
@@ -631,16 +631,16 @@ func build_focus_list(focusedScreenIndex i32, parent ControlId) {
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-func rebuild_focus(id screen_id) {
-    panicIfNot(is_valid_screen(id), "rebuild_focus : invalid id")
+func rebuild_focus(id ScreenId) {
+    panicIfNot(IsValidScreen(id), "rebuild_focus : invalid id")
     //ControlPrint("rebuild_focus : ", id.base, false)
     var i i32 = 0
 
     var focusedCount i32 = len(g_focused)
-    var lookup screen_id = invalid_screen()
+    var lookup ScreenId = InvalidScreen()
     var lookupIndex i32 = -1
     for i = 0; i < focusedCount; i = i + 1 {
-        var key screen_id = g_focused[i].key
+        var key ScreenId = g_focused[i].key
         if (key.screen == id.screen) {
             printf("LOOKUP FOUND %d\n", i)
             lookup = key
@@ -653,7 +653,7 @@ func rebuild_focus(id screen_id) {
     var oldFocusCount i32 = 0
     var oldFocus ControlId = InvalidControl()
     var remove i32 = 0
-    if (is_valid_screen(lookup)) {
+    if (IsValidScreen(lookup)) {
         //printf("VALID LOOKUP SCREEN\n")
             oldFocusIndex = g_focused[lookupIndex].currentFocus
             oldFocusCount = len(g_focused[lookupIndex].focusList)
@@ -711,8 +711,8 @@ func rebuild_focus(id screen_id) {
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-func set_current_focus(key screen_id, screenIndex i32, value ControlId, controlIndex i32, remove i32) {
-    panicIfNot(is_valid_screen(key), "set_current_focus : invalid key")
+func set_current_focus(key ScreenId, screenIndex i32, value ControlId, controlIndex i32, remove i32) {
+    panicIfNot(IsValidScreen(key), "set_current_focus : invalid key")
 
     var currentFocus i32 = g_focused[screenIndex].currentFocus
     var focusCount i32 = len(g_focused[screenIndex].focusList)
@@ -742,7 +742,7 @@ func set_current_focus(key screen_id, screenIndex i32, value ControlId, controlI
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func force_focus(id ControlId) {
-    if (is_valid_screen(g_hotScreen) && IsValidControl(id)) {
+    if (IsValidScreen(g_hotScreen) && IsValidControl(id)) {
         //printf("FORCE_FOCUS_0\n")
         var screenPair i32 = get_focus_pair(g_hotScreen)
         var currentFocus i32 = g_focused[screenPair].currentFocus
@@ -767,14 +767,14 @@ func force_focus(id ControlId) {
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-func get_focus_pair(id screen_id) (out i32) {
+func get_focus_pair(id ScreenId) (out i32) {
     out = -1
-    panicIfNot(is_valid_screen(id), "get_focus_pair: invalid id")
+    panicIfNot(IsValidScreen(id), "get_focus_pair: invalid id")
     //ControlPrint("get_focus_pair : ", id.base, false)
     var focusedCount i32 = len(g_focused)
     var i i32 = 0
     for i = 0; i < focusedCount; i = i + 1 {
-        var key screen_id = g_focused[i].key
+        var key ScreenId = g_focused[i].key
         if (key.screen == id.screen) {
             out = i
             i = focusedCount // ##pending issue break
@@ -784,8 +784,8 @@ func get_focus_pair(id screen_id) (out i32) {
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-func set_next_focus(id screen_id) {
-    panicIfNot(is_valid_screen(id), "screen_next_focus : invalid id")
+func set_next_focus(id ScreenId) {
+    panicIfNot(IsValidScreen(id), "screen_next_focus : invalid id")
     ControlPrint("set_next_focus : ", id.base, false)
     var pair i32 = get_focus_pair(id)
     var focusedCount i32 = len(g_focused)
@@ -811,8 +811,8 @@ func set_next_focus(id screen_id) {
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-func set_previous_focus(id screen_id) {
-    panicIfNot(is_valid_screen(id), "screen_previous_focus : invalid id")
+func set_previous_focus(id ScreenId) {
+    panicIfNot(IsValidScreen(id), "screen_previous_focus : invalid id")
     ControlPrint("set_previous_focus : ", id.base, false)
     var pair i32 = get_focus_pair(id)
     var focusedCount i32 = len(g_focused)
@@ -951,7 +951,7 @@ func control_measure(id ControlId) (width f32, height f32) {
     } else if (guiType == GUI_SCREEN) {
         panicIfNot(false, "not implemented")
     } else if (guiType == GUI_PICTURE) {
-        width, height = picture_measure(picture_id_(id, guiIndex))
+        width, height = PictureMeasure(NewPictureId(id, guiIndex))
     } else if (guiType == GUI_LABEL) {
         width, height = LabelMeasure(NewLabelId(id, guiIndex))
     } else if (guiType == GUI_PARTITION) {
@@ -1040,7 +1040,7 @@ func control_resize_(id ControlId, pixelBounds mat.v2, autoBounds mat.v2) () {
             } else if (guiType == GUI_SCREEN) {
                 panicIfNot(false, "unidd recursive screen")
             } else if (guiType == GUI_PICTURE) {
-                picture_resize(picture_id_(child, guiIndex))
+                PictureResize(NewPictureId(child, guiIndex))
             } else if (guiType == GUI_LABEL) {
                 LabelResize(NewLabelId(child, guiIndex))
             } else if (guiType == GUI_PARTITION) {
@@ -1371,7 +1371,7 @@ func control_redock(id ControlId, padding mat.v4) () {
                 } else if (guiType == GUI_SCREEN) {
                     panicIfNot(false, "unidd recursive screen")
                 } else if (guiType == GUI_PICTURE) {
-                    //redock_picture(picture_id_(child, guiIndex))
+                    //redock_picture(NewPictureId(child, guiIndex))
                     control_redock(NewControlId(childControl), parentPadding)
                 } else if (guiType == GUI_LABEL) {
                     //redock_label(NewLabelId(child, guiIndex))
@@ -1590,7 +1590,7 @@ func control_render(id ControlId, clip mat.v4, stack i32) () {
                 } else if (guiType == GUI_SCREEN) {
                     panicIfNot(false, "unidd recursive screen")
                 } else if (guiType == GUI_PICTURE) {
-                    picture_render(picture_id_(child, guiIndex), renderBounds, childStack)
+                    PictureRender(NewPictureId(child, guiIndex), renderBounds, childStack)
                 } else if (guiType == GUI_LABEL) {
                     LabelRender(NewLabelId(child, guiIndex), renderBounds, childStack)
                 } else if (guiType == GUI_PARTITION) {
@@ -1626,358 +1626,6 @@ func control_render(id ControlId, clip mat.v4, stack i32) () {
         //fps.Stop(g_profileControlRenderChild)
     }
     //fps.Stop(g_profileRenderControlFull)
-}
-
-//-----------------------------------------------------------------------------
-// SCREEN
-//-----------------------------------------------------------------------------
-var g_screens []screen_s
-var g_modals []screen_id
-
-var g_currentScreen screen_id = invalid_screen()
-var g_nextScreen    screen_id = invalid_screen()
-
-var g_transitionDuration f64 = 0.5D
-var g_transitionTime     f64 = 0.0D
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-type screen_id struct {
-    base ControlId
-    screen i32
-}
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-type screen_s struct {
-    id    screen_id
-    on_exit   screen_id
-    on_enter  screen_id
-    on_menu   screen_id
-    on_next   screen_id
-    duration  f64
-    time      f64
-    state     i32
-    prevState i32
-    modal     bool
-    paused    bool
-    floating  bool
-}
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func screen_id_(base ControlId, screen i32) (out screen_id) {
-    out.base = base
-    out.screen = screen
-    panicIfNot(is_valid_screen(out), "screen_id_: invalid id")
-}
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func screen_create(name str) (out screen_id) {
-    out.screen = len(g_screens)
-    out.base = controlCreate(name, GUI_SCREEN, out.screen)
-
-    ControlSetFocusIndex(out.base, 0)
-
-    var screen screen_s
-    screen.id = out
-    screen.on_exit   = invalid_screen()
-    screen.on_enter  = invalid_screen()
-    screen.on_menu   = invalid_screen()
-    screen.on_next   = invalid_screen()
-    screen.duration  = -1.0D
-    screen.time      = 0.0D
-    screen.state     = STATE_CLOSED
-    screen.prevState = STATE_CLOSED
-    screen.modal     = false
-    screen.paused    = false
-    screen.floating  = false
-
-    g_screens = append(g_screens, screen)
-    panicIfNot(is_valid_screen(out), "screen_create : invalid id")
-}
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-//func invalid_screen() { // ##pending issue
-func invalid_screen() (out screen_id) {
-    out.base = InvalidControl()
-    out.screen = -1
-}
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func is_valid_screen(id screen_id) (out bool) {
-    out = id.screen >= 0 && id.screen < len(g_screens) && IsValidControl(id.base)
-}
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func sceen_set_modal(id screen_id, modal bool) () {
-    panicIfNot(is_valid_screen(id), "screen_set_modal : invalid id")
-    g_screens[id.screen].modal = true
-}
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func screen_set_floating(id screen_id, floating bool) () {
-    panicIfNot(is_valid_screen(id), "screen_set_floating : invalid id")
-    g_screens[id.screen].floating = floating
-}
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func screen_set_on_exit(id screen_id, exit screen_id) () {
-    panicIfNot(is_valid_screen(id), "screen_on_exit : invalid id")
-    panicIfNot(is_valid_screen(exit)  , "screen_on_exit : invalid id")
-    g_screens[id.screen].on_exit = exit
-}
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func screen_set_on_menu(id screen_id, menu screen_id) () {
-    panicIfNot(is_valid_screen(id), "screen_on_menu : invalid id")
-    panicIfNot(is_valid_screen(menu)  , "screen_on_menu : invalid id")
-    g_screens[id.screen].on_menu = menu
-}
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func screen_set_on_enter(id screen_id, enter screen_id) () {
-    panicIfNot(is_valid_screen(id), "screen_on_enter : invalid id")
-    panicIfNot(is_valid_screen(enter) , "screen_on_enter : invalid id")
-    g_screens[id.screen].on_enter = enter
-}
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func screen_set_on_next(id screen_id, next screen_id) () {
-    panicIfNot(is_valid_screen(id), "screen_on_next : invalid id 0")
-    panicIfNot(is_valid_screen(next)  , "screen_on_next : invalid id 1")
-    g_screens[id.screen].on_next = next
-}
-
-//-----------------------------------------------------------------------------
-func screen_set_on_event(id screen_id, event screen_id) () {
-    screen_set_on_exit(id, event)
-    screen_set_on_enter(id, event)
-    screen_set_on_menu(id, event)
-}
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func screen_set_duration(id screen_id, duration f64) {
-    panicIfNot(is_valid_screen(id), "screen_set_duration : invalid id")
-    g_screens[id.screen].duration = duration
-}
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func screen_set_modal(id screen_id, modal bool) {
-    panicIfNot(is_valid_screen(id), "screen_set_modal : invalid id")
-    g_screens[id.screen].modal = modal
-}
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func screen_process_event(id screen_id, event *event_s) (out i32) {
-    panicIfNot(is_valid_screen(id), "screen_process_event : invalid id")
-    out = control_process_event(id.base, event)
-}
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func change_screen_state(id screen_id, state i32) () {
-    panicIfNot(is_valid_screen(id), "change_screen_state : invalid id")
-    g_screens[id.screen].prevState = g_screens[id.screen].state
-    printf("CHANGE %d\n", state)
-    g_screens[id.screen].state = state
-    var prev i32 = g_screens[id.screen].prevState
-    var curr i32 = g_screens[id.screen].state
-    if (prev != curr) {
-        printf("%d screen state changed %d -> %d\n", id.screen, prev, curr)
-    }
-}
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func screen_state_changed(id screen_id, prev i32, curr i32) (value bool) {
-    panicIfNot(is_valid_screen(id), "screen_state_chaned : invalid id")
-    var screenPrev i32 = g_screens[id.screen].prevState
-    var screenCurr i32 = g_screens[id.screen].state
-    value = ((screenPrev == prev) && (screenCurr == curr))
-}
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func update_screen(id screen_id, deltaTime f64) () {
-    panicIfNot(is_valid_screen(id), "update_screen : invalid id")
-    var t f64 = g_screens[id.screen].time
-    var d f64 = g_screens[id.screen].duration
-
-    g_screens[id.screen].time = t
-    var state i32 = g_screens[id.screen].state
-    if ((t <= 0) && (state == STATE_CLOSED)) {
-        printf("CHANGE SHOWING\n")
-        change_screen_state(id, STATE_SHOWING)
-    } else if ((t >= d) && (d > 0) && (state == STATE_OPENED)) { // can't use g_screens[screen].state here
-        printf("CHANGE CLOSING %d\n", g_screens[id.screen].state)
-        change_screen_state(id, STATE_CLOSING)
-    }
-
-    t = t + deltaTime
-    g_screens[id.screen].time = t
-    //    printf("time %f", f64.f32(t))
-}
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func screen_resize(id screen_id) () {
-    panicIfNot(is_valid_screen(id), "screen_resize : invalid id")
-    control_resize(id.base)
-}
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func clear_batches() {
-    g_renderBatches = resize(g_renderBatches, 0)
-}
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func begin_batches() {
-    var renderBatchCount i32 = len(g_renderBatches)
-    var i i32 = 0;
-    //printf("BEGIN_BATCHES %d\n", renderBatchCount)
-    for i = 0; i < renderBatchCount; i = i + 1 {
-        var batchId batch_id = g_renderBatches[i]
-        //printf("BEGIN_BATCH %d/%d BATCH %d\n", i, renderBatchCount, batchId.batch)
-        panicIfNot(is_valid_batch(batchId), "begin_batch : invalid batch")
-        var meshId gfx.MeshId = g_batches[batchId.batch].mesh
-        panicIfNot(gfx.IsValidMesh(meshId), "begin_batches : invalid mesh")
-        gfx.MeshBegin(meshId)
-    }
-}
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func end_batches() {
-    var renderBatchCount i32 = len(g_renderBatches)
-    var i i32 = 0;
-    for i = 0; i < renderBatchCount; i = i + 1 {
-        var batchId batch_id = g_renderBatches[i]
-        panicIfNot(is_valid_batch(batchId), "end_batch : invalid batch")
-        var meshId gfx.MeshId = g_batches[batchId.batch].mesh
-        panicIfNot(gfx.IsValidMesh(meshId), "end_batches : invalid mesh")
-        gfx.MeshEnd(meshId)
-    }
-}
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func render_batches(alpha bool) {
-    var renderBatchCount i32 = len(g_renderBatches)
-    var i i32 = 0
-    for i = 0; i < renderBatchCount; i = i + 1 {
-        var batchId batch_id = g_renderBatches[i]
-        panicIfNot(is_valid_batch(batchId), "render_batches : invalid batch")
-        var batch i32 = batchId.batch
-        var meshId gfx.MeshId = g_batches[batch].mesh
-        panicIfNot(gfx.IsValidMesh(meshId), "render_batches : invalid mesh")
-        if (gfx.MeshIsEmpty(meshId) == false) {
-            var batchAlpha bool = g_batches[batch].alpha
-            if (batchAlpha == alpha) {
-                if (alpha == true) {
-                    gfx.enable_blending(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-                } else {
-                    gfx.disable_blending()
-                }
-                gfx.EffectUse(gfx.g_fxTexture)
-                gfx.EffectAssignTexture(gfx.g_fxTexture, 0, g_batches[batch].texture.name)
-                gfx.MeshRender(meshId)
-            }
-        }
-    }
-}
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func screen_render(id screen_id, clip mat.v4, stack i32) () {
-    panicIfNot(is_valid_screen(id), "screen_render : invalid screen")
-    fps.Start(g_profileRenderScreenControl)
-
-    gfx.MeshBegin(g_opaqueVertexColoredTriangles)
-    gfx.MeshBegin(g_opaqueVertexColoredLines)
-    gfx.MeshBegin(g_alphaVertexColoredTriangles)
-    begin_batches()
-
-    clip = gfx.push_scissor(g_controls[id.base.control].name, gfx.gfx_viewportBounds)
-    //printf("SCREEN CLIP %f, %f, %f, %f\n", clip.x, clip.y, clip.z, clip.w)
-    control_render(id.base, clip, stack)
-    gfx.pop_scissor()
-
-    //panicIfNot(gfx.g_scissorCount == 0, "screen_render : invalid scissor stack")
-    end_batches()
-    gfx.MeshEnd(g_alphaVertexColoredTriangles)
-    gfx.MeshEnd(g_opaqueVertexColoredLines)
-    gfx.MeshEnd(g_opaqueVertexColoredTriangles)
-
-    fps.Stop(g_profileRenderScreenControl)
-
-    // opaque
-    fps.Start(g_profileRenderOpaqueVertexColoredTriangles)
-    if gfx.MeshIsEmpty(g_opaqueVertexColoredTriangles) == false {
-        gfx.disable_blending()
-        gfx.EffectUse(gfx.g_fxVertexColor)
-        gfx.MeshRender(g_opaqueVertexColoredTriangles)
-    }
-    fps.Stop(g_profileRenderOpaqueVertexColoredTriangles)
-
-    fps.Start(g_profileRenderOpaqueTexturedTriangles)
-    render_batches(false)
-    fps.Stop(g_profileRenderOpaqueTexturedTriangles)
-
-    fps.Start(g_profileRenderOpaqueVertexColoredLines)
-    if gfx.MeshIsEmpty(g_opaqueVertexColoredLines) == false {
-        gfx.disable_blending()
-        gfx.EffectUse(gfx.g_fxVertexColor)
-        gfx.MeshRender(g_opaqueVertexColoredLines)
-    }
-    fps.Stop(g_profileRenderOpaqueVertexColoredLines)
-
-    // alpha
-    fps.Start(g_profileRenderAlphaTexturedTriangles)
-    render_batches(true)
-    fps.Stop(g_profileRenderAlphaTexturedTriangles)
-
-    fps.Start(g_profileRenderAlphaVertexColoredTriangles)
-    if gfx.MeshIsEmpty(g_alphaVertexColoredTriangles) == false {
-        gfx.enable_blending(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-        gfx.EffectUse(gfx.g_fxVertexColor)
-        gfx.MeshRender(g_alphaVertexColoredTriangles)
-    }
-    fps.Stop(g_profileRenderAlphaVertexColoredTriangles)
-
-
-    /*gfx.color_write(false, false, false, false)
-      gfx.disable_depth()
-      gfx.disable_blending()
-      gfx.stencil_state(true, gl.ALWAYS, 256, 256, gl.KEEP, gl.REPLACE, gl.REPLACE, 256)
-
-      var screenPair i32 = get_focus_pair(id)
-      var currentFocus i32 = g_focused[screenPair].currentFocus
-      var focusCount i32 = g_focused[screenPair].focusCount
-      if (focusCount > 0 && currentFocus >= 0 && currentFocus < focusCount) {
-      var focusedId ControlId = g_focused[screenPair].focusList[currentFocus]
-      gfx.MeshBegin(g_opaqueVertexColoredTriangles)
-      var renderBounds mat.v4 = mat.v4_v2v2(g_controls[focusedId.control].renderPosition, g_controls[focusedId.control].size)
-      gfx.MeshAppendQuad(g_opaqueVertexColoredTriangles, renderBounds,
-      mat.v4_(0.0, 0.0, 1.0, 1.0), mat.v4_(1.0, 1.0, 1.0, 1.0), gfx.gfx_viewportBounds, 1.0)
-      gfx.MeshEnd(g_opaqueVertexColoredTriangles)
-      gfx.EffectUse(gfx.g_fxVertexColor)
-      gfx.MeshRender(g_opaqueVertexColoredTriangles)
-      }*/
 }
 
 //-----------------------------------------------------------------------------
@@ -3168,7 +2816,7 @@ func list_line_add_picture(id ControlId, align i32, animation animation_id) {
     var lineName str = g_controls[id.control].name
     var itemCount i32 = len(g_controls[id.control].children)
     var itemName str = sprintf("%s_item_%d", lineName, itemCount)
-    var label picture_id = picture_create(itemName)
+    var label PictureId = PictureCreate(itemName)
 
     ControlAddChild(id, label.base)
     ControlSetDock(label.base, DOCK_LEFT)
@@ -3178,8 +2826,8 @@ func list_line_add_picture(id ControlId, align i32, animation animation_id) {
     ControlSetFocusable(label.base, 1)
     ControlSetAutoscale(label.base, AUTOSCALE)
     //ControlSetAlign(label, align)
-    picture_set_align(label, align)
-    picture_set_animation(label, animation)
+    PictureSetAlign(label, align)
+    PictureSetAnimation(label, animation)
     /*LabelSetFont(label, g_regularFont)
     LabelSetText(label, text)
     LabelSetSize(label, size)
@@ -4426,7 +4074,7 @@ type combo_s struct {
     picture LabelId
     label LabelId
     expand LabelId
-    screen screen_id
+    screen ScreenId
     window window_id
     list list_id
 }
@@ -4488,13 +4136,13 @@ func combo_create(name str) (out combo_id) {
     var combo combo_s
     combo.id = out
 
-    var screen screen_id = screen_create(sprintf("combo_screen_%s", name))
+    var screen ScreenId = ScreenCreate(sprintf("combo_screen_%s", name))
     combo.screen = screen
     ControlSetSkin(screen.base, g_popupSkin)
     ControlSetBounds(screen.base, gfx.gfx_viewportBounds)
-    screen_set_duration(screen, -2.0D)
-    screen_set_modal(screen, true)
-    screen_set_floating(screen, true)
+    ScreenSetDuration(screen, -2.0D)
+    ScreenSetModal(screen, true)
+    ScreenSetFloating(screen, true)
 
     var window window_id = window_create(sprintf("combo_window_%s", name))
     ControlAddChild(screen.base, window.base)
@@ -4596,8 +4244,8 @@ func combo_process_event(id combo_id, event *event_s) (out i32) {
             }
 
             if (call == true) {
-                var screen screen_id = g_combos[id.combo].screen
-                show_screen(screen)
+                var screen ScreenId = g_combos[id.combo].screen
+                ScreenShow(screen)
                 out = EVENT_CONSUMED
             }
         }
@@ -4630,7 +4278,7 @@ func combo_resize(id combo_id) () {
 
         control_resize(id.base)
 
-        var screen screen_id = g_combos[id.combo].screen
+        var screen ScreenId = g_combos[id.combo].screen
         //printf("AAAAAAAA\n")
         if (modal_is_visible(screen) == true) {
         //printf("BBBBBB\n")
@@ -4659,16 +4307,16 @@ func combo_render(id combo_id, clip mat.v4, stack i32) () {
 func update(deltaTime f64)() { // ##1 rewrite
     process_events()
     //printf("UPDATE %d, %d\n", g_currentScreen.screen, g_nextScreen.screen)
-    if (is_valid_screen(g_currentScreen)) {
-        update_screen(g_currentScreen, deltaTime)
-        if (screen_state_changed(g_currentScreen, STATE_OPENED, STATE_CLOSING)) {
+    if (IsValidScreen(g_currentScreen)) {
+        ScreenUpdate(g_currentScreen, deltaTime)
+        if (ScreenStateChanged(g_currentScreen, STATE_OPENED, STATE_CLOSING)) {
             g_nextScreen = g_screens[g_currentScreen.screen].on_next // ##issue_58 issue array index with struct
             printf("NEXT_SCREEN %d\n", g_nextScreen.screen)
             printf("CURRENT %d, NEXT %d\n", g_currentScreen.screen, g_nextScreen.screen)
             g_transitionTime = 0.0D
             g_screens[g_currentScreen.screen].prevState= g_screens[g_currentScreen.screen].state
             printf("screen : %d, STATE_CLOSING\n", g_currentScreen.screen)
-        } else if (screen_state_changed(g_currentScreen, STATE_CLOSING, STATE_CLOSED)) {
+        } else if (ScreenStateChanged(g_currentScreen, STATE_CLOSING, STATE_CLOSED)) {
             g_screens[g_currentScreen.screen].time = 0.0D
             g_screens[g_currentScreen.screen].prevState = g_screens[g_currentScreen.screen].state
             g_currentScreen = g_nextScreen
@@ -4677,8 +4325,8 @@ func update(deltaTime f64)() { // ##1 rewrite
     }
 
     if (g_currentScreen.screen != g_nextScreen.screen) {
-        if (is_valid_screen(g_nextScreen)) {
-            update_screen(g_nextScreen, deltaTime)
+        if (IsValidScreen(g_nextScreen)) {
+            ScreenUpdate(g_nextScreen, deltaTime)
         }
 
         if (g_transitionTime <= 0) {
@@ -4688,18 +4336,18 @@ func update(deltaTime f64)() { // ##1 rewrite
             g_transitionTime = g_transitionTime + deltaTime
         } else {
             printf("TRANSITION ENDED\n")
-            if (is_valid_screen(g_currentScreen)) {
+            if (IsValidScreen(g_currentScreen)) {
                 printf("CHANGE CLOSED\n")
-                change_screen_state(g_currentScreen, STATE_CLOSED)
+                ScreenChangeState(g_currentScreen, STATE_CLOSED)
                 printf("prev screen : %d, %d, %s\n", g_currentScreen.screen, g_screens[g_currentScreen.screen].state, "STATE_CLOSED")
             }
 
             g_currentScreen = g_nextScreen
             printf("CURRENT_SCREEN %d\n", g_nextScreen.screen)
-            if (is_valid_screen(g_nextScreen)) {
-                var nextScreen screen_id = g_screens[g_nextScreen.screen].on_next
+            if (IsValidScreen(g_nextScreen)) {
+                var nextScreen ScreenId = g_screens[g_nextScreen.screen].on_next
                 printf("CHANGE OPENED\n")
-                change_screen_state(g_nextScreen, STATE_OPENED)
+                ScreenChangeState(g_nextScreen, STATE_OPENED)
                 printf("next screen : %d, %d, %s\n", g_nextScreen.screen, g_screens[g_nextScreen.screen].state, "STATE_OPENED")
                 g_transitionTime = 0.0D
             }
@@ -4742,13 +4390,13 @@ var MOD_MENU  i32 = 8
 //-----------------------------------------------------------------------------
 /*func skip_screens()() {
     var next bool = true
-    var skipId screen_id = g_currentScreen
+    var skipId ScreenId = g_currentScreen
     for (next == true) {
-        var nextId screen_id = g_screens[skipId].on_next
-        if (is_valid_screen(nextId)) {
-            if (is_valid_screen(g_screens[nextId.screen].on_exit) ||
-                is_valid_screen(g_screens[nextId.screen].on_enter) ||
-                is_valid_screen(g_screens[nextId.screen].on_menu)) {
+        var nextId ScreenId = g_screens[skipId].on_next
+        if (IsValidScreen(nextId)) {
+            if (IsValidScreen(g_screens[nextId.screen].on_exit) ||
+                IsValidScreen(g_screens[nextId.screen].on_enter) ||
+                IsValidScreen(g_screens[nextId.screen].on_menu)) {
                 next = false
             }
             skipId = nextId
@@ -4860,9 +4508,9 @@ func control_process_event(id ControlId, event *event_s) (out i32) {
                     panicIfNot(guiIndex == child.control, "unexpected error")
                     out = control_process_event(NewControlId(guiIndex), event)
                 } else if (guiType == GUI_SCREEN) {
-                    out = screen_process_event(screen_id_(child, guiIndex), event)
+                    out = ScreenProcessEvent(NewScreenId(child, guiIndex), event)
                 } else if (guiType == GUI_PICTURE) {
-                    out = picture_process_event(picture_id_(child, guiIndex), event)
+                    out = PictureProcessEvent(NewPictureId(child, guiIndex), event)
                 } else if (guiType == GUI_LABEL) {
                     out = LabelProcessEvent(NewLabelId(child, guiIndex), event)
                 } else if (guiType == GUI_PARTITION) {
@@ -4908,26 +4556,26 @@ func control_process_event(id ControlId, event *event_s) (out i32) {
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-func hide_modal(id screen_id) {
-    panicIfNot(is_valid_screen(id), "hide_modal : invalid screen")
+func hide_modal(id ScreenId) {
+    panicIfNot(IsValidScreen(id), "hide_modal : invalid screen")
     var modalCount i32 = len(g_modals)
     panicIfNot(modalCount > 0, "hide_modal : invalid count")
     if (modalCount > 0) {
         var modalIndex i32 = modalCount - 1
         printf("MODAL_INDEX %d, COUNT %d\n", modalIndex, modalCount)
-        var modalScreen screen_id = g_modals[modalIndex]
+        var modalScreen ScreenId = g_modals[modalIndex]
         panicIfNot(modalScreen.screen == id.screen, "hide_modal : invalid screen")
         if (modalScreen.screen == id.screen) {
-            printf("hide_screen\n")
-            hide_screen(modalScreen)
+            printf("ScreenHide\n")
+            ScreenHide(modalScreen)
             g_modals = resize(g_modals, modalIndex)
-            g_hotScreen = invalid_screen()
+            g_hotScreen = InvalidScreen()
         }
     }
     printf("AFTER HIDE_MODEL\n")
 }
 
-var g_hotScreen screen_id
+var g_hotScreen ScreenId
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -5000,11 +4648,11 @@ func process_event(event *event_s) () {
     var button i32 = (*event).mouse.button
     var buttonAction i32 = (*event).mouse.action
 
-    var currentScreen screen_id = invalid_screen()
+    var currentScreen ScreenId = InvalidScreen()
     var modalCount i32 = len(g_modals)
     if (modalCount > 0) {
         var modalIndex i32 = modalCount - 1
-        var modalScreen screen_id = g_modals[modalIndex]
+        var modalScreen ScreenId = g_modals[modalIndex]
         g_hotScreen = modalScreen
         currentScreen = modalScreen
         var floating bool = g_screens[modalScreen.screen].floating
@@ -5018,7 +4666,7 @@ func process_event(event *event_s) () {
                 g_hotScreen = modalScreen
             }
         }
-    } else if (is_valid_screen(g_currentScreen)) {
+    } else if (IsValidScreen(g_currentScreen)) {
         g_hotScreen = g_currentScreen
         //printf("NO MODAL\n")
         if (control_process_event(g_currentScreen.base, event) == EVENT_UNUSED) {
@@ -5030,23 +4678,23 @@ func process_event(event *event_s) () {
             if (state == STATE_OPENED || state == STATE_SHOWING) {
                 if (key == KEYCODE_ESCAPE && action == KEY_PRESS) {
                     g_screens[screen].paused = true
-                    var onExit screen_id = g_screens[screen].on_exit
-                    if (is_valid_screen(onExit) == true) {
-                        show_screen(onExit)
+                    var onExit ScreenId = g_screens[screen].on_exit
+                    if (IsValidScreen(onExit) == true) {
+                        ScreenShow(onExit)
                     } else {
                         printf("INVALID ON EXIT SCREEN %d, %d\n", onExit.screen, onExit.base)
                     }
                 } else if (key == KEYCODE_ENTER && action == KEY_PRESS) {
                     g_screens[screen].paused = true
-                    var onEnter screen_id = g_screens[screen].on_enter
-                    if (is_valid_screen(onEnter) == true) {
-                        show_screen(onEnter)
+                    var onEnter ScreenId = g_screens[screen].on_enter
+                    if (IsValidScreen(onEnter) == true) {
+                        ScreenShow(onEnter)
                     }
                 } else if (key == KEYCODE_MENU && action == KEY_PRESS) {
                     g_screens[screen].paused = true
-                    var onMenu screen_id = g_screens[screen].on_menu
-                    if (is_valid_screen(onMenu) == true) {
-                        show_screen(onMenu)
+                    var onMenu ScreenId = g_screens[screen].on_menu
+                    if (IsValidScreen(onMenu) == true) {
+                        ScreenShow(onMenu)
                     }
                 } else {
     //printf("process_keyboard : EVENT_UNUSED 1\n")
@@ -5056,11 +4704,11 @@ func process_event(event *event_s) () {
             }
         }
     } else {
-        g_hotScreen = invalid_screen()
+        g_hotScreen = InvalidScreen()
         //printf("----------------------------------------------->\n")
     }
 
-    if (is_valid_screen(currentScreen)) {
+    if (IsValidScreen(currentScreen)) {
     //printf("process_keyboard : EVENT_UNUSED 2\n")
         if (action == KEY_PRESS) {
             if (mods == MOD_NONE || mods == MOD_CTRL) {
@@ -5083,15 +4731,9 @@ func process_event(event *event_s) () {
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-func hide_screen(id screen_id) () {
-    panicIfNot(is_valid_screen(id), "hide_screen : invalid screen")
-}
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func modal_is_visible(id screen_id) (out bool) {
+func modal_is_visible(id ScreenId) (out bool) {
     out = false
-    panicIfNot(is_valid_screen(id), "modal_is_visible : invalid id")
+    panicIfNot(IsValidScreen(id), "modal_is_visible : invalid id")
     var modal bool = g_screens[id.screen].modal
     if (modal == true) {
         var modalCount i32 = len(g_modals)
@@ -5109,10 +4751,16 @@ func modal_is_visible(id screen_id) (out bool) {
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-func show_screen(id screen_id) () {
-    panicIfNot(is_valid_screen(id), "show_screen : invalid id")
+func ScreenHide(id ScreenId) () {
+    panicIfNot(IsValidScreen(id), "ScreenHide : invalid screen")
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func ScreenShow(id ScreenId) () {
+    panicIfNot(IsValidScreen(id), "ScreenShow : invalid id")
     g_hotScreen = id
-    ControlPrint("show_screen : ", id.base, false)
+    ControlPrint("ScreenShow : ", id.base, false)
     rebuild_focus(id)
 
     var modal bool = g_screens[id.screen].modal
@@ -5130,19 +4778,19 @@ func show_screen(id screen_id) () {
 //-----------------------------------------------------------------------------
 func resize() () {
     clear_batches()
-    if (is_valid_screen(g_currentScreen)) {
+    if (IsValidScreen(g_currentScreen)) {
         reset_scope()
         //printf("-------------------------------------------------------------------------------->\n")
-        screen_resize(g_currentScreen)
+        ScreenResize(g_currentScreen)
         control_redock(g_currentScreen.base, mat.v4_zero)
-        //screen_resize(g_currentScreen)
+        //ScreenResize(g_currentScreen)
         //control_redock(g_currentScreen.base, mat.v4_zero)
     }
-    if (is_valid_screen(g_nextScreen) && g_currentScreen.screen != g_nextScreen.screen) {
+    if (IsValidScreen(g_nextScreen) && g_currentScreen.screen != g_nextScreen.screen) {
         reset_scope()
-        screen_resize(g_nextScreen)
+        ScreenResize(g_nextScreen)
         control_redock(g_nextScreen.base, mat.v4_zero)
-        //screen_resize(g_nextScreen)
+        //ScreenResize(g_nextScreen)
         //control_redock(g_nextScreen.base, mat.v4_zero)
     }
 
@@ -5152,9 +4800,9 @@ func resize() () {
         //ControlPrint("before resize : ", g_modals[i].base, false)
         //printf("_-------------------------------------------------------------------------------->>>>\n")
         reset_scope()
-        screen_resize(g_modals[i])
+        ScreenResize(g_modals[i])
         control_redock(g_modals[i].base, mat.v4_zero)
-        //screen_resize(g_modals[i])
+        //ScreenResize(g_modals[i])
         //control_redock(g_modals[i].base, mat.v4_zero)
     }
 }
@@ -5191,15 +4839,15 @@ func render() () {
 
     fps.Start(g_profileRenderCurrentScreen)
     var target_0 gfx.Target = gfx.InvalidTarget()
-    if (is_valid_screen(g_currentScreen)) {
+    if (IsValidScreen(g_currentScreen)) {
         target_0 = gfx.lock_target(g_width, g_height)
         gfx.bind_framebuffer(target_0.framebuffer)
         gfx.bind_depthbuffer(g_depthStencilBuffer)
         //gfx.bind_stencilbuffer(g_depthStencilBuffer)
         gfx.depth_state(depthTest, depthFunc, depthWrite)
-        gfx.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT/* | gl.STENCIL_BUFFER_BIT*/, g_black, depthClear, stencilClear)
+        gfx.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT/* | gl.STENCIL_BUFFER_BIT*/, gfx.gfx_black, depthClear, stencilClear)
         gfx.color_write(true, true, true, true)
-        screen_render(g_currentScreen, clip, 0)
+        ScreenRender(g_currentScreen, clip, 0)
         gfx.bind_depthbuffer(0)
         gfx.bind_stencilbuffer(0)
     }
@@ -5207,15 +4855,15 @@ func render() () {
 
     var target_1 gfx.Target = gfx.InvalidTarget()
     fps.Start(g_profileRenderNextScreen)
-    if (is_valid_screen(g_nextScreen) && g_nextScreen.screen != g_currentScreen.screen) {
+    if (IsValidScreen(g_nextScreen) && g_nextScreen.screen != g_currentScreen.screen) {
         target_1 = gfx.lock_target(g_width, g_height)
         gfx.bind_framebuffer(target_1.framebuffer)
         gfx.bind_depthbuffer(g_depthStencilBuffer)
         //gfx.bind_stencilbuffer(g_depthStencilBuffer)
         gfx.depth_state(depthTest, depthFunc, depthWrite)
-        gfx.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT, g_black, depthClear, stencilClear)
+        gfx.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT, gfx.gfx_black, depthClear, stencilClear)
         gfx.color_write(true, true, true, true)
-        screen_render(g_nextScreen, clip, 0)
+        ScreenRender(g_nextScreen, clip, 0)
         gfx.bind_depthbuffer(0)
         gfx.bind_stencilbuffer(0)
     }
@@ -5264,7 +4912,7 @@ func render() () {
         //gfx.stencil_state(true, gl.EQUAL, 0, 256, gl.KEEP, gl.KEEP, gl.KEEP, 0)
         gfx.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT, gfx.gfx_zero, depthClear, stencilClear)
         gfx.color_write(true, true, true, true)
-        screen_render(g_modals[i], clip, 0)
+        ScreenRender(g_modals[i], clip, 0)
         gfx.bind_depthbuffer(0)
         gfx.bind_stencilbuffer(0)
 

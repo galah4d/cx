@@ -94,4 +94,67 @@ func get_batch(texture gfx.Texture, alpha bool) (out batch_id) {
 	panicIfNot(is_valid_batch(out), "get_batch : invalid index")
 }
 
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func clear_batches() {
+	g_renderBatches = resize(g_renderBatches, 0)
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func begin_batches() {
+	var renderBatchCount i32 = len(g_renderBatches)
+	var i i32 = 0;
+	//printf("BEGIN_BATCHES %d\n", renderBatchCount)
+	for i = 0; i < renderBatchCount; i = i + 1 {
+		var batchId batch_id = g_renderBatches[i]
+		//printf("BEGIN_BATCH %d/%d BATCH %d\n", i, renderBatchCount, batchId.batch)
+		panicIfNot(is_valid_batch(batchId), "begin_batch : invalid batch")
+		var meshId gfx.MeshId = g_batches[batchId.batch].mesh
+		panicIfNot(gfx.IsValidMesh(meshId), "begin_batches : invalid mesh")
+		gfx.MeshBegin(meshId)
+	}
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func end_batches() {
+	var renderBatchCount i32 = len(g_renderBatches)
+	var i i32 = 0;
+	for i = 0; i < renderBatchCount; i = i + 1 {
+		var batchId batch_id = g_renderBatches[i]
+		panicIfNot(is_valid_batch(batchId), "end_batch : invalid batch")
+		var meshId gfx.MeshId = g_batches[batchId.batch].mesh
+		panicIfNot(gfx.IsValidMesh(meshId), "end_batches : invalid mesh")
+		gfx.MeshEnd(meshId)
+	}
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func render_batches(alpha bool) {
+	var renderBatchCount i32 = len(g_renderBatches)
+	var i i32 = 0
+	for i = 0; i < renderBatchCount; i = i + 1 {
+		var batchId batch_id = g_renderBatches[i]
+		panicIfNot(is_valid_batch(batchId), "render_batches : invalid batch")
+		var batch i32 = batchId.batch
+		var meshId gfx.MeshId = g_batches[batch].mesh
+		panicIfNot(gfx.IsValidMesh(meshId), "render_batches : invalid mesh")
+		if (gfx.MeshIsEmpty(meshId) == false) {
+			var batchAlpha bool = g_batches[batch].alpha
+			if (batchAlpha == alpha) {
+				if (alpha == true) {
+					gfx.enable_blending(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+				} else {
+					gfx.disable_blending()
+				}
+				gfx.EffectUse(gfx.g_fxTexture)
+				gfx.EffectAssignTexture(gfx.g_fxTexture, 0, g_batches[batch].texture.name)
+				gfx.MeshRender(meshId)
+			}
+		}
+	}
+}
+
 

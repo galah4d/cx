@@ -19,7 +19,7 @@ func main()() {
 	o.Parse()
 
 	var appName str
-	appName = "Menu Tutorial"
+	appName = "Button Tutorial"
 
 	var f fps.Framerate
 	f.Init(i32.f64(o.fps))
@@ -38,11 +38,22 @@ func main()() {
 	gfx.Init(o.width, o.height, o.dataDir)
 	gui.Init(o.width, o.height, o.dataDir)
 
+	// mainScreen
+	var mainScreen gui.ScreenId = gui.ScreenCreate("mainScreen")
+	gui.ControlSetSkin(mainScreen.base, gui.g_blackSkin)
+	gui.ControlSetSize(mainScreen.base, gfx.gfx_viewportSize)
+	gui.ScreenSetDuration(mainScreen, -2.0D)
+	{
+		//var playButton gui.ButtonId = gui.ButtonCreate("playButton")
+		//var exitButton gui.ButtonId = gui.ButtonCreate("exitButton"
+	}
+
 	// titleScreen
 	var titleScreen gui.ScreenId = gui.ScreenCreate("titleScreen")
 	gui.ControlSetSkin(titleScreen.base, gui.g_blackSkin)
 	gui.ControlSetBounds(titleScreen.base, gfx.gfx_viewportBounds)
-	gui.ScreenSetDuration(titleScreen, -2.0D)
+	gui.ScreenSetDuration(titleScreen, 2.0D)
+	gui.ScreenSetOnNext(titleScreen, mainScreen)
 	{
 		var label gui.LabelId= gui.LabelCreate("titleLabel")
 		gui.ControlAddChild(titleScreen.base, label.base)
@@ -56,7 +67,7 @@ func main()() {
 	}
 
 	// skycoinScreen
-	var skycoinScreen gui.ScreenId = gui.ScreenCreate("skycoinSceen")
+	var skycoinScreen gui.ScreenId = gui.ScreenCreate("skycoinScreen")
 	gui.ControlSetSkin(skycoinScreen.base, gui.g_blackSkin)
 	gui.ControlSetBounds(skycoinScreen.base, gfx.gfx_viewportBounds)
 	gui.ScreenSetDuration(skycoinScreen, 2.0D)

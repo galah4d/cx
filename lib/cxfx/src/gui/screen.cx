@@ -1,0 +1,304 @@
+package gui
+
+//-----------------------------------------------------------------------------
+// Globals ...
+//-----------------------------------------------------------------------------
+var g_screens []Screen
+var g_modals []ScreenId
+
+var g_currentScreen ScreenId = InvalidScreen()
+var g_nextScreen	ScreenId = InvalidScreen()
+
+var g_transitionDuration f64 = 0.5D
+var g_transitionTime	 f64 = 0.0D
+
+//-----------------------------------------------------------------------------
+// ScreenId ...
+//-----------------------------------------------------------------------------
+type ScreenId struct {
+	base ControlId
+	screen i32
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+type Screen struct {
+	id	ScreenId
+	on_exit   ScreenId
+	on_enter  ScreenId
+	on_menu   ScreenId
+	on_next   ScreenId
+	duration  f64
+	time	  f64
+	state	 i32
+	prevState i32
+	modal	 bool
+	paused	bool
+	floating  bool
+}
+
+//-----------------------------------------------------------------------------
+// NewSceenId ...
+//-----------------------------------------------------------------------------
+func NewScreenId(base ControlId, screen i32) (out ScreenId) {
+	out.base = base
+	out.screen = screen
+	panicIfNot(IsValidScreen(out), "invalid id")
+}
+
+//-----------------------------------------------------------------------------
+// InvalidScreen ...
+//-----------------------------------------------------------------------------
+func InvalidScreen() (out ScreenId) { // ISSUE : func InvalidScreen() {
+	out.base = InvalidControl()
+	out.screen = -1
+}
+
+//-----------------------------------------------------------------------------
+// IsValidScreen ...
+//-----------------------------------------------------------------------------
+func IsValidScreen(id ScreenId) (out bool) {
+	out = id.screen >= 0 && id.screen < len(g_screens) && IsValidControl(id.base)
+}
+
+//-----------------------------------------------------------------------------
+// ScreenCreate ...
+//-----------------------------------------------------------------------------
+func ScreenCreate(name str) (out ScreenId) {
+	out.screen = len(g_screens)
+	out.base = controlCreate(name, GUI_SCREEN, out.screen)
+
+	ControlSetFocusIndex(out.base, 0)
+
+	var screen Screen
+	screen.id = out
+	screen.on_exit   = InvalidScreen()
+	screen.on_enter  = InvalidScreen()
+	screen.on_menu   = InvalidScreen()
+	screen.on_next   = InvalidScreen()
+	screen.duration  = -1.0D
+	screen.time	  = 0.0D
+	screen.state	 = STATE_CLOSED
+	screen.prevState = STATE_CLOSED
+	screen.modal	 = false
+	screen.paused	= false
+	screen.floating  = false
+
+	g_screens = append(g_screens, screen)
+	panicIfNot(IsValidScreen(out), "invalid id")
+}
+
+//-----------------------------------------------------------------------------
+// ScreenSetModal ...
+//-----------------------------------------------------------------------------
+func ScreenSetModal(id ScreenId, modal bool) {
+	panicIfNot(IsValidScreen(id), "invalid id")
+	g_screens[id.screen].modal = modal
+}
+
+//-----------------------------------------------------------------------------
+// ScreenSetFloating ...
+//-----------------------------------------------------------------------------
+func ScreenSetFloating(id ScreenId, floating bool) () {
+	panicIfNot(IsValidScreen(id), "invalid id")
+	g_screens[id.screen].floating = floating
+}
+
+//-----------------------------------------------------------------------------
+// ScreenSetOnExit ...
+//-----------------------------------------------------------------------------
+func ScreenSetOnExit(id ScreenId, exit ScreenId) () {
+	panicIfNot(IsValidScreen(id), "invalid id")
+	panicIfNot(IsValidScreen(exit)  , "invalid id")
+	g_screens[id.screen].on_exit = exit
+}
+
+//-----------------------------------------------------------------------------
+// ScreenSetOnMenu ...
+//-----------------------------------------------------------------------------
+func ScreenSetOnMenu(id ScreenId, menu ScreenId) () {
+	panicIfNot(IsValidScreen(id), "invalid id")
+	panicIfNot(IsValidScreen(menu)  , "invalid id")
+	g_screens[id.screen].on_menu = menu
+}
+
+//-----------------------------------------------------------------------------
+// ScreenSetOnEnter ...
+//-----------------------------------------------------------------------------
+func ScreenSetOnEnter(id ScreenId, enter ScreenId) () {
+	panicIfNot(IsValidScreen(id), "invalid id")
+	panicIfNot(IsValidScreen(enter) , "invalid id")
+	g_screens[id.screen].on_enter = enter
+}
+
+//-----------------------------------------------------------------------------
+// ScreenSetOnNext ...
+//-----------------------------------------------------------------------------
+func ScreenSetOnNext(id ScreenId, next ScreenId) () {
+	panicIfNot(IsValidScreen(id), "invalid id 0")
+	panicIfNot(IsValidScreen(next)  , "invalid id 1")
+	g_screens[id.screen].on_next = next
+}
+
+//-----------------------------------------------------------------------------
+// ScreenSetOnEvent ...
+//-----------------------------------------------------------------------------
+func ScreenSetOnEvent(id ScreenId, event ScreenId) () {
+	ScreenSetOnExit(id, event)
+	ScreenSetOnEnter(id, event)
+	ScreenSetOnMenu(id, event)
+}
+
+//-----------------------------------------------------------------------------
+// ScreenSetDuration ...
+//-----------------------------------------------------------------------------
+func ScreenSetDuration(id ScreenId, duration f64) {
+	panicIfNot(IsValidScreen(id), "invalid id")
+	g_screens[id.screen].duration = duration
+}
+
+//-----------------------------------------------------------------------------
+// ScreenProcessEvent ...
+//-----------------------------------------------------------------------------
+func ScreenProcessEvent(id ScreenId, event *event_s) (out i32) {
+	panicIfNot(IsValidScreen(id), "invalid id")
+	out = control_process_event(id.base, event)
+}
+
+//-----------------------------------------------------------------------------
+// ScreenChangeState ...
+//-----------------------------------------------------------------------------
+func ScreenChangeState(id ScreenId, state i32) () {
+	panicIfNot(IsValidScreen(id), "invalid id")
+	g_screens[id.screen].prevState = g_screens[id.screen].state
+	printf("CHANGE %d\n", state)
+	g_screens[id.screen].state = state
+	var prev i32 = g_screens[id.screen].prevState
+	var curr i32 = g_screens[id.screen].state
+	if (prev != curr) {
+		printf("%d screen state changed %d -> %d\n", id.screen, prev, curr)
+	}
+}
+
+//-----------------------------------------------------------------------------
+// ScreenStateChanged ...
+//-----------------------------------------------------------------------------
+func ScreenStateChanged(id ScreenId, prev i32, curr i32) (value bool) {
+	panicIfNot(IsValidScreen(id), "invalid id")
+	var screenPrev i32 = g_screens[id.screen].prevState
+	var screenCurr i32 = g_screens[id.screen].state
+	value = ((screenPrev == prev) && (screenCurr == curr))
+}
+
+//-----------------------------------------------------------------------------
+// ScreenUpdate ...
+//-----------------------------------------------------------------------------
+func ScreenUpdate(id ScreenId, deltaTime f64) () {
+	panicIfNot(IsValidScreen(id), "invalid id")
+	var t f64 = g_screens[id.screen].time
+	var d f64 = g_screens[id.screen].duration
+
+	g_screens[id.screen].time = t
+	var state i32 = g_screens[id.screen].state
+	if ((t <= 0) && (state == STATE_CLOSED)) {
+		printf("CHANGE SHOWING\n")
+		ScreenChangeState(id, STATE_SHOWING)
+	} else if ((t >= d) && (d > 0) && (state == STATE_OPENED)) { // can't use g_screens[screen].state here
+		printf("CHANGE CLOSING %d\n", g_screens[id.screen].state)
+		ScreenChangeState(id, STATE_CLOSING)
+	}
+
+	t = t + deltaTime
+	g_screens[id.screen].time = t
+	//	printf("time %f", f64.f32(t))
+}
+
+//-----------------------------------------------------------------------------
+// ScreenResize ...
+//-----------------------------------------------------------------------------
+func ScreenResize(id ScreenId) () {
+	panicIfNot(IsValidScreen(id), "invalid id")
+	control_resize(id.base)
+}
+
+//-----------------------------------------------------------------------------
+// ScreenRender ...
+//-----------------------------------------------------------------------------
+func ScreenRender(id ScreenId, clip mat.v4, stack i32) () {
+	panicIfNot(IsValidScreen(id), "invalid screen")
+	fps.Start(g_profileRenderScreenControl)
+
+	gfx.MeshBegin(g_opaqueVertexColoredTriangles)
+	gfx.MeshBegin(g_opaqueVertexColoredLines)
+	gfx.MeshBegin(g_alphaVertexColoredTriangles)
+	begin_batches()
+
+	clip = gfx.push_scissor(g_controls[id.base.control].name, gfx.gfx_viewportBounds)
+	//printf("SCREEN CLIP %f, %f, %f, %f\n", clip.x, clip.y, clip.z, clip.w)
+	control_render(id.base, clip, stack)
+	gfx.pop_scissor()
+
+	//panicIfNot(gfx.g_scissorCount == 0, "invalid scissor stack")
+	end_batches()
+	gfx.MeshEnd(g_alphaVertexColoredTriangles)
+	gfx.MeshEnd(g_opaqueVertexColoredLines)
+	gfx.MeshEnd(g_opaqueVertexColoredTriangles)
+
+	fps.Stop(g_profileRenderScreenControl)
+
+	// opaque
+	fps.Start(g_profileRenderOpaqueVertexColoredTriangles)
+	if gfx.MeshIsEmpty(g_opaqueVertexColoredTriangles) == false {
+		gfx.disable_blending()
+		gfx.EffectUse(gfx.g_fxVertexColor)
+		gfx.MeshRender(g_opaqueVertexColoredTriangles)
+	}
+	fps.Stop(g_profileRenderOpaqueVertexColoredTriangles)
+
+	fps.Start(g_profileRenderOpaqueTexturedTriangles)
+	render_batches(false)
+	fps.Stop(g_profileRenderOpaqueTexturedTriangles)
+
+	fps.Start(g_profileRenderOpaqueVertexColoredLines)
+	if gfx.MeshIsEmpty(g_opaqueVertexColoredLines) == false {
+		gfx.disable_blending()
+		gfx.EffectUse(gfx.g_fxVertexColor)
+		gfx.MeshRender(g_opaqueVertexColoredLines)
+	}
+	fps.Stop(g_profileRenderOpaqueVertexColoredLines)
+
+	// alpha
+	fps.Start(g_profileRenderAlphaTexturedTriangles)
+	render_batches(true)
+	fps.Stop(g_profileRenderAlphaTexturedTriangles)
+
+	fps.Start(g_profileRenderAlphaVertexColoredTriangles)
+	if gfx.MeshIsEmpty(g_alphaVertexColoredTriangles) == false {
+		gfx.enable_blending(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+		gfx.EffectUse(gfx.g_fxVertexColor)
+		gfx.MeshRender(g_alphaVertexColoredTriangles)
+	}
+	fps.Stop(g_profileRenderAlphaVertexColoredTriangles)
+
+
+	/*gfx.color_write(false, false, false, false)
+	  gfx.disable_depth()
+	  gfx.disable_blending()
+	  gfx.stencil_state(true, gl.ALWAYS, 256, 256, gl.KEEP, gl.REPLACE, gl.REPLACE, 256)
+
+	  var screenPair i32 = get_focus_pair(id)
+	  var currentFocus i32 = g_focused[screenPair].currentFocus
+	  var focusCount i32 = g_focused[screenPair].focusCount
+	  if (focusCount > 0 && currentFocus >= 0 && currentFocus < focusCount) {
+	  var focusedId ControlId = g_focused[screenPair].focusList[currentFocus]
+	  gfx.MeshBegin(g_opaqueVertexColoredTriangles)
+	  var renderBounds mat.v4 = mat.v4_v2v2(g_controls[focusedId.control].renderPosition, g_controls[focusedId.control].size)
+	  gfx.MeshAppendQuad(g_opaqueVertexColoredTriangles, renderBounds,
+	  mat.v4_(0.0, 0.0, 1.0, 1.0), mat.v4_(1.0, 1.0, 1.0, 1.0), gfx.gfx_viewportBounds, 1.0)
+	  gfx.MeshEnd(g_opaqueVertexColoredTriangles)
+	  gfx.EffectUse(gfx.g_fxVertexColor)
+	  gfx.MeshRender(g_opaqueVertexColoredTriangles)
+	  }*/
+}
+
+

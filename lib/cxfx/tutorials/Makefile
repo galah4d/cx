@@ -98,10 +98,11 @@
 		../src/gui/control.cx\
 		../src/gui/label.cx\
 		../src/gui/picture.cx\
+		../src/gui/screen.cx\
 		../src/gui/interface.cx\
 		7_menu.cx ++data=../resources
 
-8_perspective:
+8_button:
 	cx\
 		../src/argv.cx\
 		../src/application.cx\
@@ -114,6 +115,84 @@
 		../src/gfx/mesh.cx\
 		../src/gfx/texture.cx\
 		../src/gfx/target.cx\
-		8_perspective.cx ++data=../resources
+		../src/gfx/scissor.cx\
+		../src/gui/layer.cx\
+		../src/gui/skin.cx\
+		../src/gui/batch.cx\
+		../src/gui/font.cx\
+		../src/gui/animation.cx\
+		../src/gui/control.cx\
+		../src/gui/label.cx\
+		../src/gui/picture.cx\
+		../src/gui/screen.cx\
+		../src/gui/interface.cx\
+		8_button.cx ++data=../resources
+
+9_dialog:
+	cx\
+		../src/argv.cx\
+		../src/application.cx\
+		../src/math.cx\
+		../src/fps/profiler.cx\
+		../src/fps/framerate.cx\
+		../src/gfx/graphics.cx\
+		../src/gfx/effect.cx\
+		../src/gfx/program.cx\
+		../src/gfx/mesh.cx\
+		../src/gfx/texture.cx\
+		../src/gfx/target.cx\
+		../src/gfx/scissor.cx\
+		../src/gui/layer.cx\
+		../src/gui/skin.cx\
+		../src/gui/batch.cx\
+		../src/gui/font.cx\
+		../src/gui/animation.cx\
+		../src/gui/control.cx\
+		../src/gui/label.cx\
+		../src/gui/picture.cx\
+		../src/gui/screen.cx\
+		../src/gui/interface.cx\
+		9_dialog.cx ++data=../resources
+
+10_custom_menu:
+	cx\
+		../src/argv.cx\
+		../src/application.cx\
+		../src/math.cx\
+		../src/fps/profiler.cx\
+		../src/fps/framerate.cx\
+		../src/gfx/graphics.cx\
+		../src/gfx/effect.cx\
+		../src/gfx/program.cx\
+		../src/gfx/mesh.cx\
+		../src/gfx/texture.cx\
+		../src/gfx/target.cx\
+		../src/gfx/scissor.cx\
+		../src/gui/layer.cx\
+		../src/gui/skin.cx\
+		../src/gui/batch.cx\
+		../src/gui/font.cx\
+		../src/gui/animation.cx\
+		../src/gui/control.cx\
+		../src/gui/label.cx\
+		../src/gui/picture.cx\
+		../src/gui/screen.cx\
+		../src/gui/interface.cx\
+		10_custom_menu.cx ++data=../resources
+
+11_perspective:
+	cx\
+		../src/argv.cx\
+		../src/application.cx\
+		../src/math.cx\
+		../src/fps/profiler.cx\
+		../src/fps/framerate.cx\
+		../src/gfx/graphics.cx\
+		../src/gfx/effect.cx\
+		../src/gfx/program.cx\
+		../src/gfx/mesh.cx\
+		../src/gfx/texture.cx\
+		../src/gfx/target.cx\
+		11_perspective.cx ++data=../resources
 
 

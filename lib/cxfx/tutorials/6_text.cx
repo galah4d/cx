@@ -31,6 +31,9 @@ func main()() {
 	o.fps = 60
 	o.Parse()
 
+	var appName str
+	appName = "Text Tutorial"
+
 	var f fps.Framerate
 	f.Init(i32.f64(o.fps))
 
@@ -40,7 +43,7 @@ func main()() {
 	var prfRender fps.ProfileId = fps.CreateProfile("render")
 
 	var a app.Application
-	a.Init(o, "Text Tutorial", "mainWindow", 2, 1)
+	a.Init(o, appName, "mainWindow", 2, 1)
 	a.SetKeyboardCallback("main", "KeyboardCallback")
 	a.SetMouseButtonCallback("main", "MouseButtonCallback")
 	a.SetMousePositionCallback("main", "MousePositionCallback")
@@ -67,11 +70,11 @@ func main()() {
 				if exit {
 					a.Exit()
 				}
-				var mesh gfx.MeshId = gfx.MeshLock(gl.TRIANGLES, gfx.g_vertexColorAttributes, 7 * 6)
+				var mesh gfx.MeshId = gfx.MeshLock(gl.TRIANGLES, gfx.g_vertexColorAttributes, len(appName) * 6)
 
 				var textWidth i32
 				var textHeight i32
-				textWidth, textHeight = gfx.measure_text(fontName, "skycoin")
+				textWidth, textHeight = gfx.measure_text(fontName, appName)
 
 				var w f32 = i32.f32(textWidth) // ISSUE : can't declare using :=, compilation errors follows when f32 arguments are expected
 				var h f32 = i32.f32(textHeight)
@@ -82,7 +85,7 @@ func main()() {
 				gfx.MeshAppendText(mesh, fontTexture, fontName,
 						mat.v2_(x, y), mat.v2_(1.0, 1.0),
 						mat.v4_(1.0, 0.0, 0.0, 1.0),
-						"Skycoin",
+						appName,
 						false, mat.v4_(0.0, 0.0, 0.0, 0.0), mat.v4_(0.0, 0.0, 0.0, 0.0), // TODO remove debug arguments
 						mat.v4_(0.0, 0.0, width, height),
 						0.0)

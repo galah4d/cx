@@ -35,6 +35,9 @@ type Screen struct {
 	modal	 bool
 	paused	bool
 	floating  bool
+	onEvent func_i32_i32_id
+	onUpdate func_i32_i32_id
+	onRender func_i32_i32_id
 }
 
 //-----------------------------------------------------------------------------
@@ -83,6 +86,9 @@ func ScreenCreate(name str) (out ScreenId) {
 	screen.modal	 = false
 	screen.paused	= false
 	screen.floating  = false
+	screen.onEvent = invalid_func_i32_i32()
+	screen.onUpdate = invalid_func_i32_i32()
+	screen.onRender = invalid_func_i32_i32()
 
 	g_screens = append(g_screens, screen)
 	panicIfNot(IsValidScreen(out), "invalid id")
@@ -141,9 +147,9 @@ func ScreenSetOnNext(id ScreenId, next ScreenId) () {
 }
 
 //-----------------------------------------------------------------------------
-// ScreenSetOnEvent ...
+// ScreenSetOnEvents ...
 //-----------------------------------------------------------------------------
-func ScreenSetOnEvent(id ScreenId, event ScreenId) () {
+func ScreenSetOnEvents(id ScreenId, event ScreenId) () {
 	ScreenSetOnExit(id, event)
 	ScreenSetOnEnter(id, event)
 	ScreenSetOnMenu(id, event)
@@ -158,11 +164,46 @@ func ScreenSetDuration(id ScreenId, duration f64) {
 }
 
 //-----------------------------------------------------------------------------
+// ScreenSetOnEvent ...
+//-----------------------------------------------------------------------------
+func ScreenSetOnEvent(id ScreenId, packageName str, functionName str) {
+	panicIfNot(IsValidScreen(id), "invalid id")
+	g_screens[id.screen].onEvent = func_i32_i32(packageName, functionName)
+	var onEvent func_i32_i32_id = g_screens[id.screen].onEvent
+	panicIfNot(onEvent.index >= 0, "invalid function")
+}
+
+//-----------------------------------------------------------------------------
+// ScreenSetOnUpdate ...
+//-----------------------------------------------------------------------------
+func ScreenSetOnUpdate(id ScreenId, packageName str, functionName str) {
+	panicIfNot(IsValidScreen(id), "invalid id")
+	g_screens[id.screen].onUpdate = func_i32_i32(packageName, functionName)
+	var onUpdate func_i32_i32_id = g_screens[id.screen].onUpdate
+	panicIfNot(onUpdate.index >= 0, "invalid function")
+}
+
+//-----------------------------------------------------------------------------
+// ScreenSetOnRender ...
+//-----------------------------------------------------------------------------
+func ScreenSetOnRender(id ScreenId, packageName str, functionName str) {
+	panicIfNot(IsValidScreen(id), "invalid id")
+	g_screens[id.screen].onRender = func_i32_i32(packageName, functionName)
+	var onRender func_i32_i32_id = g_screens[id.screen].onRender
+	panicIfNot(onRender.index >= 0, "invalid function")
+}
+
+//-----------------------------------------------------------------------------
 // ScreenProcessEvent ...
 //-----------------------------------------------------------------------------
 func ScreenProcessEvent(id ScreenId, event *event_s) (out i32) {
 	panicIfNot(IsValidScreen(id), "invalid id")
+	var onEvent func_i32_i32_id = g_screens[id.screen].onEvent
+	if onEvent.index >= 0 {
+		call_i32_i32(onEvent, id.base.control, -1)
+	}
 	out = control_process_event(id.base, event)
+
 }
 
 //-----------------------------------------------------------------------------
@@ -210,6 +251,10 @@ func ScreenUpdate(id ScreenId, deltaTime f64) () {
 
 	t = t + deltaTime
 	g_screens[id.screen].time = t
+	var onUpdate func_i32_i32_id = g_screens[id.screen].onUpdate
+	if onUpdate.index >= 0 {
+		call_i32_i32(onUpdate, id.base.control, -1)
+	}
 	//	printf("time %f", f64.f32(t))
 }
 
@@ -228,55 +273,60 @@ func ScreenRender(id ScreenId, clip mat.v4, stack i32) () {
 	panicIfNot(IsValidScreen(id), "invalid screen")
 	fps.Start(g_profileRenderScreenControl)
 
-	gfx.MeshBegin(g_opaqueVertexColoredTriangles)
-	gfx.MeshBegin(g_opaqueVertexColoredLines)
-	gfx.MeshBegin(g_alphaVertexColoredTriangles)
-	begin_batches()
+	var onRender func_i32_i32_id = g_screens[id.screen].onRender
+	if onRender.index >= 0 {
+		call_i32_i32(onRender, id.base.control, -1)
+	} else {
+		gfx.MeshBegin(g_opaqueVertexColoredTriangles)
+		gfx.MeshBegin(g_opaqueVertexColoredLines)
+		gfx.MeshBegin(g_alphaVertexColoredTriangles)
+		begin_batches()
 
-	clip = gfx.push_scissor(g_controls[id.base.control].name, gfx.gfx_viewportBounds)
-	//printf("SCREEN CLIP %f, %f, %f, %f\n", clip.x, clip.y, clip.z, clip.w)
-	control_render(id.base, clip, stack)
-	gfx.pop_scissor()
+		clip = gfx.push_scissor(g_controls[id.base.control].name, gfx.gfx_viewportBounds)
+		//printf("SCREEN CLIP %f, %f, %f, %f\n", clip.x, clip.y, clip.z, clip.w)
+		control_render(id.base, clip, stack)
+		gfx.pop_scissor()
 
-	//panicIfNot(gfx.g_scissorCount == 0, "invalid scissor stack")
-	end_batches()
-	gfx.MeshEnd(g_alphaVertexColoredTriangles)
-	gfx.MeshEnd(g_opaqueVertexColoredLines)
-	gfx.MeshEnd(g_opaqueVertexColoredTriangles)
+		//panicIfNot(gfx.g_scissorCount == 0, "invalid scissor stack")
+		end_batches()
+		gfx.MeshEnd(g_alphaVertexColoredTriangles)
+		gfx.MeshEnd(g_opaqueVertexColoredLines)
+		gfx.MeshEnd(g_opaqueVertexColoredTriangles)
 
-	fps.Stop(g_profileRenderScreenControl)
+		fps.Stop(g_profileRenderScreenControl)
 
-	// opaque
-	fps.Start(g_profileRenderOpaqueVertexColoredTriangles)
-	if gfx.MeshIsEmpty(g_opaqueVertexColoredTriangles) == false {
-		gfx.disable_blending()
-		gfx.EffectUse(gfx.g_fxVertexColor)
-		gfx.MeshRender(g_opaqueVertexColoredTriangles)
-	}
-	fps.Stop(g_profileRenderOpaqueVertexColoredTriangles)
+		// opaque
+		fps.Start(g_profileRenderOpaqueVertexColoredTriangles)
+		if gfx.MeshIsEmpty(g_opaqueVertexColoredTriangles) == false {
+			gfx.disable_blending()
+			gfx.EffectUse(gfx.g_fxVertexColor)
+			gfx.MeshRender(g_opaqueVertexColoredTriangles)
+		}
+		fps.Stop(g_profileRenderOpaqueVertexColoredTriangles)
 
-	fps.Start(g_profileRenderOpaqueTexturedTriangles)
-	render_batches(false)
-	fps.Stop(g_profileRenderOpaqueTexturedTriangles)
+		fps.Start(g_profileRenderOpaqueTexturedTriangles)
+		render_batches(false)
+		fps.Stop(g_profileRenderOpaqueTexturedTriangles)
 
-	fps.Start(g_profileRenderOpaqueVertexColoredLines)
-	if gfx.MeshIsEmpty(g_opaqueVertexColoredLines) == false {
-		gfx.disable_blending()
-		gfx.EffectUse(gfx.g_fxVertexColor)
-		gfx.MeshRender(g_opaqueVertexColoredLines)
-	}
-	fps.Stop(g_profileRenderOpaqueVertexColoredLines)
+		fps.Start(g_profileRenderOpaqueVertexColoredLines)
+		if gfx.MeshIsEmpty(g_opaqueVertexColoredLines) == false {
+			gfx.disable_blending()
+			gfx.EffectUse(gfx.g_fxVertexColor)
+			gfx.MeshRender(g_opaqueVertexColoredLines)
+		}
+		fps.Stop(g_profileRenderOpaqueVertexColoredLines)
 
-	// alpha
-	fps.Start(g_profileRenderAlphaTexturedTriangles)
-	render_batches(true)
-	fps.Stop(g_profileRenderAlphaTexturedTriangles)
+		// alpha
+		fps.Start(g_profileRenderAlphaTexturedTriangles)
+		render_batches(true)
+		fps.Stop(g_profileRenderAlphaTexturedTriangles)
 
-	fps.Start(g_profileRenderAlphaVertexColoredTriangles)
-	if gfx.MeshIsEmpty(g_alphaVertexColoredTriangles) == false {
-		gfx.enable_blending(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
-		gfx.EffectUse(gfx.g_fxVertexColor)
-		gfx.MeshRender(g_alphaVertexColoredTriangles)
+		fps.Start(g_profileRenderAlphaVertexColoredTriangles)
+		if gfx.MeshIsEmpty(g_alphaVertexColoredTriangles) == false {
+			gfx.enable_blending(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+			gfx.EffectUse(gfx.g_fxVertexColor)
+			gfx.MeshRender(g_alphaVertexColoredTriangles)
+		}
 	}
 	fps.Stop(g_profileRenderAlphaVertexColoredTriangles)
 

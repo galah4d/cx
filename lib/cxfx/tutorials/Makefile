@@ -193,6 +193,16 @@
 		../src/gfx/mesh.cx\
 		../src/gfx/texture.cx\
 		../src/gfx/target.cx\
+		../src/gfx/scissor.cx\
+		../src/gui/layer.cx\
+		../src/gui/skin.cx\
+		../src/gui/batch.cx\
+		../src/gui/font.cx\
+		../src/gui/animation.cx\
+		../src/gui/control.cx\
+		../src/gui/label.cx\
+		../src/gui/picture.cx\
+		../src/gui/screen.cx\
+		../src/gui/interface.cx\
 		11_perspective.cx ++data=../resources
-
 

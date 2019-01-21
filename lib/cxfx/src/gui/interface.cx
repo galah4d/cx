@@ -4661,7 +4661,7 @@ func process_event(event *event_s) () {
         g_hotScreen = modalScreen
         currentScreen = modalScreen
         var floating bool = g_screens[modalScreen.screen].floating
-        if (control_process_event(modalScreen.base, event) == EVENT_UNUSED) {
+        if (ScreenProcessEvent(modalScreen, event) == EVENT_UNUSED) {
             if ((key == KEYCODE_ESCAPE && action == KEY_PRESS) ||
                 (button == BUTTON_LEFT && buttonAction == MOUSE_PRESS && floating == true)) {
                 hide_modal(modalScreen)
@@ -4673,8 +4673,7 @@ func process_event(event *event_s) () {
         }
     } else if (IsValidScreen(g_currentScreen)) {
         g_hotScreen = g_currentScreen
-        //printf("NO MODAL\n")
-        if (control_process_event(g_currentScreen.base, event) == EVENT_UNUSED) {
+        if (ScreenProcessEvent(g_currentScreen, event) == EVENT_UNUSED) {
         //printf("process_keyboard : EVENT_UNUSED 0\n")
             var screen i32 = g_currentScreen.screen
             var state i32 = g_screens[screen].state

@@ -12,7 +12,8 @@ import "gui"
 // TODO
 //-----------------------------------------------------------------------------
 // TODO : centre buttons
-// TODO : fix black scren when exiting gameScreen
+// TODO : fix black scren when coming back from gameScreen
+// TODO : fix exitScreen not showing when coming back from gameScreen
 //
 
 //-----------------------------------------------------------------------------

@@ -24,11 +24,11 @@ var cSources map[string]**uint8 = make(map[string]**uint8, 0)
 var gifs map[string]*gif.GIF = make(map[string]*gif.GIF, 0)
 
 func readF32Ptr(fp int, inp *CXArgument) *float32 {
-	return (*float32)(gl.Ptr(ReadX32Data(fp, inp, TYPE_F32)))
+	return (*float32)(gl.Ptr(ReadData(fp, inp, TYPE_F32)))
 }
 
 func readI32Ptr(fp int, inp *CXArgument) *int32 {
-	return (*int32)(gl.Ptr(ReadX32Data(fp, inp, TYPE_I32)))
+	return (*int32)(gl.Ptr(ReadData(fp, inp, TYPE_I32)))
 }
 
 // gogl
@@ -428,12 +428,12 @@ func op_gl_GenBuffers(expr *CXExpression, fp int) {
 
 func op_gl_BufferData(expr *CXExpression, fp int) {
 	inp1, inp2, inp3, inp4 := expr.Inputs[0], expr.Inputs[1], expr.Inputs[2], expr.Inputs[3]
-	gl.BufferData(uint32(ReadI32(fp, inp1)), int(ReadI32(fp, inp2)), gl.Ptr(ReadX32Data(fp, inp3, -1)), uint32(ReadI32(fp, inp4)))
+	gl.BufferData(uint32(ReadI32(fp, inp1)), int(ReadI32(fp, inp2)), gl.Ptr(ReadData(fp, inp3, -1)), uint32(ReadI32(fp, inp4)))
 }
 
 func op_gl_BufferSubData(expr *CXExpression, fp int) {
 	inp1, inp2, inp3, inp4 := expr.Inputs[0], expr.Inputs[1], expr.Inputs[2], expr.Inputs[3]
-	gl.BufferSubData(uint32(ReadI32(fp, inp1)), int(ReadI32(fp, inp2)), int(ReadI32(fp, inp3)), gl.Ptr(ReadX32Data(fp, inp4, -1)))
+	gl.BufferSubData(uint32(ReadI32(fp, inp1)), int(ReadI32(fp, inp2)), int(ReadI32(fp, inp3)), gl.Ptr(ReadData(fp, inp4, -1)))
 }
 
 // gl_2_0

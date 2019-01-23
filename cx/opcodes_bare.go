@@ -3,7 +3,7 @@ package base
 // CorePackages ...
 var CorePackages = []string{
 	// temporary solution until we can implement these packages in pure CX I guess
-	"gl", "glfw", "time", "http", "os", "explorer", "aff", "gltext", "cx",
+	"gl", "glfw", "time", "http", "os", "explorer", "aff", "gltext", "cx", "al",
 }
 
 // op codes

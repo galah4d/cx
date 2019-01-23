@@ -315,23 +315,23 @@ func FromF64(in float64) []byte {
 // 	return offset, size
 // }
 
-// ReadX32Data ...
-func ReadX32Data(fp int, inp *CXArgument, dataType int) interface{} {
+// ReadData ...
+func ReadData(fp int, inp *CXArgument, dataType int) interface{} {
 	elt := GetAssignmentElement(inp)
 	if elt.IsSlice {
-		return ReadX32Slice(fp, inp, dataType)
+		return ReadSlice(fp, inp, dataType)
 	} else if elt.IsArray {
-		return ReadX32A(fp, inp, dataType)
+		return ReadArray(fp, inp, dataType)
 	} else {
 		panic(CX_RUNTIME_INVALID_ARGUMENT)
 	}
 }
 
-// ReadX32Slice ...
-func ReadX32Slice(fp int, inp *CXArgument, dataType int) interface{} {
+// ReadSlice ...
+func ReadSlice(fp int, inp *CXArgument, dataType int) interface{} {
 	var out interface{}
 	sliceOffset := GetSliceOffset(fp, inp)
-	if sliceOffset >= 0 && (inp.Type == TYPE_F32 || inp.Type == TYPE_I32) && (dataType < 0 || inp.Type == dataType) {
+	if sliceOffset >= 0 && (dataType < 0 || inp.Type == dataType) {
 		slice := GetSlice(sliceOffset, GetAssignmentElement(inp).TotalSize)
 		if slice != nil {
 			switch inp.Type {
@@ -347,6 +347,14 @@ func ReadX32Slice(fp int, inp *CXArgument, dataType int) interface{} {
 				if len(data) > 0 {
 					out = data
 				}
+			case TYPE_BYTE:
+				var data []byte
+				encoder.DeserializeRaw(slice, &data)
+				if len(data) > 0 {
+					out = data
+				}
+			default:
+				panic(CX_RUNTIME_INVALID_ARGUMENT)
 			}
 		}
 	} else {
@@ -355,19 +363,19 @@ func ReadX32Slice(fp int, inp *CXArgument, dataType int) interface{} {
 	return out
 }
 
-// ReadX32A ...
-func ReadX32A(fp int, inp *CXArgument, dataType int) interface{} {
+// ReadArray ...
+func ReadArray(fp int, inp *CXArgument, dataType int) interface{} { // REFACTOR with ReadSlice
 	var out interface{}
 
 	offset := GetFinalOffset(fp, inp)
 	byts := ReadMemory(offset, inp)
 	byts = append(encoder.SerializeAtomic(int32(len(byts)/4)), byts...) // REFACTOR
-	if (inp.Type == TYPE_F32 || inp.Type == TYPE_I32) && (dataType < 0 || inp.Type == dataType) {
+	if dataType < 0 || inp.Type == dataType {
 		switch inp.Type {
 		case TYPE_F32:
 			var data []float32
 			encoder.DeserializeRaw(byts, &data)
-			if len(data) > 0 {
+			if len(data) > 0 { // REFACTOR duplicate code
 				out = data
 			}
 		case TYPE_I32:
@@ -376,6 +384,14 @@ func ReadX32A(fp int, inp *CXArgument, dataType int) interface{} {
 			if len(data) > 0 {
 				out = data
 			}
+		case TYPE_BYTE:
+			var data []byte
+			encoder.DeserializeRaw(byts, &data)
+			if len(data) > 0 {
+				out = data
+			}
+		default:
+			panic(CX_RUNTIME_INVALID_ARGUMENT)
 		}
 	} else {
 		panic(CX_RUNTIME_INVALID_ARGUMENT)

@@ -206,3 +206,32 @@
 		../src/gui/interface.cx\
 		11_perspective.cx ++data=../resources
 
+12_audio:
+	cx\
+		../src/argv.cx\
+		../src/application.cx\
+		../src/math.cx\
+		../src/fps/profiler.cx\
+		../src/fps/framerate.cx\
+		../src/gfx/graphics.cx\
+		../src/gfx/effect.cx\
+		../src/gfx/program.cx\
+		../src/gfx/mesh.cx\
+		../src/gfx/texture.cx\
+		../src/gfx/target.cx\
+		../src/gfx/scissor.cx\
+		../src/gui/layer.cx\
+		../src/gui/skin.cx\
+		../src/gui/batch.cx\
+		../src/gui/font.cx\
+		../src/gui/animation.cx\
+		../src/gui/control.cx\
+		../src/gui/label.cx\
+		../src/gui/picture.cx\
+		../src/gui/screen.cx\
+		../src/gui/interface.cx\
+		../src/snd/sounds.cx\
+		../src/snd/audio.cx\
+		../src/snd/voice.cx\
+		12_audio.cx ++data=../resources
+

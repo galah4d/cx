@@ -1,6 +1,6 @@
 package main
 
-import "argv"
+import "arg"
 import "os"
 import "cx"
 import "time"
@@ -142,27 +142,27 @@ func main ()() {
 	for a := 0; a < argCount; a++ {
 		var arg str = os.Args[a]
 
-		if argv.GetValueStr(arg, "++wdir=", &g_workingDir, &workingDirMatch) {
+		if arg.GetValueStr(arg, "++wdir=", &g_workingDir, &workingDirMatch) {
 			continue
 		}
 
-		if argv.GetValueStr(arg, "++cxpath=", &g_cxPath, &cxPathMatch) {
+		if arg.GetValueStr(arg, "++cxpath=", &g_cxPath, &cxPathMatch) {
 			continue
 		}
 
-		if argv.GetFlags(arg, "++log=", &log, &logMatch, logNames, logValues) {
+		if arg.GetFlags(arg, "++log=", &log, &logMatch, logNames, logValues) {
 			continue
 		}
 
-		if argv.GetFlags(arg, "++enable-tests=", &enabledTests, &enabledTestMatch, testNames, testValues) {
+		if arg.GetFlags(arg, "++enable-tests=", &enabledTests, &enabledTestMatch, testNames, testValues) {
 			continue
 		}
 
-		if argv.GetFlags(arg, "++disable-tests=", &disabledTests, &disabledTestMatch, testNames, testValues) {
+		if arg.GetFlags(arg, "++disable-tests=", &disabledTests, &disabledTestMatch, testNames, testValues) {
 			continue
 		}
 
-		if argv.Match(arg, "++help", &helpMatch) {
+		if arg.Match(arg, "++help", &helpMatch) {
 			help()
 			os.Exit(0)
 		}
@@ -173,8 +173,8 @@ func main ()() {
 
 	if enabledTests == TEST_ALL && disabledTests == TEST_ALL {
 		printf("Invalid test combination :\n")
-		argv.PrintFlags("++enabled-test=", enabledTests, testNames, testValues)
-		argv.PrintFlags("++disabled-tests=", disabledTests, testNames, testValues)
+		arg.PrintFlags("++enabled-test=", enabledTests, testNames, testValues)
+		arg.PrintFlags("++disabled-tests=", disabledTests, testNames, testValues)
 		os.Exit(cx.PANIC)
 	} else if disabledTests == TEST_ALL {
 		g_enabledTests = enabledTests
@@ -187,8 +187,8 @@ func main ()() {
 	}
 
 	printf("\nRunning CX tests in dir : '%s'\n", g_workingDir)
-	argv.PrintFlags("Enabled tests", g_enabledTests, testNames, testValues)
-	argv.PrintFlags("Enabled log", g_log, logNames, logValues)
+	arg.PrintFlags("Enabled tests", g_enabledTests, testNames, testValues)
+	arg.PrintFlags("Enabled log", g_log, logNames, logValues)
 	printf("\n")
 
 	var start i64

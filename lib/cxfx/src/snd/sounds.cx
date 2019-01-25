@@ -41,7 +41,7 @@ func AlError() (error bool) {
 
 
 // GetExtension ...
-func GetExtension(extensions str, name str) (out bool) { // REFACTOR : use in gfx. use in argv ??
+func GetExtension(extensions str, name str) (out bool) { // REFACTOR : use in gfx. use in arg ??
 	var nameLen i32 = len(name)
 	//printf("nameLen %d\n", nameLen)
 

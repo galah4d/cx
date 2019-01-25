@@ -416,6 +416,7 @@ func MeshAppendQuad(id MeshId, rect mat.v4, uv mat.v4, color mat.v4, clip mat.v4
 			var du f32 = u1 - u0
 			var dv f32 = v0 - v1
 
+			// TODO : inverted uv, fix texture loading ??
 			u0 = u0 + du * deltaLeft / w
 			u1 = u1 + du * deltaRight / w
 			v1 = v1 + dv * deltaBottom / h
@@ -544,65 +545,71 @@ func MeshAppendCube(id MeshId, position mat.v3, size mat.v3, color mat.v4) {
 
 	var vertices []f32 = g_meshes[mesh].vertices
 
-	r = 1.0
+	// TODO : inverted uv, fix texture loading ??
+	var u0 f32 = 0.0
+	var u1 f32 = 1.0
+	var v0 f32 = 1.0
+	var v1 f32 = 0.0
+
+	/*r = 1.0
 	g = 0.0
-	b = 0.0
-	vertices = appendV9(vertices, left , bottom, front , r, g, b, a, 0.0, 0.0)
-	vertices = appendV9(vertices, right, bottom, front , r, g, b, a, 1.0, 0.0)
-	vertices = appendV9(vertices, left , top   , front , r, g, b, a, 0.0, 1.0)
-	vertices = appendV9(vertices, left , top   , front , r, g, b, a, 0.0, 1.0)
-	vertices = appendV9(vertices, right, bottom, front , r, g, b, a, 1.0, 0.0)
-	vertices = appendV9(vertices, right, top   , front , r, g, b, a, 1.0, 1.0)
+	b = 0.0*/
+	vertices = appendV9(vertices, left , bottom, front , r, g, b, a, u0, v0)
+	vertices = appendV9(vertices, right, bottom, front , r, g, b, a, u1, v0)
+	vertices = appendV9(vertices, left , top   , front , r, g, b, a, u0, v1)
+	vertices = appendV9(vertices, left , top   , front , r, g, b, a, u0, v1)
+	vertices = appendV9(vertices, right, bottom, front , r, g, b, a, u1, v0)
+	vertices = appendV9(vertices, right, top   , front , r, g, b, a, u1, v1)
 
-	r = 0.0
+	/*r = 0.0
 	g = 1.0
-	b = 0.0
-	vertices = appendV9(vertices, right, bottom, front , r, g, b, a, 0.0, 0.0)
-	vertices = appendV9(vertices, right, bottom, back  , r, g, b, a, 1.0, 0.0)
-	vertices = appendV9(vertices, right, top   , front , r, g, b, a, 0.0, 1.0)
-	vertices = appendV9(vertices, right, top   , front , r, g, b, a, 0.0, 1.0)
-	vertices = appendV9(vertices, right, bottom, back  , r, g, b, a, 1.0, 0.0)
-	vertices = appendV9(vertices, right, top   , back  , r, g, b, a, 1.0, 1.0)
+	b = 0.0*/
+	vertices = appendV9(vertices, right, bottom, front , r, g, b, a, u0, v0)
+	vertices = appendV9(vertices, right, bottom, back  , r, g, b, a, u1, v0)
+	vertices = appendV9(vertices, right, top   , front , r, g, b, a, u0, v1)
+	vertices = appendV9(vertices, right, top   , front , r, g, b, a, u0, v1)
+	vertices = appendV9(vertices, right, bottom, back  , r, g, b, a, u1, v0)
+	vertices = appendV9(vertices, right, top   , back  , r, g, b, a, u1, v1)
 
-	r = 0.0
+	/*r = 0.0
 	g = 0.0
-	b = 1.0
-	vertices = appendV9(vertices, right, bottom, back  , r, g, b, a, 0.0, 0.0)
-	vertices = appendV9(vertices, left , bottom, back  , r, g, b, a, 1.0, 0.0)
-	vertices = appendV9(vertices, right, top   , back  , r, g, b, a, 0.0, 1.0)
-	vertices = appendV9(vertices, right, top   , back  , r, g, b, a, 0.0, 1.0)
-	vertices = appendV9(vertices, left , bottom, back  , r, g, b, a, 1.0, 0.0)
-	vertices = appendV9(vertices, left , top   , back  , r, g, b, a, 1.0, 1.0)
+	b = 1.0*/
+	vertices = appendV9(vertices, right, bottom, back  , r, g, b, a, u0, v0)
+	vertices = appendV9(vertices, left , bottom, back  , r, g, b, a, u1, v0)
+	vertices = appendV9(vertices, right, top   , back  , r, g, b, a, u0, v1)
+	vertices = appendV9(vertices, right, top   , back  , r, g, b, a, u0, v1)
+	vertices = appendV9(vertices, left , bottom, back  , r, g, b, a, u1, v0)
+	vertices = appendV9(vertices, left , top   , back  , r, g, b, a, u1, v1)
 
-	r = 1.0
+	/*r = 1.0
 	g = 1.0
-	b = 0.0
-	vertices = appendV9(vertices, left , bottom, back  , r, g, b, a, 0.0, 0.0)
-	vertices = appendV9(vertices, left , bottom, front , r, g, b, a, 1.0, 0.0)
-	vertices = appendV9(vertices, left , top   , back  , r, g, b, a, 0.0, 1.0)
-	vertices = appendV9(vertices, left , top   , back  , r, g, b, a, 0.0, 1.0)
-	vertices = appendV9(vertices, left , bottom, front , r, g, b, a, 1.0, 0.0)
-	vertices = appendV9(vertices, left , top   , front , r, g, b, a, 1.0, 1.0)
+	b = 0.0*/
+	vertices = appendV9(vertices, left , bottom, back  , r, g, b, a, u0, v0)
+	vertices = appendV9(vertices, left , bottom, front , r, g, b, a, u1, v0)
+	vertices = appendV9(vertices, left , top   , back  , r, g, b, a, u0, v1)
+	vertices = appendV9(vertices, left , top   , back  , r, g, b, a, u0, v1)
+	vertices = appendV9(vertices, left , bottom, front , r, g, b, a, u1, v0)
+	vertices = appendV9(vertices, left , top   , front , r, g, b, a, u1, v1)
 
-	r = 1.0
+	/*r = 1.0
 	g = 0.0
-	b = 1.0
-	vertices = appendV9(vertices, left , top   , front , r, g, b, a, 0.0, 0.0)
-	vertices = appendV9(vertices, right, top   , front , r, g, b, a, 1.0, 0.0)
-	vertices = appendV9(vertices, left , top   , back  , r, g, b, a, 0.0, 1.0)
-	vertices = appendV9(vertices, left , top   , back  , r, g, b, a, 0.0, 1.0)
-	vertices = appendV9(vertices, right, top   , front , r, g, b, a, 1.0, 0.0)
-	vertices = appendV9(vertices, right, top   , back  , r, g, b, a, 1.0, 1.0)
+	b = 1.0*/
+	vertices = appendV9(vertices, left , top   , front , r, g, b, a, u0, v0)
+	vertices = appendV9(vertices, right, top   , front , r, g, b, a, u1, v0)
+	vertices = appendV9(vertices, left , top   , back  , r, g, b, a, u0, v1)
+	vertices = appendV9(vertices, left , top   , back  , r, g, b, a, u0, v1)
+	vertices = appendV9(vertices, right, top   , front , r, g, b, a, u1, v0)
+	vertices = appendV9(vertices, right, top   , back  , r, g, b, a, u1, v1)
 
-	r = 0.0
+	/*r = 0.0
 	g = 1.0
-	b = 1.0
-	vertices = appendV9(vertices, right, bottom, front , r, g, b, a, 0.0, 0.0)
-	vertices = appendV9(vertices, left , bottom, front , r, g, b, a, 1.0, 0.0)
-	vertices = appendV9(vertices, right, bottom, back  , r, g, b, a, 0.0, 1.0)
-	vertices = appendV9(vertices, right, bottom, back  , r, g, b, a, 0.0, 1.0)
-	vertices = appendV9(vertices, left , bottom, front , r, g, b, a, 1.0, 0.0)
-	vertices = appendV9(vertices, left , bottom, back  , r, g, b, a, 1.0, 1.0)
+	b = 1.0*/
+	vertices = appendV9(vertices, right, bottom, front , r, g, b, a, u0, v0)
+	vertices = appendV9(vertices, left , bottom, front , r, g, b, a, u1, v0)
+	vertices = appendV9(vertices, right, bottom, back  , r, g, b, a, u0, v1)
+	vertices = appendV9(vertices, right, bottom, back  , r, g, b, a, u0, v1)
+	vertices = appendV9(vertices, left , bottom, front , r, g, b, a, u1, v0)
+	vertices = appendV9(vertices, left , bottom, back  , r, g, b, a, u1, v1)
 
 	g_meshes[mesh].vertices = vertices
 }

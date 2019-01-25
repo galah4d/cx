@@ -2,7 +2,7 @@ PACKAG
  IDENT main
 SCOLON 
 IMPORT 
-STRLIT argv
+STRLIT arg
 SCOLON 
 IMPORT 
 STRLIT os
@@ -912,7 +912,7 @@ LBRACK
 RBRACK 
 SCOLON 
     IF 
- IDENT argv
+ IDENT arg
 PERIOD 
  IDENT GetValueStr
 LPAREN 
@@ -932,7 +932,7 @@ SCOLON
 RBRACE 
 SCOLON 
     IF 
- IDENT argv
+ IDENT arg
 PERIOD 
  IDENT GetValueStr
 LPAREN 
@@ -952,7 +952,7 @@ SCOLON
 RBRACE 
 SCOLON 
     IF 
- IDENT argv
+ IDENT arg
 PERIOD 
  IDENT GetFlags
 LPAREN 
@@ -976,7 +976,7 @@ SCOLON
 RBRACE 
 SCOLON 
     IF 
- IDENT argv
+ IDENT arg
 PERIOD 
  IDENT GetFlags
 LPAREN 
@@ -1000,7 +1000,7 @@ SCOLON
 RBRACE 
 SCOLON 
     IF 
- IDENT argv
+ IDENT arg
 PERIOD 
  IDENT GetFlags
 LPAREN 
@@ -1024,7 +1024,7 @@ SCOLON
 RBRACE 
 SCOLON 
     IF 
- IDENT argv
+ IDENT arg
 PERIOD 
  IDENT Match
 LPAREN 
@@ -1083,7 +1083,7 @@ STRLIT Invalid test combination :
 
 RPAREN 
 SCOLON 
- IDENT argv
+ IDENT arg
 PERIOD 
  IDENT PrintFlags
 LPAREN 
@@ -1096,7 +1096,7 @@ STRLIT ++enabled-test=
  IDENT testValues
 RPAREN 
 SCOLON 
- IDENT argv
+ IDENT arg
 PERIOD 
  IDENT PrintFlags
 LPAREN 
@@ -1169,7 +1169,7 @@ Running CX tests in dir : '%s'
  IDENT g_workingDir
 RPAREN 
 SCOLON 
- IDENT argv
+ IDENT arg
 PERIOD 
  IDENT PrintFlags
 LPAREN 
@@ -1182,7 +1182,7 @@ STRLIT Enabled tests
  IDENT testValues
 RPAREN 
 SCOLON 
- IDENT argv
+ IDENT arg
 PERIOD 
  IDENT PrintFlags
 LPAREN 

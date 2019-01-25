@@ -23,9 +23,9 @@ var gameScreen gui.ScreenId
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func onPlayButton(controlIndex i32, action i32) {
-	if action == gui.KEY_PRESS {
+	if action == app.KEY_PRESS {
 		gui.ScreenShow(gameScreen)
-	} else if action != gui.KEY_RELEASE && action != gui.KEY_REPEAT {
+	} else if action != app.KEY_RELEASE && action != app.KEY_REPEAT {
 		panicIfNot(false, "invalid action")
 	}
 }
@@ -33,9 +33,9 @@ func onPlayButton(controlIndex i32, action i32) {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func onExitButton(controlIndex i32, action i32) {
-	if action == gui.KEY_PRESS {
+	if action == app.KEY_PRESS {
 		exit = true
-	} else if action != gui.KEY_RELEASE && action != gui.KEY_REPEAT {
+	} else if action != app.KEY_RELEASE && action != app.KEY_REPEAT {
 		panicIfNot(false, "invalid action")
 	}
 }
@@ -62,12 +62,8 @@ func main()() {
 
 	var a app.Application
 	a.Init(o, appName, "mainWindow", 2, 1)
-	a.SetKeyboardCallback("gui", "process_keyboard")
-	a.SetMouseButtonCallback("gui", "process_button")
-	a.SetMousePositionCallback("gui", "process_cursor")
-
 	gfx.Init(o.width, o.height, o.dataDir)
-	gui.Init(o.width, o.height, o.dataDir)
+	gui.Init(&a, o.width, o.height, o.dataDir)
 
 	// mainScreen
 	var mainScreen gui.ScreenId = gui.ScreenCreate("mainScreen")

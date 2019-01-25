@@ -5,9 +5,7 @@ import "gltext"
 import "mat"
 import "os"
 
-//-----------------------------------------------------------------------------
 // Globals ...
-//-----------------------------------------------------------------------------
 var g_sizeofFloat i32 = 4
 
 var g_colorMaskRed bool = true
@@ -65,17 +63,13 @@ var g_scissors[]mat.v4
 
 var g_vertexColorAttributes []i32
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
 var g_fxVertexColor EffectId = InvalidEffect()
 var g_fxTexture	 EffectId = InvalidEffect()
 var g_fxTrans_0	 EffectId = InvalidEffect()
 var g_fxTrans_1	 EffectId = InvalidEffect()
 var g_fxPerspectiveTexture EffectId = InvalidEffect()
 
-//-----------------------------------------------------------------------------
 // GlError ...
-//-----------------------------------------------------------------------------
 func GlError() (error bool) {
 	error = false
 	var glerr i32 = -1
@@ -102,17 +96,13 @@ func GlError() (error bool) {
 	}
 }
 
-//-----------------------------------------------------------------------------
 // NoGlError ...
-//-----------------------------------------------------------------------------
 func NoGlErrror() (noerror bool) {
 	var error bool = GlError()
 	noerror = error == false // panic if noerror = (GlError() == false)
 }
 
-//-----------------------------------------------------------------------------
 // GlStatus ...
-//-----------------------------------------------------------------------------
 func GlStatus() (error bool) {
 	error = false
 	var glstat i32
@@ -142,58 +132,44 @@ func GlStatus() (error bool) {
 	}
 }
 
-//-----------------------------------------------------------------------------
 // NoGlStatus ...
-//-----------------------------------------------------------------------------
 func NoGlStatus() (nostatus bool) { // ISSUE : typo in function name GlStatus instaed of NoGlStatus : error: /home/reash/go/src/github.com/skycoin/cx/lib/cxfx/src/graphics.cx:123 identifier 'error' does not exist
 	var status bool = GlStatus()
 	nostatus = status == false // panic if nostatus = (GlStatus() == false)
 }
 
-//-----------------------------------------------------------------------------
 // Attribute ...
-//-----------------------------------------------------------------------------
 type Attribute struct {
 	location i32
 	name str
 }
 
-//-----------------------------------------------------------------------------
 // NewAttribute ...
-//-----------------------------------------------------------------------------
 func NewAttribute(location i32, name str) (out Attribute) {
 	out.location = location
 	out.name = name
 }
 
-//-----------------------------------------------------------------------------
 // Sampler ...
-//-----------------------------------------------------------------------------
 type Sampler struct {
 	location i32
 	name str
 }
 
-//-----------------------------------------------------------------------------
 // NewSampler ...
-//-----------------------------------------------------------------------------
 func NewSampler(location i32, name str) (out Sampler) {
 	out.location = location
 	out.name = name
 }
 
-//-----------------------------------------------------------------------------
 // Uniform ...
-//-----------------------------------------------------------------------------
 type Uniform struct {
 	location i32
 	name str
 	Type i32
 }
 
-//-----------------------------------------------------------------------------
 // NewUniform ...
-//-----------------------------------------------------------------------------
 func NewUniform(location i32, name str) (out Uniform) {
 	out.location = location
 	out.name = name
@@ -427,9 +403,15 @@ func color_write(red bool, green bool, blue bool, alpha bool) {
 	}
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
+// Init ...
 func Init(width i32, height i32, dataDir str)() {
+	/*var view []f32
+	view = resize(view, 16)
+	State.View = view
+
+	var projection []f32
+	projection = resize(projection, 16)
+	State.Projection = projection*/
 
 	g_vertexColorAttributes = []i32{3, 4, 2}
 
@@ -520,8 +502,7 @@ func Init(width i32, height i32, dataDir str)() {
 	EffectBindUniform(g_fxPerspectiveTexture, "u_m44Projection")
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
+// Free ...
 func Free()() {
 
 	//pop_scissor()

@@ -1,0 +1,183 @@
+package gam
+
+import "app"
+import "gfx"
+import "gui"
+import "mat"
+
+// TODO : rotation based on mouse
+// TODO : translation based on at vector
+// TODO : apply on gfx.State
+// FIX : matrix ordering
+//
+
+// Globals ...
+var g_fpsCameras []FpsCamera
+
+// FpsCameraId ...
+type FpsCameraId struct {
+	camera i32
+}
+
+// FpsCamera ...
+type FpsCamera struct {
+	id FpsCameraId
+
+	xdir f32
+	zdir f32
+
+	rotation mat.v3
+	position mat.v3
+
+	rotate []f32
+	translate []f32
+
+	view []f32
+	projection []f32
+}
+
+// IsValidFpsCamera ...
+func IsValidFpsCamera(id FpsCameraId) (out bool) {
+	out = id.camera >= 0 && id.camera < len(g_fpsCameras)
+}
+
+// FpsCameraGetView ...
+func FpsCameraGetView(id FpsCameraId) (out []f32) {
+	panicIfNot(IsValidFpsCamera(id), "")
+	out = g_fpsCameras[id.camera].view
+}
+
+// FpsCameraGetProjection ...
+func FpsCameraGetProjection(id FpsCameraId) (out []f32) {
+	panicIfNot(IsValidFpsCamera(id), "")
+	out = g_fpsCameras[id.camera].projection
+}
+
+// FpsCameraCreate ...
+func FpsCameraCreate(near f32, far f32, fov f32, width f32, height f32) (out FpsCameraId) {
+	out.camera = len(g_fpsCameras)
+
+	var camera FpsCamera
+	camera.id = out
+
+	var rotate []f32
+	rotate = mat.Identity(rotate)
+	camera.rotate = rotate
+	//camera.rotate = mat.Identity(camera.rotate) // ISSUE : function 'Identity' expected input argument of type '[]f32'; 'f32' was provided
+
+	var translate []f32
+	translate = mat.Identity(translate)
+	camera.translate = translate
+	//camera.translate = mat.Identity(camera.translate)
+
+	var view []f32
+	view = mat.Identity(view)
+	camera.view = view
+	//camera.view = mat.Identity(camera.view)
+
+	var projection []f32
+	projection = mat.ProjectionMatrix(projection, near, far, fov, height / width)
+	camera.projection = projection
+	mat.PrintMatrix(projection)
+	//camera.projection = mat.Identity(camera.projection)
+
+	g_fpsCameras = append(g_fpsCameras, camera)
+
+	panicIfNot(IsValidFpsCamera(out), "")
+}
+
+// FpsCameraProcess ...
+func FpsCameraProcess(id FpsCameraId, event *app.Event) {
+	panicIfNot(IsValidFpsCamera(id), "")
+
+	var key i32 = gui.CurrentEvent.keyboard.key
+	var action i32 = gui.CurrentEvent.keyboard.action
+	var mods i32 = gui.CurrentEvent.keyboard.mods
+
+	var right mat.v3 = mat.v3_(1.0, 0.0, 0.0)
+	var at mat.v3 = mat.v3_(0.0, 0.0, 1.0)
+
+	var xdir f32 = g_fpsCameras[id.camera].xdir
+	var zdir f32 = g_fpsCameras[id.camera].zdir
+
+	if mods == false {
+		if key == app.KEYCODE_LEFT || key == app.KEYCODE_A {
+			if action == app.KEY_PRESS {
+				xdir = 1.0
+			} else if action == app.KEY_RELEASE {
+				xdir = 0.0
+			}
+		} else if key == app.KEYCODE_RIGHT || key == app.KEYCODE_D {
+			if action == app.KEY_PRESS {
+				xdir = -1.0
+			} else if action == app.KEY_RELEASE {
+				xdir = 0.0
+			}
+		} else if key == app.KEYCODE_DOWN || key == app.KEYCODE_S {
+			if action == app.KEY_PRESS {
+				zdir = -1.0
+			} else if action == app.KEY_RELEASE {
+				zdir = 0.0
+			}
+		} else if key == app.KEYCODE_UP || key == app.KEYCODE_W {
+			if action == app.KEY_PRESS {
+				zdir = 1.0
+			} else if action == app.KEY_RELEASE {
+				zdir = 0.0
+			}
+		}
+	}
+
+	g_fpsCameras[id.camera].xdir = xdir
+	g_fpsCameras[id.camera].zdir = zdir
+}
+
+// FpsCameraUpdate ...
+func FpsCameraUpdate(id FpsCameraId, deltaTime f64) {
+	panicIfNot(IsValidFpsCamera(id), "")
+
+	var position mat.v3
+	position = g_fpsCameras[id.camera].position
+	position = mat.v3_add(position, mat.v3_(
+		g_fpsCameras[id.camera].xdir * f64.f32(deltaTime) * 20.0,
+		0.0,
+		g_fpsCameras[id.camera].zdir * f64.f32(deltaTime) * 20.0))
+	g_fpsCameras[id.camera].position = position
+	var translate []f32
+	translate = g_fpsCameras[id.camera].translate
+	translate = resize(translate, 0)
+	translate = mat.Translate(translate, position.x, position.y, position.z) // ISSUE : can't use this.translate or g_fpsCameras[id.camera].translate : function 'Translate' expected input argument of type '[]f32'; 'f32' was provided
+	g_fpsCameras[id.camera].translate = translate
+
+	var rotation mat.v3
+	rotation = g_fpsCameras[id.camera].rotation
+	g_fpsCameras[id.camera].rotation = rotation
+	var rotate []f32
+	rotate = g_fpsCameras[id.camera].rotate
+	rotate = resize(rotate, 0)
+	rotate = mat.Rotate(rotate, rotation.x, rotation.y, rotation.z)
+	g_fpsCameras[id.camera].rotate = rotate
+
+	var view []f32
+	view = g_fpsCameras[id.camera].view
+	view = resize(view, 0)
+	view = mat.Multiply(view, translate, rotate)
+	g_fpsCameras[id.camera].view = view
+}
+
+// FpsCameraApply ...
+func FpsCameraApply(id FpsCameraId, state *gfx.State) {
+	panicIfNot(IsValidFpsCamera(id), "")
+
+	//var viewDst []f32
+	//viewDst = *state.View
+	//var viewSrc []f32
+	//viewSrc = g_fpsCameras[id.camera].view
+
+	//b0 := copy(viewDst, viewSrc) // ISSUE : function 'copy' expected receiving variable of type 'i32'; 'f32' was provided
+	//if copy(state.View, g_fpsCameras[id.camera].view) > 0 {
+	//}
+	//if copy(state.Projection, g_fpsCameras[id.camera].projection) > 0 {
+	//}
+}
+

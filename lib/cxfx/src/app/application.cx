@@ -1,6 +1,6 @@
 package app
 
-import "argv"
+import "arg"
 import "cx"
 import "glfw"
 import "os"
@@ -68,11 +68,11 @@ func (this *Options) Parse() {
 	for a := 0; a < argc; a++ {
 		arg := os.Args[a]
 
-		if argv.Match(arg, "++help", &helpMatch) {
+		if arg.Match(arg, "++help", &helpMatch) {
 			Help("", 0)
 		}
 
-		if argv.GetValueI32(arg, "++width=", &width, &widthMatch) {
+		if arg.GetValueI32(arg, "++width=", &width, &widthMatch) {
 			if (width < 0 || width > 65536) {
 				 Help(sprintf("invalid value %s\n", arg), cx.PANIC)
 			}
@@ -80,7 +80,7 @@ func (this *Options) Parse() {
 			continue
 		}
 
-		if argv.GetValueI32(arg, "++height=", &height, &heightMatch) {
+		if arg.GetValueI32(arg, "++height=", &height, &heightMatch) {
 			if (height < 0 || height > 65536) {
 				 Help(sprintf("invalid value %s\n", arg), cx.PANIC)
 			}
@@ -88,7 +88,7 @@ func (this *Options) Parse() {
 			continue
 		}
 
-		if argv.GetValueI32(arg, "++fps=", &fps, &fpsMatch) {
+		if arg.GetValueI32(arg, "++fps=", &fps, &fpsMatch) {
 			if (this.fps < 0 || this.fps > 65536) {
 				 Help(sprintf("invalid value %s\n", arg), cx.PANIC)
 			}
@@ -96,12 +96,12 @@ func (this *Options) Parse() {
 			continue
 		}
 
-		if argv.GetValueStr(arg, "++data=", &dataDir, &dataDirMatch) {
+		if arg.GetValueStr(arg, "++data=", &dataDir, &dataDirMatch) {
 			this.dataDir = dataDir
 			continue
 		}
 
-		if argv.GetFlags(arg, "++hints=", &hints, &hintsMatch, hintNames, hintValues) {
+		if arg.GetFlags(arg, "++hints=", &hints, &hintsMatch, hintNames, hintValues) {
 			continue
 		}
 	}

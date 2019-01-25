@@ -10,7 +10,7 @@ var exit bool // ISSUE : panic when Application is global
 
 func KeyboardCallback(window str, key i32, scancode i32, action i32, mods i32) () {
 	printf("KeyboardCallback : window %s, key %d, scancode %d, action %d, mods %d\n", window, key, scancode, action, mods)
-	if key == 256 && action == 1 {
+	if key == app.KEYCODE_ESCAPE && action == app.KEY_PRESS {
 		exit = true
 	}
 }

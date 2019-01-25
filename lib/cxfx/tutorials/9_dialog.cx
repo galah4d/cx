@@ -25,9 +25,9 @@ var exitScreen gui.ScreenId
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func onPlayButton(controlIndex i32, action i32) {
-	if action == gui.KEY_PRESS {
+	if action == app.KEY_PRESS {
 		gui.ScreenShow(gameScreen)
-	} else if action != gui.KEY_RELEASE && action != gui.KEY_REPEAT {
+	} else if action != app.KEY_RELEASE && action != app.KEY_REPEAT {
 		panicIfNot(false, "invalid action")
 	}
 }
@@ -35,9 +35,9 @@ func onPlayButton(controlIndex i32, action i32) {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func onExitButton(controlIndex i32, action i32) {
-	if action == gui.KEY_PRESS {
+	if action == app.KEY_PRESS {
 		gui.ScreenShow(exitScreen)
-	} else if action != gui.KEY_RELEASE && action != gui.KEY_REPEAT {
+	} else if action != app.KEY_RELEASE && action != app.KEY_REPEAT {
 		panicIfNot(false, "invalid action")
 	}
 }
@@ -48,13 +48,13 @@ func onExitButton(controlIndex i32, action i32) {
 func onExitDialogNo(controlIndex i32, action i32) {
 	var id gui.ControlId = gui.NewControlId(controlIndex)
 
-	if (action == gui.KEY_PRESS) {
+	if (action == app.KEY_PRESS) {
 		printf("NO PRESSED\n")
-	} else if (action == gui.KEY_RELEASE) {
+	} else if (action == app.KEY_RELEASE) {
 		printf("NO RELEASED\n")
 		gui.hide_modal(exitScreen)
 		printf("HERE\n")
-	} else if (action == gui.KEY_REPEAT) {
+	} else if (action == app.KEY_REPEAT) {
 		printf("NO REPEAT\n")
 	} else {
 		panicIfNot(false, "invalid action")
@@ -66,13 +66,13 @@ func onExitDialogNo(controlIndex i32, action i32) {
 func onExitDialogYes(controlIndex i32, action i32) {
 	var id gui.ControlId = gui.NewControlId(controlIndex)
 
-	if (action == gui.KEY_PRESS) {
+	if (action == app.KEY_PRESS) {
 		printf("YES PRESSED\n")
-	} else if (action == gui.KEY_RELEASE) {
+	} else if (action == app.KEY_RELEASE) {
 		printf("YES RELEASED\n")
 		gui.hide_modal(exitScreen)
 		exit = true
-	} else if (action == gui.KEY_REPEAT) {
+	} else if (action == app.KEY_REPEAT) {
 		printf("YES REPEAT\n")
 	} else {
 		panicIfNot(false, "invalid action")
@@ -101,12 +101,8 @@ func main()() {
 
 	var a app.Application
 	a.Init(o, appName, "mainWindow", 2, 1)
-	a.SetKeyboardCallback("gui", "process_keyboard")
-	a.SetMouseButtonCallback("gui", "process_button")
-	a.SetMousePositionCallback("gui", "process_cursor")
-
 	gfx.Init(o.width, o.height, o.dataDir)
-	gui.Init(o.width, o.height, o.dataDir)
+	gui.Init(&a, o.width, o.height, o.dataDir)
 
 	// exitScreen
 	exitScreen  = gui.ScreenCreate("exitScreen")

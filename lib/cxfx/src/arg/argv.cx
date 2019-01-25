@@ -1,4 +1,4 @@
-package argv
+package arg
 
 import "cx"
 import "os"

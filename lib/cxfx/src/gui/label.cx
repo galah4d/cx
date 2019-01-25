@@ -1,5 +1,6 @@
 package gui
 
+import "app"
 import "mat"
 
 //-----------------------------------------------------------------------------
@@ -135,24 +136,24 @@ func LabelSetOnState(i_id LabelId, packageName str, functionName str) {
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-func LabelProcessEvent(id LabelId, event *event_s) (out i32) {
+func LabelProcessEvent(id LabelId, event *app.Event) (out i32) {
 	panicIfNot(IsValidLabel(id), "invalid label")
 	out = control_process_event(id.base, event)
 
-	if (out == EVENT_UNUSED) {
+	if (out == app.EVENT_UNUSED) {
 		var index i32 = id.base.control
 		var focused i32 = g_controls[index].focused
 		var mods i32 = ((*event).keyboard).mods
 
-		if (mods == MOD_NONE) {
+		if (mods == app.MOD_NONE) {
 
 			var callAction i32 = 0
 			var call bool = false
 			var button i32 = (*event).mouse.button
-			if (button == BUTTON_LEFT) {
+			if (button == app.BUTTON_LEFT) {
 				var action i32 = (*event).mouse.action
-				if (action == MOUSE_PRESS || action == MOUSE_RELEASE) {
-					//printf("MOUSE_PRESS\n")
+				if (action == app.MOUSE_PRESS || action == app.MOUSE_RELEASE) {
+					//printf("app.MOUSE_PRESS\n")
 					var hovered i32 = g_controls[id.base.control].hovered
 					if (hovered > 0) {
 						call = true
@@ -161,9 +162,9 @@ func LabelProcessEvent(id LabelId, event *event_s) (out i32) {
 				}
 			} else if (focused > 0) {
 				var key i32 = (*event).keyboard.key
-				if (key == KEYCODE_ENTER || key == KEYCODE_SPACE) {
+				if (key == app.KEYCODE_ENTER || key == app.KEYCODE_SPACE) {
 					var action i32 = ((*event).keyboard).action
-					if (action == KEY_PRESS || action == KEY_RELEASE) {
+					if (action == app.KEY_PRESS || action == app.KEY_RELEASE) {
 						call = true
 						callAction = action
 					}
@@ -177,7 +178,7 @@ func LabelProcessEvent(id LabelId, event *event_s) (out i32) {
 					//printf("------------------------------------------------------------>>>>> ON_STATE %d\n", functionIndex)
 					call_i32_i32(function, index, callAction)
 					//printf("LabelProcessEvent\n")
-					out = EVENT_CONSUMED
+					out = app.EVENT_CONSUMED
 				}
 			}
 		}

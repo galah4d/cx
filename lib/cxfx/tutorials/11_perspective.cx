@@ -33,7 +33,6 @@ var gameScreen gui.ScreenId
 var exitScreen gui.ScreenId
 
 var depthBuffer i32
-var screenMesh gfx.MeshId
 var cubeMesh gfx.MeshId
 var texture gfx.Texture
 
@@ -47,9 +46,9 @@ var projection []f32
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func onPlayButton(controlIndex i32, action i32) {
-	if action == gui.KEY_PRESS {
+	if action == app.KEY_PRESS {
 		gui.ScreenShow(gameScreen)
-	} else if action != gui.KEY_RELEASE && action != gui.KEY_REPEAT {
+	} else if action != app.KEY_RELEASE && action != app.KEY_REPEAT {
 		panicIfNot(false, "invalid action")
 	}
 }
@@ -57,9 +56,9 @@ func onPlayButton(controlIndex i32, action i32) {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func onExitButton(controlIndex i32, action i32) {
-	if action == gui.KEY_PRESS {
+	if action == app.KEY_PRESS {
 		gui.ScreenShow(exitScreen)
-	} else if action != gui.KEY_RELEASE && action != gui.KEY_REPEAT {
+	} else if action != app.KEY_RELEASE && action != app.KEY_REPEAT {
 		panicIfNot(false, "invalid action")
 	}
 }
@@ -70,13 +69,13 @@ func onExitButton(controlIndex i32, action i32) {
 func onExitDialogNo(controlIndex i32, action i32) {
 	var id gui.ControlId = gui.NewControlId(controlIndex)
 
-	if (action == gui.KEY_PRESS) {
+	if (action == app.KEY_PRESS) {
 		printf("NO PRESSED\n")
-	} else if (action == gui.KEY_RELEASE) {
+	} else if (action == app.KEY_RELEASE) {
 		printf("NO RELEASED\n")
 		gui.hide_modal(exitScreen)
 		printf("HERE\n")
-	} else if (action == gui.KEY_REPEAT) {
+	} else if (action == app.KEY_REPEAT) {
 		printf("NO REPEAT\n")
 	} else {
 		panicIfNot(false, "invalid action")
@@ -88,13 +87,13 @@ func onExitDialogNo(controlIndex i32, action i32) {
 func onExitDialogYes(controlIndex i32, action i32) {
 	var id gui.ControlId = gui.NewControlId(controlIndex)
 
-	if (action == gui.KEY_PRESS) {
+	if (action == app.KEY_PRESS) {
 		printf("YES PRESSED\n")
-	} else if (action == gui.KEY_RELEASE) {
+	} else if (action == app.KEY_RELEASE) {
 		printf("YES RELEASED\n")
 		gui.hide_modal(exitScreen)
 		exit = true
-	} else if (action == gui.KEY_REPEAT) {
+	} else if (action == app.KEY_REPEAT) {
 		printf("YES REPEAT\n")
 	} else {
 		panicIfNot(false, "invalid action")
@@ -105,28 +104,30 @@ func onExitDialogYes(controlIndex i32, action i32) {
 //-----------------------------------------------------------------------------
 func gameOnEvent(controlIndex i32, action i32) {
 	var id gui.ControlId = gui.NewControlId(controlIndex)
-	printf("ON_EVENT\n")
-	/*
-	if key == 262 {
+
+	var key i32 = gui.CurrentEvent.keyboard.key
+	var mods i32 = gui.CurrentEvent.keyboard.mods
+
+	if key == app.KEYCODE_LEFT {
 		dx = dx + 1.0
 	}
-	if key == 263 {
+	if key == app.KEYCODE_RIGHT {
 		dx = dx - 1.0
 	}
-	if key == 264 {
+	if key == app.KEYCODE_DOWN {
 		if mods > 0 {
-			dy = dy + 0.1
+			dy = dy + 1.0
 		} else {
-			dz = dz + 0.1
+			dz = dz - 1.0
 		}
 	}
-	if key == 265 {
+	if key == app.KEYCODE_UP {
 		if mods > 0 {
-			dy = dy - 0.1
+			dy = dy - 1.0
 		} else {
-			dz = dz - 0.1
+			dz = dz + 1.0
 		}
-	}*/
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -142,14 +143,6 @@ func gameOnUpdate(controlIndex i32, action i32) {
 
 	world = resize(world, 0)
 	world = mat.Multiply(world, rotate, translate)
-
-	gfx.MeshBegin(screenMesh)
-	gfx.MeshAppendQuad(screenMesh,
-		gfx.gfx_viewportBounds,
-		mat.v4_(0.0, 0.0, 1.0, 1.0),
-		mat.v4_(1.0, 1.0, 1.0, 1.0),
-		gfx.gfx_viewportBounds, 0.0)
-	gfx.MeshEnd(screenMesh)
 
 	gfx.MeshBegin(cubeMesh)
 	gfx.MeshAppendCube(cubeMesh,
@@ -196,24 +189,19 @@ func main()() {
 
 	var a app.Application
 	a.Init(o, appName, "mainWindow", 2, 1)
-	a.SetKeyboardCallback("gui", "process_keyboard")
-	a.SetMouseButtonCallback("gui", "process_button")
-	a.SetMousePositionCallback("gui", "process_cursor")
-
 	gfx.Init(o.width, o.height, o.dataDir)
-	gui.Init(o.width, o.height, o.dataDir)
+	gui.Init(&a, o.width, o.height, o.dataDir)
 
 	texture = gfx.TextureCreate(sprintf("%s/textures/Skycoin-Cloud-BW-Vertical-on_black@2x.png", o.dataDir),
 		gl.LINEAR, gl.LINEAR, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, 0, 0)
 
-	view = mat.IdentityMatrix(view)
+	view = mat.Identity(view)
 	var width f32 = gfx.gfx_viewportSize.x
 	var height f32 = gfx.gfx_viewportSize.y
 	projection = mat.ProjectionMatrix(projection, 0.1, 10000.0, 0.5, height / width) // ISSUE : gfx.gfx_viewportSize.y / gfx.gfx_viewportSize.x)
 
 	depthBuffer = gfx.create_depth_buffer(gl.DEPTH_COMPONENT, o.width, o.height)
 
-	screenMesh = gfx.MeshLock(gl.TRIANGLES, gfx.g_vertexColorAttributes, 6)
 	cubeMesh = gfx.MeshLock(gl.TRIANGLES, gfx.g_vertexColorAttributes, 36)
 
 	// exitScreen
@@ -366,7 +354,6 @@ func main()() {
 		f.EndUpdate()
 	}
 
-	gfx.MeshUnlock(screenMesh)
 	gfx.MeshUnlock(cubeMesh)
 
 	gfx.Free()

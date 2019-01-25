@@ -1,0 +1,10 @@
+package gfx
+
+// Globals ...
+var State State
+
+// State ...
+type State struct {
+	View []f32
+	Projection []f32
+}

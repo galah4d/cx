@@ -196,7 +196,7 @@ func ScreenSetOnRender(id ScreenId, packageName str, functionName str) {
 //-----------------------------------------------------------------------------
 // ScreenProcessEvent ...
 //-----------------------------------------------------------------------------
-func ScreenProcessEvent(id ScreenId, event *event_s) (out i32) {
+func ScreenProcessEvent(id ScreenId, event *app.Event) (out i32) {
 	panicIfNot(IsValidScreen(id), "invalid id")
 	var onEvent func_i32_i32_id = g_screens[id.screen].onEvent
 	if onEvent.index >= 0 {

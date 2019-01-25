@@ -177,7 +177,7 @@ func template_create(name str) (out template_id) {
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-func template_process_event(id template_id, event *event_s) (out i32) {
+func template_process_event(id template_id, event *app.Event) (out i32) {
     panicIfNot(is_valid_template(id), "template_process_event : invalid id")
     var visible i32 = g_controls[id.base.control].visible
     if (visible > 0) {
@@ -233,9 +233,13 @@ func call_i32_i32(function func_i32_i32_id, a i32, b i32) {
 //-----------------------------------------------------------------------------
 // Init ...
 //-----------------------------------------------------------------------------
-func Init(width i32, height i32, dataDir str) {
+func Init(a *app.Application, width i32, height i32, dataDir str) {
     g_width = width
     g_height = height
+
+    (*a).SetKeyboardCallback("gui", "process_keyboard")
+    (*a).SetMouseButtonCallback("gui", "process_button")
+    (*a).SetMousePositionCallback("gui", "process_cursor")
 
     // meshes
     var attributes []i32
@@ -1716,7 +1720,7 @@ func splitter_create(name str) (out splitter_id) {
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-func splitter_process_event(id splitter_id, event *event_s) (out i32) {
+func splitter_process_event(id splitter_id, event *app.Event) (out i32) {
     panicIfNot(is_valid_splitter(id), "splitter_process_event : invalid id")
     out = control_process_event(id.base, event)
 }
@@ -1969,7 +1973,7 @@ func window_add_button(id window_id, name str, caption str, packageName str, fun
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-func window_process_event(id window_id, event *event_s) (out i32) {
+func window_process_event(id window_id, event *app.Event) (out i32) {
     panicIfNot(is_valid_window(id), "window_process_event : invalid id")
     out = control_process_event(id.base, event)
 }
@@ -2098,7 +2102,7 @@ func keyboard_get_key_index(id keyboard_id, key i32) (index i32) {
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-func keyboard_process_event(id keyboard_id, event *event_s) (out i32) {
+func keyboard_process_event(id keyboard_id, event *app.Event) (out i32) {
     panicIfNot(is_valid_keyboard(id), "keyboard_process_event : invalid id")
     out = control_process_event(id.base, event)
 
@@ -2106,19 +2110,19 @@ func keyboard_process_event(id keyboard_id, event *event_s) (out i32) {
     var key i32 = (*event).keyboard.key
     var mods i32 = (*event).keyboard.mods
 
-    if key == KEYCODE_SHIFT{
-        if action == KEY_PRESS {
+    if key == app.KEYCODE_SHIFT{
+        if action == app.KEY_PRESS {
             g_keyboards[id.keyboard].caps = true
-            out = EVENT_CONSUMED
-        } else if action == KEY_RELEASE {
+            out = app.EVENT_CONSUMED
+        } else if action == app.KEY_RELEASE {
             g_keyboards[id.keyboard].caps = false
-            //out = EVENT_CONSUMED
+            //out = app.EVENT_CONSUMED
         }
     } else {
         var selected i32 = -1
-        if action == KEY_PRESS {
+        if action == app.KEY_PRESS {
             selected = 1
-        } else if action == KEY_RELEASE {
+        } else if action == app.KEY_RELEASE {
             selected = 0
         }
 
@@ -2242,7 +2246,7 @@ func create_partition(name str) (out partition_id) {
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-func partition_process_event(id partition_id, event *event_s) (out i32) {
+func partition_process_event(id partition_id, event *app.Event) (out i32) {
     panicIfNot(is_valid_partition(id), "partition_process_event : invalid id")
     out = control_process_event(id.base, event)
 }
@@ -2348,12 +2352,12 @@ func graph_get_label(id graph_id) (label LabelId) {
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-func graph_process_event(id graph_id, event *event_s) (out i32) {
+func graph_process_event(id graph_id, event *app.Event) (out i32) {
     panicIfNot(is_valid_graph(id), "graph_process_event : invalid id")
     //ControlPrint("graph_process_event : ", id.base, false)
 
     out = control_process_event(id.base, event)
-    if (out == EVENT_UNUSED) {
+    if (out == app.EVENT_UNUSED) {
         var controlIndex i32 = id.base.control
         var focused i32 = g_controls[controlIndex].focused
         var childFocused i32 = g_controls[controlIndex].childFocused
@@ -2365,20 +2369,20 @@ func graph_process_event(id graph_id, event *event_s) (out i32) {
             var unit mat.v2 = g_graphs[graphIndex].unit
             var scale mat.v2 = g_graphs[graphIndex].scale
             var offset mat.v2 = g_graphs[graphIndex].offset
-            if (mods == MOD_CTRL) {
-                if (action == KEY_PRESS ||
-                    action == KEY_REPEAT) {
-                    if (key == KEYCODE_LEFT) {
-                        out = EVENT_CONSUMED
+            if (mods == app.MOD_CTRL) {
+                if (action == app.KEY_PRESS ||
+                    action == app.KEY_REPEAT) {
+                    if (key == app.KEYCODE_LEFT) {
+                        out = app.EVENT_CONSUMED
                         scale.x = scale.x * 0.9
-                    } else if (key == KEYCODE_RIGHT) {
-                        out = EVENT_CONSUMED
+                    } else if (key == app.KEYCODE_RIGHT) {
+                        out = app.EVENT_CONSUMED
                         scale.x = scale.x * 1.1
-                    } else if (key == KEYCODE_DOWN) {
-                        out = EVENT_CONSUMED
+                    } else if (key == app.KEYCODE_DOWN) {
+                        out = app.EVENT_CONSUMED
                         scale.y = scale.y * 0.9
-                    } else if (key == KEYCODE_UP) {
-                        out = EVENT_CONSUMED
+                    } else if (key == app.KEYCODE_UP) {
+                        out = app.EVENT_CONSUMED
                         scale.y = scale.y * 1.1
                     }
                     if (scale.x > 1.0) {
@@ -2399,20 +2403,20 @@ func graph_process_event(id graph_id, event *event_s) (out i32) {
                     g_graphs[graphIndex].scale = scale
                     g_graphs[graphIndex].unit = unit
                 }
-            } else if (mods == MOD_NONE) {
-                if (action == KEY_PRESS ||
-                        action == KEY_REPEAT) {
-                    if (key == KEYCODE_LEFT) {
-                        out = EVENT_CONSUMED
+            } else if (mods == app.MOD_NONE) {
+                if (action == app.KEY_PRESS ||
+                        action == app.KEY_REPEAT) {
+                    if (key == app.KEYCODE_LEFT) {
+                        out = app.EVENT_CONSUMED
                         offset.x = offset.x - unit.x * 0.1 * scale.x
-                    } else if (key == KEYCODE_RIGHT) {
-                        out = EVENT_CONSUMED
+                    } else if (key == app.KEYCODE_RIGHT) {
+                        out = app.EVENT_CONSUMED
                         offset.x = offset.x + unit.x * 0.1 * scale.x
-                    } else if (key == KEYCODE_DOWN) {
-                        out = EVENT_CONSUMED
+                    } else if (key == app.KEYCODE_DOWN) {
+                        out = app.EVENT_CONSUMED
                         offset.y = offset.y - unit.y * 0.1 * scale.y
-                    } else if (key == KEYCODE_UP) {
-                        out = EVENT_CONSUMED
+                    } else if (key == app.KEYCODE_UP) {
+                        out = app.EVENT_CONSUMED
                         offset.y = offset.y + unit.y * 0.1 * scale.y
                     }
                     g_graphs[graphIndex].offset = offset
@@ -2935,12 +2939,12 @@ func list_child_focused(id list_id, child ControlId, value i32) {
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-func list_process_event(id list_id, event *event_s) (out i32) {
+func list_process_event(id list_id, event *app.Event) (out i32) {
     panicIfNot(is_valid_list(id), "list_process_event : invalid id")
     out = control_process_event(id.base, event)
 
 
-    if (out == EVENT_UNUSED) {
+    if (out == app.EVENT_UNUSED) {
         var index i32 = id.base.control
         var columns ControlId = g_lists[id.list].header
         var columnsIndex i32 = columns.control
@@ -2954,7 +2958,7 @@ func list_process_event(id list_id, event *event_s) (out i32) {
         var lineCount i32 = len(g_controls[linesIndex].children)
         var itemCount i32 = len(g_controls[columnsIndex].children)
         if (lineCount > 0) {
-            if ((headerFocused > 0 || focused > 0) && action == KEY_PRESS) {
+            if ((headerFocused > 0 || focused > 0) && action == app.KEY_PRESS) {
                 var key i32 = ((*event).keyboard).key
                 var action i32 = ((*event).keyboard).action
                 var selectedLine i32 = g_lists[id.list].selectedLine
@@ -2964,67 +2968,67 @@ func list_process_event(id list_id, event *event_s) (out i32) {
                 if (headerVisible <= 0) {
                     headerOffset = 1
                 }
-                if (key == KEYCODE_LEFT) {
+                if (key == app.KEYCODE_LEFT) {
                     selectedItem = selectedItem - 1
                     if (selectedItem < 0) {
                         selectedItem = itemCount - 1
                     }
-                    out = EVENT_CONSUMED
-                } else if (key == KEYCODE_DOWN) {
+                    out = app.EVENT_CONSUMED
+                } else if (key == app.KEYCODE_DOWN) {
                     selectedLine = selectedLine + 1
                     if (selectedLine > lineCount) {
-                        if (mods == MOD_CTRL) {
+                        if (mods == app.MOD_CTRL) {
                             selectedLine = lineCount
-                            out = EVENT_UNUSED
-                            //printf("EVENT_UNUSED\n")
+                            out = app.EVENT_UNUSED
+                            //printf("app.EVENT_UNUSED\n")
                         }else {
                             selectedLine = headerOffset
-                            out = EVENT_CONSUMED
+                            out = app.EVENT_CONSUMED
                         }
                    }
-                } else if (key == KEYCODE_RIGHT) {
+                } else if (key == app.KEYCODE_RIGHT) {
                     selectedItem = selectedItem + 1
                     if (selectedItem >= itemCount) {
                         selectedItem = 0
                     }
-                    out = EVENT_CONSUMED
-                } else if (key == KEYCODE_UP) {
+                    out = app.EVENT_CONSUMED
+                } else if (key == app.KEYCODE_UP) {
                     selectedLine = selectedLine - 1
                     if (selectedLine < headerOffset) {
-                        if (mods == MOD_CTRL) {
+                        if (mods == app.MOD_CTRL) {
                             selectedLine = selectedLine + 1
-                            out = EVENT_UNUSED
-                            //printf("EVENT_UNUSED\n")
+                            out = app.EVENT_UNUSED
+                            //printf("app.EVENT_UNUSED\n")
                         } else {
                             selectedLine = lineCount
-                            out = EVENT_CONSUMED
+                            out = app.EVENT_CONSUMED
                         }
                     }
-                } else if (key == KEYCODE_TAB) {
-                    if (mods == MOD_SHIFT) {
+                } else if (key == app.KEYCODE_TAB) {
+                    if (mods == app.MOD_SHIFT) {
                         if (selectedItem > 0) {
                             selectedItem = selectedItem - 1
-                            out = EVENT_CONSUMED
+                            out = app.EVENT_CONSUMED
                         } else {
                             if (selectedLine > headerOffset) {
                                 selectedLine = selectedLine - 1
                                 selectedItem = itemCount - 1
-                                out = EVENT_CONSUMED
+                                out = app.EVENT_CONSUMED
                             } else {
-                                out = EVENT_UNUSED
+                                out = app.EVENT_UNUSED
                             }
                         }
                     } else {
                         if ((selectedItem + 1) < itemCount) {
                             selectedItem = selectedItem + 1
-                            out = EVENT_CONSUMED
+                            out = app.EVENT_CONSUMED
                         } else {
                             if ((selectedLine + 1) <= lineCount) {
                                 selectedLine = selectedLine + 1
                                 selectedItem = 0
-                                out = EVENT_CONSUMED
+                                out = app.EVENT_CONSUMED
                             } else {
-                                out = EVENT_UNUSED
+                                out = app.EVENT_UNUSED
                             }
                         }
                     }
@@ -3311,14 +3315,14 @@ func lifter_set_direction(id lifter_id, direction i32) {
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-func lifter_process_event(id lifter_id, event *event_s) (out i32) {
+func lifter_process_event(id lifter_id, event *app.Event) (out i32) {
     panicIfNot(is_valid_lifter(id), "lifter_process_event : invalid id")
     out = control_process_event(id.base, event)
 
     var mouseAction i32 = (*event).mouse.action
     var mouseButton i32 = (*event).mouse.button
-    if mouseButton == BUTTON_LEFT {
-        if mouseAction == MOUSE_RELEASE {
+    if mouseButton == app.BUTTON_LEFT {
+        if mouseAction == app.MOUSE_RELEASE {
             var dragged bool = g_lifters[id.lifter].dragged
             if dragged {
                 var begin mat.v2 = g_lifters[id.lifter].dragBegin
@@ -3330,53 +3334,53 @@ func lifter_process_event(id lifter_id, event *event_s) (out i32) {
             g_lifters[id.lifter].dragEnd = mat.v2_(0.0, 0.0)
             g_lifters[id.lifter].dragDelta = mat.v2_(0.0, 0.0)
             g_lifters[id.lifter].dragOffset = lifter_get_offset(id)
-            printf("MOUSE_RELEASE %f, %f\n", (*event).mouse.position.x, (*event).mouse.position.y)
+            printf("app.MOUSE_RELEASE %f, %f\n", (*event).mouse.position.x, (*event).mouse.position.y)
         }
     }
 
     //ControlPrint("LIFTER", id.base, false)
-    if (out == EVENT_UNUSED) {
+    if (out == app.EVENT_UNUSED) {
         var focused i32 = g_controls[id.base.control].childFocused
         if (focused > 0) {
             var mods i32 = ((*event).keyboard).mods
-            if (mods == MOD_NONE) {
+            if (mods == app.MOD_NONE) {
                 var action i32 = ((*event).keyboard).action
-                if (action == KEY_PRESS) {
+                if (action == app.KEY_PRESS) {
                     var key i32 = ((*event).keyboard).key
                     var direction i32 = g_lifters[id.lifter].direction
                     var carret ControlId = g_lifters[id.lifter].carret
                     var offset f32 = lifter_get_offset(id)
-                    if (key == KEYCODE_LEFT ||
-                        key == KEYCODE_UP) {
+                    if (key == app.KEYCODE_LEFT ||
+                        key == app.KEYCODE_UP) {
                         if (direction == LIFT_HORZ ||
                             direction == LIFT_VERT) {
                             offset = offset - 3.0
-                            out = EVENT_CONSUMED
+                            out = app.EVENT_CONSUMED
                             force_focus(carret)
                         } else {
                             panicIfNot(false, "lifter_process_event : unknown direction")
                         }
-                    } else if (key == KEYCODE_RIGHT ||
-                               key == KEYCODE_DOWN) {
+                    } else if (key == app.KEYCODE_RIGHT ||
+                               key == app.KEYCODE_DOWN) {
                         if (direction == LIFT_HORZ ||
                             direction == LIFT_VERT) {
                             offset = offset + 3.0
-                            out = EVENT_CONSUMED
+                            out = app.EVENT_CONSUMED
                             force_focus(carret)
                         } else {
                             panicIfNot(false, "lifter_process_event : unknown direction")
                         }
                     }
                     lifter_set_offset(id, offset)
-                } else if (mouseAction == MOUSE_PRESS) {
+                } else if (mouseAction == app.MOUSE_PRESS) {
                     g_lifters[id.lifter].dragged = true
                     g_lifters[id.lifter].dragBegin = (*event).mouse.position
                     g_lifters[id.lifter].dragEnd = (*event).mouse.position
                     g_lifters[id.lifter].dragOffset = lifter_get_offset(id)
                     g_lifters[id.lifter].dragDelta = mat.v2_(0.0, 0.0)
-                    printf("MOUSE_PRESS %f, %f\n", (*event).mouse.position.x, (*event).mouse.position.y)
-                    out = EVENT_CONSUMED
-                } else if (mouseAction == MOUSE_MOVE) {
+                    printf("app.MOUSE_PRESS %f, %f\n", (*event).mouse.position.x, (*event).mouse.position.y)
+                    out = app.EVENT_CONSUMED
+                } else if (mouseAction == app.MOUSE_MOVE) {
                     var dragged bool = g_lifters[id.lifter].dragged
                     if dragged {
                         g_lifters[id.lifter].dragEnd = (*event).mouse.position
@@ -3394,7 +3398,7 @@ func lifter_process_event(id lifter_id, event *event_s) (out i32) {
                         } else {
                             panic(false, true, "lifter_process_event : invalid direction")
                         }
-                        printf("MOUSE_MOVE : %f, %f, %f, %f, %f\n", delta.x, delta.y, dragOffset, dragDelta, dragOffset + dragDelta)
+                        printf("app.MOUSE_MOVE : %f, %f, %f, %f, %f\n", delta.x, delta.y, dragOffset, dragDelta, dragOffset + dragDelta)
                         lifter_set_offset(id, dragOffset + dragDelta)
                     }
                 }
@@ -3661,10 +3665,10 @@ func scroller_create(name str) (out scroller_id) {
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-func scroller_process_event(id scroller_id, event *event_s) (out i32) {
+func scroller_process_event(id scroller_id, event *app.Event) (out i32) {
     panicIfNot(is_valid_scroller(id), "scroller_process_event : invalid id")
     //ControlPrint("SCROLLER", id.base, false)
-    out = EVENT_UNUSED
+    out = app.EVENT_UNUSED
     var vlift lifter_id = g_scrollers[id.scroller].vlift
     var vliftFocused i32 = ControlFocused(vlift.base)
 
@@ -3673,17 +3677,17 @@ func scroller_process_event(id scroller_id, event *event_s) (out i32) {
 
     if (vliftFocused > 0 || hliftFocused > 0) {
         var action i32 = ((*event).keyboard).action
-        if (action == KEY_PRESS) {
+        if (action == app.KEY_PRESS) {
             var key i32 = ((*event).keyboard).key
             var lift lifter_id = invalid_lifter()
             if (/*hliftFocused > 0 &&*/
-                (key == KEYCODE_LEFT ||
-                 key == KEYCODE_RIGHT)) {
+                (key == app.KEYCODE_LEFT ||
+                 key == app.KEYCODE_RIGHT)) {
                 lift = hlift
                 ControlPrint("HLIFT ", hlift.base, false)
             } else if (/*vliftFocused > 0 &&*/
-                      (key == KEYCODE_UP ||
-                       key == KEYCODE_DOWN)) {
+                      (key == app.KEYCODE_UP ||
+                       key == app.KEYCODE_DOWN)) {
                 lift = vlift
                 ControlPrint("VLIFT ", vlift.base, false)
             }
@@ -3931,7 +3935,7 @@ func binder_add_page(id binder_id, name str, color mat.v4, size i32, control Con
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-func binder_process_event(id binder_id, event *event_s) (out i32) {
+func binder_process_event(id binder_id, event *app.Event) (out i32) {
     panicIfNot(is_valid_binder(id), "binder_process_event : invalid id")
     var visible i32 = g_controls[id.base.control].visible
     if (visible > 0) {
@@ -4035,7 +4039,7 @@ func vector_create(name str) (out vector_id) {
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-func vector_process_event(id vector_id, event *event_s) (out i32) {
+func vector_process_event(id vector_id, event *app.Event) (out i32) {
     panicIfNot(is_valid_vector(id), "vector_process_event : invalid id")
     var visible i32 = g_controls[id.base.control].visible
     if (visible > 0) {
@@ -4216,8 +4220,8 @@ func combo_create(name str) (out combo_id) {
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-func combo_process_event(id combo_id, event *event_s) (out i32) {
-    out = EVENT_UNUSED
+func combo_process_event(id combo_id, event *app.Event) (out i32) {
+    out = app.EVENT_UNUSED
     panicIfNot(is_valid_combo(id), "combo_process_event : invalid id")
     var visible i32 = g_controls[id.base.control].visible
 
@@ -4226,13 +4230,13 @@ func combo_process_event(id combo_id, event *event_s) (out i32) {
         var focused i32 = g_controls[index].focused
         var mods i32 = ((*event).keyboard).mods
 
-        if (mods == MOD_NONE) { // ##1 refactor with LabelProcessEvent
+        if (mods == app.MOD_NONE) { // ##1 refactor with LabelProcessEvent
             var call bool = false
             var button i32 = (*event).mouse.button
-            if (button == BUTTON_LEFT) {
+            if (button == app.BUTTON_LEFT) {
                 var action i32 = (*event).mouse.action
-                if (action == MOUSE_PRESS) {
-                    //printf("MOUSE_PRESS\n")
+                if (action == app.MOUSE_PRESS) {
+                    //printf("app.MOUSE_PRESS\n")
                     var hovered i32 = g_controls[id.base.control].hovered
                     if (hovered > 0) {
                         call = true
@@ -4240,9 +4244,9 @@ func combo_process_event(id combo_id, event *event_s) (out i32) {
                 }
             } else if (focused > 0) {
                 var key i32 = (*event).keyboard.key
-                if (key == KEYCODE_ENTER || key == KEYCODE_SPACE) {
+                if (key == app.KEYCODE_ENTER || key == app.KEYCODE_SPACE) {
                     var action i32 = ((*event).keyboard).action
-                    if (action == KEY_PRESS) {
+                    if (action == app.KEY_PRESS) {
                         call = true
                     }
                 }
@@ -4251,12 +4255,12 @@ func combo_process_event(id combo_id, event *event_s) (out i32) {
             if (call == true) {
                 var screen ScreenId = g_combos[id.combo].screen
                 ScreenShow(screen)
-                out = EVENT_CONSUMED
+                out = app.EVENT_CONSUMED
             }
         }
     }
 
-    if (out == EVENT_UNUSED) {
+    if (out == app.EVENT_UNUSED) {
         out = control_process_event(id.base, event)
     }
 }
@@ -4362,37 +4366,6 @@ func update(deltaTime f64)() { // ##1 rewrite
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-var BUTTON_LEFT  i32 = 0
-var BUTTON_RIGHT i32 = 1
-
-var MOUSE_RELEASE i32 = 0
-var MOUSE_PRESS   i32 = 1
-var MOUSE_MOVE    i32 = 38
-
-var KEY_RELEASE i32 = 0
-var KEY_PRESS   i32 = 1
-var KEY_REPEAT  i32 = 2
-
-var KEYCODE_SPACE     i32 =  32
-var KEYCODE_ESCAPE    i32 = 256
-var KEYCODE_ENTER     i32 = 257
-var KEYCODE_TAB       i32 = 258
-var KEYCODE_RIGHT     i32 = 262
-var KEYCODE_LEFT      i32 = 263
-var KEYCODE_DOWN      i32 = 264
-var KEYCODE_UP        i32 = 265
-var KEYCODE_LEFT_CTRL i32 = 341
-var KEYCODE_SHIFT     i32 = 340
-var KEYCODE_MENU      i32 = 343
-
-var MOD_NONE  i32 = 0
-var MOD_SHIFT i32 = 1
-var MOD_CTRL  i32 = 2
-var MOD_ALT   i32 = 4
-var MOD_MENU  i32 = 8
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
 /*func skip_screens()() {
     var next bool = true
     var skipId ScreenId = g_currentScreen
@@ -4414,59 +4387,9 @@ var MOD_MENU  i32 = 8
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-var EVENT_ERROR    i32 = 0
-var EVENT_UNUSED   i32 = 1
-var EVENT_CONSUMED i32 = 2
-
-type keyboard_event_s struct {
-    key i32
-    scancode i32
-    action i32
-    mods i32
-}
-
-type mouse_event_s struct {
-    position mat.v2
-    button i32
-    action i32
-    mods i32
-}
-
-type event_s struct {
-    keyboard keyboard_event_s
-    mouse mouse_event_s
-}
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func invalid_keyboard_event() (out keyboard_event_s) {
-    out.key = -1
-    out.scancode = -1
-    out.action = 0
-    out.mods = 0
-}
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func invalid_mouse_event() (out mouse_event_s) {
-    out.position = mat.v2_(-1.0, -1.0)
-    out.button = -1
-    out.action = 0
-    out.mods = 0
-}
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func invalid_event() (out event_s) {
-    out.keyboard = invalid_keyboard_event()
-    out.mouse = invalid_mouse_event()
-}
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func control_process_event(id ControlId, event *event_s) (out i32) {
+func control_process_event(id ControlId, event *app.Event) (out i32) {
     panicIfNot(IsValidControl(id), "control_process_event : invalid id")
-    out = EVENT_UNUSED
+    out = app.EVENT_UNUSED
 
     /*if (id.control == 158) {
         ControlPrint("TOTO :", id, false)
@@ -4491,7 +4414,7 @@ func control_process_event(id ControlId, event *event_s) (out i32) {
             var focusable i32 = g_controls[id.control].focusable
             if (focusable > 0) {
                 var action i32 = (*event).mouse.action
-                if (action == MOUSE_PRESS) {
+                if (action == app.MOUSE_PRESS) {
                    force_focus(id)
                 }
             }
@@ -4546,11 +4469,11 @@ func control_process_event(id ControlId, event *event_s) (out i32) {
                 }
             }
 
-            if (out == EVENT_CONSUMED) {
+            if (out == app.EVENT_CONSUMED) {
                 i = count // ##pending issue brue
-            } else if (out == EVENT_ERROR) {
-                panicIfNot(false, "EVENT_ERROR")
-            } else if (out != EVENT_UNUSED) {
+            } else if (out == app.EVENT_ERROR) {
+                panicIfNot(false, "app.EVENT_ERROR")
+            } else if (out != app.EVENT_UNUSED) {
                 panicIfNot(false, "invalid EVENT code")
             }
         }
@@ -4584,7 +4507,8 @@ var g_hotScreen ScreenId
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-var g_events []event_s
+var g_events []app.Event
+var CurrentEvent app.Event
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -4596,9 +4520,9 @@ func process_cursor(window str, x f64, y f64) {
     g_cursorPos.x = xx
     g_cursorPos.y = yy
 
-    var event event_s = invalid_event()
+    var event app.Event = app.InvalidEvent()
     event.mouse.position = g_cursorPos
-    event.mouse.action = MOUSE_MOVE
+    event.mouse.action = app.MOUSE_MOVE
 
     g_events = append(g_events, event)
 }
@@ -4608,7 +4532,7 @@ func process_cursor(window str, x f64, y f64) {
 func process_button(window str, key i32, action i32, mods i32) {
     printf("button : %d, %d, %d\n", key, action, mods)
 
-    var event event_s = invalid_event()
+    var event app.Event = app.InvalidEvent()
     event.mouse.button = key
     event.mouse.action = action
     event.mouse.mods = mods
@@ -4622,7 +4546,7 @@ func process_button(window str, key i32, action i32, mods i32) {
 func process_keyboard(window str, key i32, scancode i32, action i32, mods i32) () {
     printf("key pressed : %d, scancode %d, action %d, mods %d\n", key, scancode, action, mods)
 
-    var event event_s = invalid_event()
+    var event app.Event = app.InvalidEvent()
     event.keyboard.key = key
     event.keyboard.scancode = scancode
     event.keyboard.action = action
@@ -4637,15 +4561,15 @@ func process_events() () {
     var i i32 = 0
     var eventCount i32 = len(g_events)
     for i = 0; i < eventCount; i = i + 1 {
-        var event event_s = g_events[i]
-        process_event(&event)
+        CurrentEvent = g_events[i]
+        process_event(&CurrentEvent)
     }
     g_events = resize(g_events, 0)
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-func process_event(event *event_s) () {
+func process_event(event *app.Event) () {
     var action i32 = (*event).keyboard.action
     var key i32 = (*event).keyboard.key
     var mods i32 = (*event).keyboard.mods
@@ -4661,9 +4585,9 @@ func process_event(event *event_s) () {
         g_hotScreen = modalScreen
         currentScreen = modalScreen
         var floating bool = g_screens[modalScreen.screen].floating
-        if (ScreenProcessEvent(modalScreen, event) == EVENT_UNUSED) {
-            if ((key == KEYCODE_ESCAPE && action == KEY_PRESS) ||
-                (button == BUTTON_LEFT && buttonAction == MOUSE_PRESS && floating == true)) {
+        if (ScreenProcessEvent(modalScreen, event) == app.EVENT_UNUSED) {
+            if ((key == app.KEYCODE_ESCAPE && action == app.KEY_PRESS) ||
+                (button == app.BUTTON_LEFT && buttonAction == app.MOUSE_PRESS && floating == true)) {
                 hide_modal(modalScreen)
                 g_hotScreen = g_currentScreen
             } else {
@@ -4673,14 +4597,14 @@ func process_event(event *event_s) () {
         }
     } else if (IsValidScreen(g_currentScreen)) {
         g_hotScreen = g_currentScreen
-        if (ScreenProcessEvent(g_currentScreen, event) == EVENT_UNUSED) {
-        //printf("process_keyboard : EVENT_UNUSED 0\n")
+        if (ScreenProcessEvent(g_currentScreen, event) == app.EVENT_UNUSED) {
+        //printf("process_keyboard : app.EVENT_UNUSED 0\n")
             var screen i32 = g_currentScreen.screen
             var state i32 = g_screens[screen].state
             //if (g_screens[g_currentScreen.screen].state == STATE_OPENED) { // ##pending
             //} else if (g_screens[g_currentScreen.screen].state == STATE_SHOWING) { // ##pending
             if (state == STATE_OPENED || state == STATE_SHOWING) {
-                if (key == KEYCODE_ESCAPE && action == KEY_PRESS) {
+                if (key == app.KEYCODE_ESCAPE && action == app.KEY_PRESS) {
                     g_screens[screen].paused = true
                     var onExit ScreenId = g_screens[screen].on_exit
                     if (IsValidScreen(onExit) == true) {
@@ -4688,20 +4612,20 @@ func process_event(event *event_s) () {
                     } else {
                         printf("INVALID ON EXIT SCREEN %d, %d\n", onExit.screen, onExit.base)
                     }
-                } else if (key == KEYCODE_ENTER && action == KEY_PRESS) {
+                } else if (key == app.KEYCODE_ENTER && action == app.KEY_PRESS) {
                     g_screens[screen].paused = true
                     var onEnter ScreenId = g_screens[screen].on_enter
                     if (IsValidScreen(onEnter) == true) {
                         ScreenShow(onEnter)
                     }
-                } else if (key == KEYCODE_MENU && action == KEY_PRESS) {
+                } else if (key == app.KEYCODE_MENU && action == app.KEY_PRESS) {
                     g_screens[screen].paused = true
                     var onMenu ScreenId = g_screens[screen].on_menu
                     if (IsValidScreen(onMenu) == true) {
                         ScreenShow(onMenu)
                     }
                 } else {
-    //printf("process_keyboard : EVENT_UNUSED 1\n")
+    //printf("process_keyboard : app.EVENT_UNUSED 1\n")
                     currentScreen = g_currentScreen
                     g_hotScreen = g_currentScreen
                 }
@@ -4713,19 +4637,19 @@ func process_event(event *event_s) () {
     }
 
     if (IsValidScreen(currentScreen)) {
-    //printf("process_keyboard : EVENT_UNUSED 2\n")
-        if (action == KEY_PRESS) {
-            if (mods == MOD_NONE || mods == MOD_CTRL) {
-                if (key == KEYCODE_LEFT ||
-                    key == KEYCODE_UP) {
+    //printf("process_keyboard : app.EVENT_UNUSED 2\n")
+        if (action == app.KEY_PRESS) {
+            if (mods == app.MOD_NONE || mods == app.MOD_CTRL) {
+                if (key == app.KEYCODE_LEFT ||
+                    key == app.KEYCODE_UP) {
                     set_previous_focus(g_hotScreen)
-                } else if (key == KEYCODE_RIGHT ||
-                           key == KEYCODE_DOWN ||
-                           key == KEYCODE_TAB) {
+                } else if (key == app.KEYCODE_RIGHT ||
+                           key == app.KEYCODE_DOWN ||
+                           key == app.KEYCODE_TAB) {
                     set_next_focus(g_hotScreen)
                 }
-            } else if (mods == MOD_SHIFT) {
-                if (key == KEYCODE_TAB) {
+            } else if (mods == app.MOD_SHIFT) {
+                if (key == app.KEYCODE_TAB) {
                     set_previous_focus(g_hotScreen)
                 }
             }

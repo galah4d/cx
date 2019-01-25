@@ -1,5 +1,7 @@
 package gui
 
+import "app"
+
 //-----------------------------------------------------------------------------
 // Globals ...
 //-----------------------------------------------------------------------------
@@ -80,7 +82,7 @@ func PictureSetAlign(id PictureId, align i32) {
 //-----------------------------------------------------------------------------
 // PictureProcessEvent ...
 //-----------------------------------------------------------------------------
-func PictureProcessEvent(id PictureId, event *event_s) (out i32) {
+func PictureProcessEvent(id PictureId, event *app.Event) (out i32) {
 	panicIfNot(IsValidPicture(id), "invalid id")
 	out = control_process_event(id.base, event)
 }

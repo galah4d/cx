@@ -36,12 +36,8 @@ func main()() {
 
 	var a app.Application
 	a.Init(o, appName, "mainWindow", 2, 1)
-	a.SetKeyboardCallback("gui", "process_keyboard")
-	a.SetMouseButtonCallback("gui", "process_button")
-	a.SetMousePositionCallback("gui", "process_cursor")
-
 	gfx.Init(o.width, o.height, o.dataDir)
-	gui.Init(o.width, o.height, o.dataDir)
+	gui.Init(&a, o.width, o.height, o.dataDir)
 
 	// titleScreen
 	var titleScreen gui.ScreenId = gui.ScreenCreate("titleScreen")

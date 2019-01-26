@@ -209,6 +209,52 @@ func rgba_ui8(x i32, y i32, z i32, w i32) (out v4) {
 	out.w = i32.f32(w) / 255.0
 }
 
+// Transpose ...
+func Transpose(in []f32) (out []f32) { // ISSUE : if named Identity
+//	github.com/skycoin/cx/cxgo/actions.FunctionAddParameters(0xc42073e840, 0xc42000ed60, 0x1, 0x1, 0xc42000ed68, 0x1, 0x1)
+//	/go/src/github.com/skycoin/cx/cxgo/actions/functions.go:59 +0x166
+
+	var m00 f32 = in[0]
+	var m01 f32 = in[1]
+	var m02 f32 = in[2]
+	var m03 f32 = in[3]
+
+	var m10 f32 = in[4]
+	var m11 f32 = in[5]
+	var m12 f32 = in[6]
+	var m13 f32 = in[7]
+
+	var m20 f32 = in[8]
+	var m21 f32 = in[9]
+	var m22 f32 = in[10]
+	var m23 f32 = in[11]
+
+	var m30 f32 = in[12]
+	var m31 f32 = in[13]
+	var m32 f32 = in[14]
+	var m33 f32 = in[15]
+
+	out[0] = m00
+	out[1] = m10
+	out[2] = m20
+	out[3] = m30
+
+	out[4] = m01
+	out[5] = m11
+	out[6] = m21
+	out[7] = m31
+
+	out[8] = m02
+	out[9] = m12
+	out[10] = m22
+	out[11] = m32
+
+	out[12] = m03
+	out[13] = m13
+	out[14] = m23
+	out[15] = m33
+}
+
 // Identity ...
 func Identity(in []f32) (out []f32) {
 	out = in
@@ -297,6 +343,34 @@ func Translate(in []f32, x f32, y f32, z f32) (out []f32) {
 // Rotate ...
 func Rotate(in[] f32, x f32, y f32, z f32) (out []f32) {
 	out = Identity(in)
+}
+
+// RotationX ...
+func RotationX(in []f32, alpha f32) (out []f32) {
+	out = in
+
+	var cosA f32 = f32.cos(alpha)
+	var sinA f32 = f32.sin(alpha)
+
+	out = append(out, 1.0)
+	out = append(out, 0.0)
+	out = append(out, 0.0)
+	out = append(out, 0.0)
+
+	out = append(out, 0.0)
+	out = append(out, cosA)
+	out = append(out, sinA)
+	out = append(out, 0.0)
+
+	out = append(out, 0.0)
+	out = append(out, -sinA)
+	out = append(out, cosA)
+	out = append(out, 0.0)
+
+	out = append(out, 0.0)
+	out = append(out, 0.0)
+	out = append(out, 0.0)
+	out = append(out, 1.0)
 }
 
 // RotationY ...

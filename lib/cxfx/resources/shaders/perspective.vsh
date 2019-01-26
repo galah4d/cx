@@ -13,7 +13,8 @@ out vec2 v_v2Texcoord;
 
 void main()
 {
-	gl_Position = u_m44Projection * u_m44World * u_m44View * vec4(i_v3Position, 1);
+	gl_Position = u_m44Projection * u_m44View * u_m44World * vec4(i_v3Position, 1);
+
 	v_v4Albedo = i_v4Albedo;
 	v_v2Texcoord = i_v2Texcoord;
 }

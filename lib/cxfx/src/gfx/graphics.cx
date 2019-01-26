@@ -497,8 +497,8 @@ func Init(width i32, height i32, dataDir str)() {
 	EffectBindAttribute(g_fxPerspectiveTexture, 1, "i_v4Albedo")
 	EffectBindAttribute(g_fxPerspectiveTexture, 2, "i_v2Texcoord")
 	EffectBindSampler(g_fxPerspectiveTexture, "u_t2Albedo")
-	EffectBindUniform(g_fxPerspectiveTexture, "u_m44View")
 	EffectBindUniform(g_fxPerspectiveTexture, "u_m44World")
+	EffectBindUniform(g_fxPerspectiveTexture, "u_m44View")
 	EffectBindUniform(g_fxPerspectiveTexture, "u_m44Projection")
 }
 

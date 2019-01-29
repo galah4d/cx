@@ -88,6 +88,7 @@
 		../src/app/event.cx\
 		../src/fps/profiler.cx\
 		../src/fps/framerate.cx\
+		../src/gfx/batch.cx\
 		../src/gfx/graphics.cx\
 		../src/gfx/effect.cx\
 		../src/gfx/program.cx\
@@ -97,7 +98,6 @@
 		../src/gfx/scissor.cx\
 		../src/gui/layer.cx\
 		../src/gui/skin.cx\
-		../src/gui/batch.cx\
 		../src/gui/font.cx\
 		../src/gui/animation.cx\
 		../src/gui/control.cx\
@@ -115,6 +115,7 @@
 		../src/app/event.cx\
 		../src/fps/profiler.cx\
 		../src/fps/framerate.cx\
+		../src/gfx/batch.cx\
 		../src/gfx/graphics.cx\
 		../src/gfx/effect.cx\
 		../src/gfx/program.cx\
@@ -124,7 +125,6 @@
 		../src/gfx/scissor.cx\
 		../src/gui/layer.cx\
 		../src/gui/skin.cx\
-		../src/gui/batch.cx\
 		../src/gui/font.cx\
 		../src/gui/animation.cx\
 		../src/gui/control.cx\
@@ -142,6 +142,7 @@
 		../src/app/event.cx\
 		../src/fps/profiler.cx\
 		../src/fps/framerate.cx\
+		../src/gfx/batch.cx\
 		../src/gfx/graphics.cx\
 		../src/gfx/effect.cx\
 		../src/gfx/program.cx\
@@ -151,7 +152,6 @@
 		../src/gfx/scissor.cx\
 		../src/gui/layer.cx\
 		../src/gui/skin.cx\
-		../src/gui/batch.cx\
 		../src/gui/font.cx\
 		../src/gui/animation.cx\
 		../src/gui/control.cx\
@@ -169,6 +169,7 @@
 		../src/app/event.cx\
 		../src/fps/profiler.cx\
 		../src/fps/framerate.cx\
+		../src/gfx/batch.cx\
 		../src/gfx/graphics.cx\
 		../src/gfx/effect.cx\
 		../src/gfx/program.cx\
@@ -178,7 +179,6 @@
 		../src/gfx/scissor.cx\
 		../src/gui/layer.cx\
 		../src/gui/skin.cx\
-		../src/gui/batch.cx\
 		../src/gui/font.cx\
 		../src/gui/animation.cx\
 		../src/gui/control.cx\
@@ -196,6 +196,7 @@
 		../src/app/event.cx\
 		../src/fps/profiler.cx\
 		../src/fps/framerate.cx\
+		../src/gfx/batch.cx\
 		../src/gfx/graphics.cx\
 		../src/gfx/effect.cx\
 		../src/gfx/program.cx\
@@ -205,7 +206,6 @@
 		../src/gfx/scissor.cx\
 		../src/gui/layer.cx\
 		../src/gui/skin.cx\
-		../src/gui/batch.cx\
 		../src/gui/font.cx\
 		../src/gui/animation.cx\
 		../src/gui/control.cx\
@@ -223,6 +223,7 @@
 		../src/app/event.cx\
 		../src/fps/profiler.cx\
 		../src/fps/framerate.cx\
+		../src/gfx/batch.cx\
 		../src/gfx/graphics.cx\
 		../src/gfx/effect.cx\
 		../src/gfx/program.cx\
@@ -232,7 +233,6 @@
 		../src/gfx/scissor.cx\
 		../src/gui/layer.cx\
 		../src/gui/skin.cx\
-		../src/gui/batch.cx\
 		../src/gui/font.cx\
 		../src/gui/animation.cx\
 		../src/gui/control.cx\
@@ -253,6 +253,7 @@
 		../src/app/event.cx\
 		../src/fps/profiler.cx\
 		../src/fps/framerate.cx\
+		../src/gfx/batch.cx\
 		../src/gfx/graphics.cx\
 		../src/gfx/state.cx\
 		../src/gfx/effect.cx\
@@ -263,7 +264,6 @@
 		../src/gfx/scissor.cx\
 		../src/gui/layer.cx\
 		../src/gui/skin.cx\
-		../src/gui/batch.cx\
 		../src/gui/font.cx\
 		../src/gui/animation.cx\
 		../src/gui/control.cx\
@@ -276,4 +276,36 @@
 		../src/snd/voice.cx\
 		../src/gam/camera.cx\
 		13_camera.cx ++data=../resources
+
+14_batch:
+	cx\
+		../src/arg/argv.cx\
+		../src/mat/math.cx\
+		../src/app/application.cx\
+		../src/app/event.cx\
+		../src/fps/profiler.cx\
+		../src/fps/framerate.cx\
+		../src/gfx/batch.cx\
+		../src/gfx/graphics.cx\
+		../src/gfx/state.cx\
+		../src/gfx/effect.cx\
+		../src/gfx/program.cx\
+		../src/gfx/mesh.cx\
+		../src/gfx/texture.cx\
+		../src/gfx/target.cx\
+		../src/gfx/scissor.cx\
+		../src/gui/layer.cx\
+		../src/gui/skin.cx\
+		../src/gui/font.cx\
+		../src/gui/animation.cx\
+		../src/gui/control.cx\
+		../src/gui/label.cx\
+		../src/gui/picture.cx\
+		../src/gui/screen.cx\
+		../src/gui/interface.cx\
+		../src/snd/sounds.cx\
+		../src/snd/audio.cx\
+		../src/snd/voice.cx\
+		../src/gam/camera.cx\
+		14_batch.cx ++data=../resources ++fps=0
 

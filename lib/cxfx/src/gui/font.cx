@@ -85,7 +85,7 @@ func font_add_size(id font_id, size i32) {
 	textureName = sprintf("%s_%d", name, size)
 
 	var textureCount i32 = g_fonts[index].textureCount
-	g_fonts[index].textures = append(g_fonts[index].textures, gfx.TextureCreateFont(textureName, path, size, min, max, dir))
+	g_fonts[index].textures = append(g_fonts[index].textures, gfx.TextureCreateFont(textureName, path, size, min, max, dir, false))
 	g_fonts[index].names = append(g_fonts[index].names, textureName)
 	g_fonts[index].sizes = append(g_fonts[index].sizes, size)
 

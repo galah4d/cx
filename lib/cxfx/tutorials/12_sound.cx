@@ -52,7 +52,6 @@ var voiceId snd.VoiceId
 func onPlayButton(controlIndex i32, action i32) {
 	if action == app.KEY_PRESS {
 		gui.ScreenShow(gameScreen)
-		snd.VoicePlay(voiceId)
 	} else if action != app.KEY_RELEASE && action != app.KEY_REPEAT {
 		panicIfNot(false, "invalid action")
 	}
@@ -101,6 +100,14 @@ func onExitDialogYes(controlIndex i32, action i32) {
 		printf("YES REPEAT\n")
 	} else {
 		panicIfNot(false, "invalid action")
+	}
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func skycoinOnUpdate(controlIndex i32, action i32) {
+	if snd.VoiceState(voiceId) == snd.VOICE_STOPPED {
+		snd.VoicePlay(voiceId)
 	}
 }
 
@@ -198,7 +205,7 @@ func main()() {
 	snd.Init(64, 64)
 
 	texture = gfx.TextureCreate(sprintf("%s/textures/Skycoin-Cloud-BW-Vertical-on_black@2x.png", o.dataDir),
-		gl.LINEAR, gl.LINEAR, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, 0, 0)
+		gl.LINEAR, gl.LINEAR, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, 0, 0, true)
 
 	view = mat.Identity(view)
 	var width f32 = gfx.gfx_viewportSize.x
@@ -311,6 +318,7 @@ func main()() {
 	gui.ControlSetBounds(skycoinScreen.base, gfx.gfx_viewportBounds)
 	gui.ScreenSetDuration(skycoinScreen, 2.0D)
 	gui.ScreenSetOnNext(skycoinScreen, titleScreen)
+	gui.ScreenSetOnUpdate(skycoinScreen, "main", "skycoinOnUpdate")
 	{
 		var picture PictureId = gui.PictureCreate("skycoinPicture")
 		gui.ControlAddChild(skycoinScreen.base, picture.base)
@@ -330,18 +338,18 @@ func main()() {
 
 	gui.ScreenShow(bootScreen)
 
-	var audioId snd.AudioId = snd.AudioCreate(sprintf("%s/audios/small.wav", o.dataDir)) // TODO : find good audio file
+	var audioId snd.AudioId = snd.AudioCreate(sprintf("%s/audios/skycoin_baby.wav", o.dataDir)) // TODO : find good audio file
 	var voiceId snd.VoiceId = snd.VoiceCreate(audioId)
 
 	for app.Running(&a) { // ISSUE : can't use member function
 		f.BeginUpdate(2.0D)
-		fps.Start(prfSwap)
+		fps.StartProfile(prfSwap)
 		{
 			a.BeginFrame()
-			fps.Start(prfFrame)
+			fps.StartProfile(prfFrame)
 			{
 				// Update ...
-				fps.Start(prfUpdate)
+				fps.StartProfile(prfUpdate)
 				if exit {
 					a.Exit()
 				}
@@ -349,17 +357,17 @@ func main()() {
 				snd.Update()
 				gui.update(f.deltaTime)
 				gui.resize()
-				fps.Stop(prfUpdate)
+				fps.StopProfile(prfUpdate)
 
 				// Render ...
-				fps.Start(prfRender)
+				fps.StartProfile(prfRender)
 				gui.render()
-				fps.Stop(prfRender)
+				fps.StopProfile(prfRender)
 			}
-			fps.Stop(prfFrame)
+			fps.StopProfile(prfFrame)
 			a.EndFrame()
 		}
-		fps.Stop(prfSwap)
+		fps.StopProfile(prfSwap)
 		f.EndUpdate()
 	}
 

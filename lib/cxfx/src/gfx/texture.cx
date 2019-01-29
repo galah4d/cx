@@ -1,32 +1,28 @@
 package gfx
 
-//-----------------------------------------------------------------------------
+// TODO : texture array
+// TODO : texture 3d
+// TODO : texture compression
+
 // Globals ...
-//-----------------------------------------------------------------------------
 var g_textures []i32
 
-//-----------------------------------------------------------------------------
 // Texture ...
-//-----------------------------------------------------------------------------
 type Texture struct {
 	name i32
 	width i32
 	height i32
 }
 
-//-----------------------------------------------------------------------------
 // InvalidTexture ...
-//-----------------------------------------------------------------------------
 func InvalidTexture() (out Texture) {
 	out.name = -1
 	out.width = 0
 	out.height = 0
 }
 
-//-----------------------------------------------------------------------------
 // TextureCreate ...
-//-----------------------------------------------------------------------------
-func TextureCreate(path str, mag i32, min i32, s i32, t i32, r i32, w i32, h i32) (texture Texture) {
+func TextureCreate(path str, mag i32, min i32, s i32, t i32, r i32, w i32, h i32, mipmap bool) (texture Texture) {
 	if (path == "") {
 		texture.name = gl.GenTextures(1, texture.name)
 		panicIf(GlError(), "gl.GenTextures")
@@ -66,12 +62,16 @@ func TextureCreate(path str, mag i32, min i32, s i32, t i32, r i32, w i32, h i32
 	texture.height = gl.GetTexLevelParameteriv(gl.TEXTURE_2D, 0, gl.TEXTURE_HEIGHT);
 	panicIf(GlError(), "gl.GetTexLevelParameteriv")
 
+	if mipmap {
+		gl.GenerateMipmap(gl.TEXTURE_2D)
+		panicIf(GlError(), "gl.GenerateMipmap")
+	}
+
 	//printf("TEXTURE W %d, H %d\n", texture.width, texture.height)
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func TextureCreateFont(name str, path str, scale i32, min i32, max i32, dir i32) (texture Texture) {
+// TextureCreateFont ...
+func TextureCreateFont(name str, path str, scale i32, min i32, max i32, dir i32, mipmap bool) (texture Texture) {
 	os.Open(path)
 //	if (range == true) {
   //  var min i32 = ui32.i32(runes[0])
@@ -91,5 +91,37 @@ func TextureCreateFont(name str, path str, scale i32, min i32, max i32, dir i32)
 
 	texture.height = gl.GetTexLevelParameteriv(gl.TEXTURE_2D, 0, gl.TEXTURE_HEIGHT)
 	panicIf(GlError(), "gl.GetTexLevelParameteriv")
+
+	if mipmap {
+		gl.GenerateMipmap(gl.TEXTURE_2D)
+		panicIf(GlError(), "gl.GenerateMipmap")
+	}
+}
+
+// TextureBind ...
+func TextureBind(name i32) {
+	gl.BindTexture(gl.TEXTURE_2D, name)
+	panicIf(GlError(), "gl.BindTexture")
+}
+
+// TextureFilter ...
+func TextureFilter(minFilter i32, magFilter i32) {
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, minFilter)
+	panicIf(GlError(), "gl.TexParameteri")
+
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, magFilter)
+	panicIf(GlError(), "gl.TexParameteri")
+}
+
+// TextureWrap ...
+func TextureWrap(wrapS i32, wrapT i32, wrapR i32) {
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrapS)
+	panicIf(GlError(), "gl.TexParameteri")
+
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrapT)
+	panicIf(GlError(), "gl.TexParameteri")
+
+	gl.TexParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_R, wrapR)
+	panicIf(GlError(), "gl.TexParameteri")
 }
 

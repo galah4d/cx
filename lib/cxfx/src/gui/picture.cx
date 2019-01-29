@@ -2,51 +2,39 @@ package gui
 
 import "app"
 
-//-----------------------------------------------------------------------------
 // Globals ...
-//-----------------------------------------------------------------------------
 var g_pictures []Picture
 
-//-----------------------------------------------------------------------------
 // PictureId ...
-//-----------------------------------------------------------------------------
 type PictureId struct {
 	base ControlId
 	picture i32
 }
 
-//-----------------------------------------------------------------------------
 // Picture ...
-//-----------------------------------------------------------------------------
 type Picture struct {
 	id PictureId
 	frame i32
-	animation animation_id
-	batch batch_id
+	animation AnimationId
+	batch gfx.BatchId
 	pictureAlign i32
 	picturePosition mat.v2
 	alpha bool
 }
 
-//-----------------------------------------------------------------------------
 // NewPictureId ...
-//-----------------------------------------------------------------------------
 func NewPictureId(base ControlId, picture i32) (out PictureId) {
 	out.base = base
 	out.picture = picture
 	panicIfNot(IsValidPicture(out), "invalid id")
 }
 
-//-----------------------------------------------------------------------------
 // IsValidPicture ...
-//-----------------------------------------------------------------------------
 func IsValidPicture(id PictureId) (out bool) {
 	out = id.picture >= 0 && id.picture < len(g_pictures) && IsValidControl(id.base)
 }
 
-//-----------------------------------------------------------------------------
 // PictureCreate ...
-//-----------------------------------------------------------------------------
 func PictureCreate(name str) (out PictureId) {
 	out.picture = len(g_pictures)
 	out.base = controlCreate(name, GUI_PICTURE, out.picture)
@@ -54,7 +42,7 @@ func PictureCreate(name str) (out PictureId) {
 	var picture Picture
 	picture.id = out
 	picture.animation = invalid_animation()
-	picture.batch = invalid_batch()
+	picture.batch = gfx.InvalidBatch()
 	picture.pictureAlign = ALIGN_NONE
 	picture.picturePosition = mat.v2_zero
 	picture.alpha = false
@@ -63,38 +51,30 @@ func PictureCreate(name str) (out PictureId) {
 	panicIfNot(IsValidPicture(out), "invalid id")
 }
 
-//-----------------------------------------------------------------------------
 // PictureSetAnimation ...
-//-----------------------------------------------------------------------------
-func PictureSetAnimation(id PictureId, animation animation_id) {
+func PictureSetAnimation(id PictureId, animation AnimationId) {
 	panicIfNot(IsValidPicture(id), "invalid id")
 	g_pictures[id.picture].animation = animation
 }
 
-//-----------------------------------------------------------------------------
 // PictureSetAlign ...
-//-----------------------------------------------------------------------------
 func PictureSetAlign(id PictureId, align i32) {
 	panicIfNot(IsValidPicture(id), "invalid id")
 	g_pictures[id.picture].pictureAlign = align
 }
 
-//-----------------------------------------------------------------------------
 // PictureProcessEvent ...
-//-----------------------------------------------------------------------------
 func PictureProcessEvent(id PictureId, event *app.Event) (out i32) {
 	panicIfNot(IsValidPicture(id), "invalid id")
 	out = control_process_event(id.base, event)
 }
 
-//-----------------------------------------------------------------------------
 // PictureMeasure ...
-//-----------------------------------------------------------------------------
 func PictureMeasure(id PictureId) (width f32, height f32) { // ##1 factorize with label_resize
 	panicIfNot(IsValidPicture(id), "invalid id")
 
-	var animation animation_id = g_pictures[id.picture].animation
-	panicIfNot(is_valid_animation(animation), "invalid animation")
+	var animation AnimationId = g_pictures[id.picture].animation
+	panicIfNot(IsValidAnimation(animation), "invalid animation")
 
 	var i32Width i32 = g_animations[animation.index].width
 	var i32Height i32 = g_animations[animation.index].height
@@ -112,14 +92,12 @@ func PictureMeasure(id PictureId) (width f32, height f32) { // ##1 factorize wit
 	}
 }
 
-//-----------------------------------------------------------------------------
 // PictureResize ...
-//-----------------------------------------------------------------------------
 func PictureResize(id PictureId) () {
 	panicIfNot(IsValidPicture(id), "invalid id")
 
-	var animation animation_id = g_pictures[id.picture].animation
-	panicIfNot(is_valid_animation(animation), "invalid animation")
+	var animation AnimationId = g_pictures[id.picture].animation
+	panicIfNot(IsValidAnimation(animation), "invalid animation")
 
 	var i32Width i32 = g_animations[animation.index].width
 	var i32Height i32 = g_animations[animation.index].height
@@ -143,13 +121,11 @@ func PictureResize(id PictureId) () {
 
 	var frame i32 = g_pictures[id.picture].frame
 	var texture gfx.Texture = g_animations[animation.index].textures[frame]
-	g_pictures[id.picture].batch = get_batch(texture, g_pictures[id.picture].alpha)
+	g_pictures[id.picture].batch = gfx.GetBatch(gfx.g_fxTexture, texture, 0, g_pictures[id.picture].alpha, 4096 * 30)
 	//ControlPrint("PictureResize : AFTER", id.base, false)
 }
 
-//-----------------------------------------------------------------------------
 // PictureRender ...
-//-----------------------------------------------------------------------------
 func PictureRender(id PictureId, clip mat.v4, stack i32) () {
 	panicIfNot(IsValidPicture(id), "invalid id")
 
@@ -168,8 +144,8 @@ func PictureRender(id PictureId, clip mat.v4, stack i32) () {
 		}
 	}
 
-	var animation animation_id = g_pictures[id.picture].animation
-	panicIfNot(is_valid_animation(animation), "invalid animation")
+	var animation AnimationId = g_pictures[id.picture].animation
+	panicIfNot(IsValidAnimation(animation), "invalid animation")
 
 	var i32Width i32 = g_animations[animation.index].width
 	var i32Height i32 = g_animations[animation.index].height
@@ -204,15 +180,15 @@ func PictureRender(id PictureId, clip mat.v4, stack i32) () {
 		var renderPosition mat.v2 = g_pictures[id.picture].picturePosition
 		//var renderPosition mat.v2 = g_controls[controlIndex].renderPosition
 
-		var batch batch_id = g_pictures[id.picture].batch
-		panicIfNot(is_valid_batch(batch), "invalid batch")
+		var batch gfx.BatchId = g_pictures[id.picture].batch
+		panicIfNot(gfx.IsValidBatch(batch), "invalid batch")
 
 		var renderBounds mat.v4 = mat.v4_v2v2(renderPosition, mat.v2_(width, height))
 		//ControlPrint("PictureRender : renderBounds ", id.base, false)
 		//printf("renderBounds %f, %f, %f, %f\n", renderBounds.x, renderBounds.y, renderBounds.z, renderBounds.w)
 		var renderClips mat.v4 = gfx.push_scissor(g_controls[controlIndex].name, renderBounds)
-		var meshId gfx.MeshId = g_batches[batch.batch].mesh
-		gfx.MeshAppendQuad(meshId, renderBounds, mat.v4_(0.0, 0.0, 1.0, 1.0), color, renderClips, compute_depth(stack))
+		var meshId gfx.MeshId = gfx.BatchGetMesh(batch)
+		gfx.MeshAppendOrthoQuad(meshId, renderBounds, mat.v4_(0.0, 0.0, 1.0, 1.0), color, renderClips, compute_depth(stack))
 		gfx.pop_scissor()
 	}
 }

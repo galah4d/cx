@@ -122,7 +122,7 @@ func FpsCameraProcess(id FpsCameraId, event *app.Event) {
 	var dragDelta mat.v2
 	var dragPosition mat.v2 = g_fpsCameras[id.camera].dragPosition
 
-	if mods == false {
+	if mods <= 0 {
 		if key == app.KEYCODE_LEFT || key == app.KEYCODE_A {
 			if action == app.KEY_PRESS {
 				xdir = xdir - 1.0

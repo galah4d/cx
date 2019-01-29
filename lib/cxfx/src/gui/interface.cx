@@ -8,9 +8,7 @@ import "gltext"
 import "gfx"
 import "mat"
 
-//-----------------------------------------------------------------------------
 // Globals ...
-//-----------------------------------------------------------------------------
 var g_opaqueVertexColoredLines      gfx.MeshId
 var g_opaqueVertexColoredTriangles  gfx.MeshId
 var g_alphaVertexColoredLines       gfx.MeshId
@@ -18,31 +16,29 @@ var g_alphaVertexColoredTriangles   gfx.MeshId
 var g_fullscreenQuad                gfx.MeshId
 
 var g_skycoinTexture gfx.Texture
-var g_skycoinAnim animation_id
+var g_skycoinAnim AnimationId
 
 //var g_USTexture gfx.Texture
-//var g_USAnim animation_id
+//var g_USAnim AnimationId
 
 //var g_JPTexture gfx.Texture
-//var g_JPAnim animation_id
+//var g_JPAnim AnimationId
 
 //var g_BRTexture gfx.Texture
-//var g_BRAnim animation_id
+//var g_BRAnim AnimationId
 
 var g_pumpcxTexture_0 gfx.Texture
 var g_pumpcxTexture_1 gfx.Texture
 
-var g_pumpcxAnim animation_id
-var g_dumpcxAnim animation_id
+var g_pumpcxAnim AnimationId
+var g_dumpcxAnim AnimationId
 
 var g_depthStencilBuffer i32 = -1
 
 var g_width i32 // ##0 handle resize events
 var g_height i32 // ##0 handle resize events
 
-//-----------------------------------------------------------------------------
 // Constants ...
-//-----------------------------------------------------------------------------
 var GUI_INVALID     i32 =  0
 var GUI_CONTROL     i32 =  1
 var GUI_SCREEN      i32 =  2
@@ -251,7 +247,7 @@ func Init(a *app.Application, width i32, height i32, dataDir str) {
     g_fullscreenQuad = gfx.MeshCreate(gl.TRIANGLES, attributes, 6 * 3)
 
     gfx.MeshBegin(g_fullscreenQuad)
-    gfx.MeshAppendQuad(g_fullscreenQuad, gfx.gfx_viewportBounds, mat.v4_(0.0, 1.0, 1.0, 0.0), gfx.gfx_white, gfx.gfx_viewportBounds, 0.0)
+    gfx.MeshAppendOrthoQuad(g_fullscreenQuad, gfx.gfx_viewportBounds, mat.v4_(0.0, 1.0, 1.0, 0.0), gfx.gfx_white, gfx.gfx_viewportBounds, 0.0)
     gfx.MeshEnd(g_fullscreenQuad)
 
     // fonts
@@ -291,22 +287,22 @@ func Init(a *app.Application, width i32, height i32, dataDir str) {
     //g_JPTexture = gfx.TextureCreate(sprintf("%s/textures/flags/jp.png", dataDir), gl.LINEAR, gl.LINEAR, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, 0, 0)
     //g_BRTexture = gfx.TextureCreate(sprintf("%s/textures/flags/br.png", dataDir), gl.LINEAR, gl.LINEAR, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, 0, 0)
 
-    //g_USAnim = animation_create_from_texture(g_USTexture)
-    //g_JPAnim = animation_create_from_texture(g_JPTexture)
-    //g_BRAnim = animation_create_from_texture(g_BRTexture)
+    //g_USAnim = AnimationCreateFromTexture(g_USTexture)
+    //g_JPAnim = AnimationCreateFromTexture(g_JPTexture)
+    //g_BRAnim = AnimationCreateFromTexture(g_BRTexture)
 
-    g_skycoinTexture = gfx.TextureCreate(sprintf("%s/textures/Skycoin-Cloud-BW-Vertical-on_black@2x.png", dataDir), gl.LINEAR, gl.LINEAR, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, 0, 0)
+    g_skycoinTexture = gfx.TextureCreate(sprintf("%s/textures/Skycoin-Cloud-BW-Vertical-on_black@2x.png", dataDir), gl.LINEAR, gl.LINEAR, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, 0, 0, true)
 
     //g_pumpcxTexture_0 = gfx.TextureCreate("textures/pumpcx_0.png", gl.LINEAR, gl.LINEAR, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, 0, 0)
     //g_pumpcxTexture_1 = gfx.TextureCreate("textures/pumpcx_1.png", gl.LINEAR, gl.LINEAR, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, 0, 0)
-    //g_pumpcxAnim = animation_create()
-    //animation_add_frame(g_pumpcxAnim, 10, 0, g_pumpcxTexture_0)
-    //animation_add_frame(g_pumpcxAnim, 10, 0, g_pumpcxTexture_1)
+    //g_pumpcxAnim = AnimationCreate()
+    //AnimationAddFrame(g_pumpcxAnim, 10, 0, g_pumpcxTexture_0)
+    //AnimationAddFrame(g_pumpcxAnim, 10, 0, g_pumpcxTexture_1)
 
-    g_dumpcxAnim = animation_create_from_path(sprintf("%s/textures/dumpcx.gif", dataDir))
+    g_dumpcxAnim = AnimationCreateFromPath(sprintf("%s/textures/dumpcx.gif", dataDir))
     g_pumpcxAnim = g_dumpcxAnim
 
-    g_skycoinAnim = animation_create_from_texture(g_skycoinTexture)
+    g_skycoinAnim = AnimationCreateFromTexture(g_skycoinTexture)
 
     // layers
     g_blackLayer            = layer_create("black"            , g_black     , g_gray_3    , g_gray_3    , g_gray_3    , g_gray_3)
@@ -646,7 +642,7 @@ func rebuild_focus(id ScreenId) {
     for i = 0; i < focusedCount; i = i + 1 {
         var key ScreenId = g_focused[i].key
         if (key.screen == id.screen) {
-            printf("LOOKUP FOUND %d\n", i)
+            //printf("LOOKUP FOUND %d\n", i)
             lookup = key
             lookupIndex = i
             i = focusedCount // ##pending issue break
@@ -665,7 +661,7 @@ func rebuild_focus(id ScreenId) {
          //   printf("oldFocusIndex %d, oldFocusCount %d\n", oldFocusIndex, oldFocusCount)
             if (oldFocusIndex >= 0 && oldFocusIndex < oldFocusCount) {
                 oldFocus = g_focused[lookupIndex].focusList[oldFocusIndex]
-                printf("REMOVE TRUE\n")
+                //printf("REMOVE TRUE\n")
                 remove = 1
             }
     } else {
@@ -699,7 +695,7 @@ func rebuild_focus(id ScreenId) {
     } else if (newFocusCount > 0) {
         newFocusIndex = 0
         newFocus = g_focused[lookupIndex].focusList[0]
-        printf("NEW FOCUS %d\n", newFocusIndex)
+        //printf("NEW FOCUS %d\n", newFocusIndex)
         //ControlPrint("NEW FOCUS : ", newFocus, false)
     }
 
@@ -720,7 +716,7 @@ func set_current_focus(key ScreenId, screenIndex i32, value ControlId, controlIn
 
     var currentFocus i32 = g_focused[screenIndex].currentFocus
     var focusCount i32 = len(g_focused[screenIndex].focusList)
-    printf("REMOVE REMOVE %d\n", remove)
+    //printf("REMOVE REMOVE %d\n", remove)
     if (currentFocus >= 0 && currentFocus < focusCount) {
         if (remove > 0) {
         var focusId ControlId = g_focused[screenIndex].focusList[currentFocus]
@@ -1109,7 +1105,7 @@ func control_resize_(id ControlId, pixelBounds mat.v2, autoBounds mat.v2) () {
             var scaleW f32 = scale.x
             var scaleH f32 = scale.y
     if (autoscale == AUTOSCALE || autoscale == AUTOSCALE_X || autoscale == AUTOSCALE_Y) {
-        if (autoBounds.x > 0 && autoBounds.y > 0) {
+        if (autoBounds.x > 0.0 && autoBounds.y > 0.0) {
             //ControlPrint("AUTOSCALE : ", id, false)
             //printf("scale %f, %f, newWidth %f, newHeight %f, autoBounds %f, %f\n", scale.x, scale.y, newWidth, newHeight, autoBounds.x, autoBounds.y)
             if ((autoscale & AUTOSCALE_X) == AUTOSCALE_X) {
@@ -1453,12 +1449,12 @@ func control_redock(id ControlId, padding mat.v4) () {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func render_surface(opaque gfx.MeshId, alpha gfx.MeshId, bounds mat.v4, color mat.v4, clip mat.v4, depth f32) () {
-    if (color.w > 0) {
+    if (color.w > 0.0) {
         var mesh gfx.MeshId = opaque
         if (color.w < 1.0) {
             mesh = alpha
         }
-        gfx.MeshAppendQuad(mesh, bounds, mat.v4_(0.0, 0.0, 1.0, 1.0), color, clip, depth)
+        gfx.MeshAppendOrthoQuad(mesh, bounds, mat.v4_(0.0, 0.0, 1.0, 1.0), color, clip, depth)
     }
 }
 
@@ -1470,36 +1466,36 @@ func render_border(opaque gfx.MeshId, alpha gfx.MeshId, bounds mat.v4, left mat.
     var x1 f32 = x0 + bounds.z
     var y1 f32 = y0 + bounds.w
 
-    if (left.w > 0) {
+    if (left.w > 0.0) {
         var mesh gfx.MeshId = opaque
         if (left.w < 1.0) {
             mesh = alpha
         }
-        gfx.MeshAppendLine(mesh, mat.v4_(x0, y0, x0, y1), left, clip, depth)
+        gfx.MeshAppendOrthoLine(mesh, mat.v4_(x0, y0, x0, y1), left, clip, depth)
     }
 
-    if (bottom.w > 0) {
+    if (bottom.w > 0.0) {
         var mesh gfx.MeshId = opaque
         if (bottom.w < 1.0) {
             mesh = alpha
         }
-        gfx.MeshAppendLine(mesh, mat.v4_(x0, y0, x1, y0), bottom, clip, depth)
+        gfx.MeshAppendOrthoLine(mesh, mat.v4_(x0, y0, x1, y0), bottom, clip, depth)
     }
 
-    if (right.w > 0) {
+    if (right.w > 0.0) {
         var mesh gfx.MeshId = opaque
         if (right.w < 1.0) {
             mesh = alpha
         }
-        gfx.MeshAppendLine(mesh, mat.v4_(x1, y0, x1, y1), right, clip, depth)
+        gfx.MeshAppendOrthoLine(mesh, mat.v4_(x1, y0, x1, y1), right, clip, depth)
     }
 
-    if (top.w > 0) {
+    if (top.w > 0.0) {
         var mesh gfx.MeshId = opaque
         if (top.w < 1.0) {
             mesh = alpha
         }
-        gfx.MeshAppendLine(mesh, mat.v4_(x0, y1, x1, y1), top, clip, depth)
+        gfx.MeshAppendOrthoLine(mesh, mat.v4_(x0, y1, x1, y1), top, clip, depth)
     }
 }
 
@@ -1527,7 +1523,7 @@ func layer_render(layer layer_id, renderBounds mat.v4, renderClips mat.v4, depth
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func control_render(id ControlId, clip mat.v4, stack i32) () {
-    //fps.Start(g_profileRenderControlFull)
+    //fps.StartProfile(g_profileRenderControlFull)
 
     panicIfNot(IsValidControl(id), "control_render : invalid control index")
 
@@ -1536,7 +1532,7 @@ func control_render(id ControlId, clip mat.v4, stack i32) () {
     if (visible > 0) {
         var renderBounds mat.v4 = mat.v4_v2v2(g_controls[index].renderPosition, g_controls[index].size)
         var renderClips mat.v4 = gfx.push_scissor(g_controls[index].name, renderBounds)
-        //fps.Start(g_profileControlRender)
+        //fps.StartProfile(g_profileControlRender)
         var skin skin_id = g_controls[index].skin
         panicIfNot(is_valid_skin(skin) || skin.skin == -1, "control_render : invalid control skin")
         if is_valid_skin(skin) {
@@ -1577,9 +1573,9 @@ func control_render(id ControlId, clip mat.v4, stack i32) () {
                 layer_render(g_skins[skin.skin].hoverFront, renderBounds, renderClips, depth + 0.15)
             }
         }
-        //fps.Stop(g_profileControlRender)
+        //fps.StopProfile(g_profileControlRender)
 
-        //fps.Start(g_profileControlRenderChild)
+        //fps.StartProfile(g_profileControlRenderChild)
         var childStack i32 = stack + 1
         var count i32 = len(g_controls[index].children)
         for i := 0; i < count; i = i + 1 {
@@ -1632,9 +1628,9 @@ func control_render(id ControlId, clip mat.v4, stack i32) () {
         }
         gfx.pop_scissor()
         //ControlPrint("after control_render : ", id, false)
-        //fps.Stop(g_profileControlRenderChild)
+        //fps.StopProfile(g_profileControlRenderChild)
     }
-    //fps.Stop(g_profileRenderControlFull)
+    //fps.StopProfile(g_profileRenderControlFull)
 }
 
 //-----------------------------------------------------------------------------
@@ -2182,7 +2178,7 @@ func keyboard_resize(id keyboard_id) () {
             ControlSetPosition(label.base, mat.v2_(kx, ky))
             ControlSetSize(label.base, mat.v2_(kw, kh))
             LabelSetText(label, mapping[l])
-            //gfx.MeshAppendQuad(g_opaqueVertexColoredTriangles, mat.v4_(kx, ky, kw, kh), mat.v4_(0.0, 0.0, 1.0, 1.0), gui.g_blue)
+            //gfx.MeshAppendOrthoQuad(g_opaqueVertexColoredTriangles, mat.v4_(kx, ky, kw, kh), mat.v4_(0.0, 0.0, 1.0, 1.0), gui.g_blue)
             //gfx.append_text(g_alphaTexturedTriangles, g_skycoinFontTexture, "skycoin", kx, ky, gui.g_lightBlue, "A", false, false)
             //gfx.append_rect(g_opaqueVertexColoredLines, mat.v4_(kx, ky, kw, kh), gui.g_blue, gui.g_blue, gui.g_blue, gui.g_blue)
             //count = count + 1
@@ -2466,26 +2462,26 @@ func graph_resize(id graph_id) () {
     var iy i32 = 0
 
     var offsetX f32 = offset.x
-    if (offsetX > 0) {
-        for (offsetX > 0) {
+    if (offsetX > 0.0) {
+        for (offsetX > 0.0) {
             offsetX = offsetX - stepX
             ix = ix - 1
         }
-    } else if (offsetX < 0) {
-        for ((offsetX + stepX) < 0) {
+    } else if (offsetX < 0.0) {
+        for ((offsetX + stepX) < 0.0) {
             offsetX = offsetX + stepX
             ix = ix + 1
         }
     }
 
     var offsetY f32 = offset.y
-    if (offsetY > 0) {
-        for (offsetY > 0) {
+    if (offsetY > 0.0) {
+        for (offsetY > 0.0) {
             offsetY = offsetY - stepY
             iy = iy - 1
         }
-    } else if (offsetY < 0) {
-        for ((offsetY + stepY) < 0) {
+    } else if (offsetY < 0.0) {
+        for ((offsetY + stepY) < 0.0) {
             offsetY = offsetY + stepY
             iy = iy + 1
         }
@@ -2624,7 +2620,7 @@ func graph_render(id graph_id, clip mat.v4, stack i32) () {
     for i = 0; i < horzCount; i = i + 1 {
         var bounds mat.v4 = g_graphs[graphIndex].horz[i].bounds
         var color mat.v4 = g_graphs[graphIndex].horz[i].color
-        gfx.MeshAppendLine(g_opaqueVertexColoredLines, bounds, color, renderClips, compute_depth(stack))
+        gfx.MeshAppendOrthoLine(g_opaqueVertexColoredLines, bounds, color, renderClips, compute_depth(stack))
     }
 
     var vertCount i32 = len(g_graphs[graphIndex].vert)
@@ -2638,7 +2634,7 @@ func graph_render(id graph_id, clip mat.v4, stack i32) () {
           }*/
         //        printf("II %d, COLOR %f, %f, %f, %f, BOUNDS %f, %f, %f, %f\n",
         //          i, color.x, color.y, color.z, color.w, bounds.x, bounds.y, bounds.z, bounds.w)
-        gfx.MeshAppendLine(g_opaqueVertexColoredLines, bounds, color, renderClips, compute_depth(stack))
+        gfx.MeshAppendOrthoLine(g_opaqueVertexColoredLines, bounds, color, renderClips, compute_depth(stack))
     }
     gfx.pop_scissor()
     gfx.pop_scissor()
@@ -2819,7 +2815,7 @@ func list_line_add_label(id ControlId, text str, align i32, color mat.v4, size i
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-func list_line_add_picture(id ControlId, align i32, animation animation_id) {
+func list_line_add_picture(id ControlId, align i32, animation AnimationId) {
     panicIfNot(IsValidControl(id), "list_line_add_picture : invalid id")
 
     var lineName str = g_controls[id.control].name
@@ -3729,7 +3725,7 @@ func scroller_resize(id scroller_id) () {
     var maxOffset mat.v2 = mat.v2_(lifter_get_max_offset(hlift), lifter_get_max_offset(vlift))
     //printf("MAXOFFSET %f, %f\n", maxOffset.x, maxOffset.y)
 
-    if (curSize.y > 0) {
+    if (curSize.y > 0.0) {
         var vliftIndex i32 = vlift.lifter
         var vliftMax f32 = lifter_get_max_amount(vlift)
         var vamount f32 = maxSize.y * vliftMax / curSize.y
@@ -3739,73 +3735,73 @@ func scroller_resize(id scroller_id) () {
             g_controls[vlift.base.control].visible = 0
         } else {
             g_controls[vlift.base.control].visible = 1
-            if (maxOffset.y > 0.0) {
-                percent.y = offset.y * 100.0 / maxOffset.y
-            } else {
-                percent.y = 0.0
-            }
+                if (maxOffset.y > 0.0) {
+                    percent.y = offset.y * 100.0 / maxOffset.y
+                } else {
+                    percent.y = 0.0
+                }
         }
     } else {
         g_controls[vlift.base.control].visible = 0
     }
 
-    if (curSize.x > 0) {
+    if (curSize.x > 0.0) {
         var hliftIndex i32 = hlift.lifter
-        var hliftMax f32 = lifter_get_max_amount(hlift)
-        var hamount f32 = maxSize.x * hliftMax / curSize.x
-        lifter_set_amount(hlift, hamount)
-        var maxOffsetX f32 = lifter_get_max_offset(hlift)
-        if (curSize.x <= maxSize.x) {
-            g_controls[hlift.base.control].visible = 0
-        } else {
-            g_controls[hlift.base.control].visible = 1
-            percent.x = offset.x * 100.0 / maxOffset.x
-        }
+            var hliftMax f32 = lifter_get_max_amount(hlift)
+            var hamount f32 = maxSize.x * hliftMax / curSize.x
+            lifter_set_amount(hlift, hamount)
+            var maxOffsetX f32 = lifter_get_max_offset(hlift)
+            if (curSize.x <= maxSize.x) {
+                g_controls[hlift.base.control].visible = 0
+            } else {
+                g_controls[hlift.base.control].visible = 1
+                    percent.x = offset.x * 100.0 / maxOffset.x
+            }
     } else {
         g_controls[hlift.base.control].visible = 0
     }
 
     //printf("percent %f, %f\n", percent.x, percent.y)
 
-/*    var hvisible i32 = g_controls[hlift.base.control].visible
-    var vvisible i32 = g_controls[vlift.base.control].visible
+    /*    var hvisible i32 = g_controls[hlift.base.control].visible
+          var vvisible i32 = g_controls[vlift.base.control].visible
 
-    if (hvisible > 0 && vvisible > 0) {
-    } else if (hvisible > 0) {
-    } else if (vvisible > 0) {
-    }
-*/
+          if (hvisible > 0 && vvisible > 0) {
+          } else if (hvisible > 0) {
+          } else if (vvisible > 0) {
+          }
+          */
 
     var widthOffset f32 = maxSize.x - curSize.x
-    var heightOffset f32 = maxSize.y - curSize.y
-    //panicIfNot(mat.is_nan(curSize.y) == false, "scroller_resize curSize.y nan")
-    //panicIfNot(mat.is_nan(maxSize.y) == false, "scroller_resize maxSize.y nan")
-    //panicIfNot(mat.is_nan(heightOffset) == false, "scroller_resize heightOffset nan")
-    //panicIfNot(mat.is_nan(percent.y) == false, "scroller_resize percent.y nan")
-    
-    /*if (id.base.control == 38) {
-    printf("heightOffset %f\n", heightOffset)
+        var heightOffset f32 = maxSize.y - curSize.y
+        //panicIfNot(mat.is_nan(curSize.y) == false, "scroller_resize curSize.y nan")
+        //panicIfNot(mat.is_nan(maxSize.y) == false, "scroller_resize maxSize.y nan")
+        //panicIfNot(mat.is_nan(heightOffset) == false, "scroller_resize heightOffset nan")
+        //panicIfNot(mat.is_nan(percent.y) == false, "scroller_resize percent.y nan")
 
-    printf("position.x %f, position.y : heightOffset + percent.y * maxSize.y / 100.0 %f\n", 0.0 - percent.x * maxSize.x / 100.0, heightOffset + percent.y * maxSize.y / 100.0)
-    }*/
-    g_controls[containee.control].position = mat.v2_(0.0 + percent.x * widthOffset / 100.0, heightOffset - percent.y * heightOffset / 100.0)
-    var after mat.v2 = g_controls[containee.control].position
+        /*if (id.base.control == 38) {
+          printf("heightOffset %f\n", heightOffset)
 
-    /*if (id.base.control == 38) {
-    printf("AFTER %f, %f\n", after.x, after.y)
-    }*/
-    control_resize(id.base)
-    //if (id.base.control == 38) {
-    //printf("offset %f, %f\n", offsetX, offsetY)
-    //ControlPrint("scroller_resize : after ", containee, false)
-    //}
+          printf("position.x %f, position.y : heightOffset + percent.y * maxSize.y / 100.0 %f\n", 0.0 - percent.x * maxSize.x / 100.0, heightOffset + percent.y * maxSize.y / 100.0)
+          }*/
+        g_controls[containee.control].position = mat.v2_(0.0 + percent.x * widthOffset / 100.0, heightOffset - percent.y * heightOffset / 100.0)
+        var after mat.v2 = g_controls[containee.control].position
+
+        /*if (id.base.control == 38) {
+          printf("AFTER %f, %f\n", after.x, after.y)
+          }*/
+        control_resize(id.base)
+        //if (id.base.control == 38) {
+        //printf("offset %f, %f\n", offsetX, offsetY)
+        //ControlPrint("scroller_resize : after ", containee, false)
+        //}
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func scroller_render(id scroller_id, clip mat.v4, stack i32) () {
     panicIfNot(is_valid_scroller(id), "render_scroller : invalid id")
-    control_render(id.base, clip, stack)
+        control_render(id.base, clip, stack)
 }
 
 //-----------------------------------------------------------------------------
@@ -3813,31 +3809,31 @@ func scroller_render(id scroller_id, clip mat.v4, stack i32) () {
 //-----------------------------------------------------------------------------
 type binder_id struct {
     base ControlId
-    binder i32
+        binder i32
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 type binder_s struct {
     id binder_id
-    header ControlId
-    container ControlId
-    selected i32
+        header ControlId
+        container ControlId
+        selected i32
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func binder_id_(base ControlId, binder i32) (out binder_id) {
     out.base = base
-    out.binder = binder
-    panicIfNot(is_valid_binder(out), "binder_id_: invalid id")
+        out.binder = binder
+        panicIfNot(is_valid_binder(out), "binder_id_: invalid id")
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func invalid_binder() (out binder_id) {
     out.base = InvalidControl()
-    out.binder = -1
+        out.binder = -1
 }
 
 //-----------------------------------------------------------------------------
@@ -4338,7 +4334,7 @@ func update(deltaTime f64)() { // ##1 rewrite
             ScreenUpdate(g_nextScreen, deltaTime)
         }
 
-        if (g_transitionTime <= 0) {
+        if (g_transitionTime <= 0.0D) {
             printf("TRANSITION STARTED %f\n", f64.f32(g_transitionTime + deltaTime))
             g_transitionTime = g_transitionTime + deltaTime
         } else if (g_transitionTime <= g_transitionDuration) {
@@ -4705,7 +4701,7 @@ func ScreenShow(id ScreenId) () {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func resize() () {
-    clear_batches()
+    gfx.ClearBatches()
     if (IsValidScreen(g_currentScreen)) {
         reset_scope()
         //printf("-------------------------------------------------------------------------------->\n")
@@ -4765,7 +4761,7 @@ func render() () {
 
     var clearColor mat.v4 = mat.v4_(0.0, 0.0, 0.0, 0.0)
 
-    fps.Start(g_profileRenderCurrentScreen)
+    fps.StartProfile(g_profileRenderCurrentScreen)
     var target_0 gfx.Target = gfx.InvalidTarget()
     if (IsValidScreen(g_currentScreen)) {
         target_0 = gfx.lock_target(g_width, g_height)
@@ -4779,10 +4775,10 @@ func render() () {
         gfx.bind_depthbuffer(0)
         gfx.bind_stencilbuffer(0)
     }
-    fps.Stop(g_profileRenderCurrentScreen)
+    fps.StopProfile(g_profileRenderCurrentScreen)
 
     var target_1 gfx.Target = gfx.InvalidTarget()
-    fps.Start(g_profileRenderNextScreen)
+    fps.StartProfile(g_profileRenderNextScreen)
     if (IsValidScreen(g_nextScreen) && g_nextScreen.screen != g_currentScreen.screen) {
         target_1 = gfx.lock_target(g_width, g_height)
         gfx.bind_framebuffer(target_1.framebuffer)
@@ -4795,9 +4791,9 @@ func render() () {
         gfx.bind_depthbuffer(0)
         gfx.bind_stencilbuffer(0)
     }
-    fps.Stop(g_profileRenderNextScreen)
+    fps.StopProfile(g_profileRenderNextScreen)
 
-    fps.Start(g_profileRenderScreenEffect)
+    fps.StartProfile(g_profileRenderScreenEffect)
     var target_2 gfx.Target = gfx.InvalidTarget()
     //if (gfx.IsValidTarget(target_0) && gfx.IsValidTarget(target_1)) {
         target_2 = gfx.lock_target(g_width, g_height)
@@ -4809,7 +4805,11 @@ func render() () {
         gfx.disable_blending()
         gfx.EffectUse(gfx.g_fxTrans_0)
         gfx.EffectAssignTexture(gfx.g_fxTrans_0, 0, target_0.texture.name)
+        gfx.TextureWrap(gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE)
+        gfx.TextureFilter(gl.NEAREST, gl.NEAREST)
         gfx.EffectAssignTexture(gfx.g_fxTrans_0, 1, target_1.texture.name)
+        gfx.TextureWrap(gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE)
+        gfx.TextureFilter(gl.NEAREST, gl.NEAREST)
         gfx.EffectAssignFloat(gfx.g_fxTrans_0, 0, f64.f32(g_transitionTime / g_transitionDuration))
         gfx.MeshRender(g_fullscreenQuad)
         if (gfx.IsValidTarget(target_0)) {
@@ -4826,9 +4826,9 @@ func render() () {
         panicIfNot(false, "render : invalid target")
     }*/
 
-    fps.Stop(g_profileRenderScreenEffect)
+    fps.StopProfile(g_profileRenderScreenEffect)
 
-    fps.Start(g_profileRenderModals)
+    fps.StartProfile(g_profileRenderModals)
     var i i32 = 0
     var modalCount i32 = len(g_modals)
     for i = 0; i < modalCount; i = i + 1 {
@@ -4853,16 +4853,20 @@ func render() () {
         gfx.disable_blending()
         gfx.EffectUse(gfx.g_fxTrans_1)
         gfx.EffectAssignTexture(gfx.g_fxTrans_1, 0, target_2.texture.name)
+        gfx.TextureWrap(gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE)
+        gfx.TextureFilter(gl.NEAREST, gl.NEAREST)
         gfx.EffectAssignTexture(gfx.g_fxTrans_1, 1, target.texture.name)
+        gfx.TextureWrap(gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE)
+        gfx.TextureFilter(gl.NEAREST, gl.NEAREST)
         gfx.EffectAssignFloat(gfx.g_fxTrans_1, 0, 1.0)
         gfx.MeshRender(g_fullscreenQuad)
         gfx.unlock_target(target)
         gfx.unlock_target(target_2)
         target_2 = target_3
     }
-    fps.Stop(g_profileRenderModals)
+    fps.StopProfile(g_profileRenderModals)
 
-    fps.Start(g_profileRenderDefaultFramebuffer)
+    fps.StartProfile(g_profileRenderDefaultFramebuffer)
     // ##todo fast path if no modals => render in default framebuffer 0
     gfx.bind_framebuffer(0)
     gfx.clear(gl.COLOR_BUFFER_BIT, gfx.gfx_zero, 0.0D, 0)
@@ -4872,9 +4876,11 @@ func render() () {
     gfx.disable_blending()
     gfx.EffectUse(gfx.g_fxTexture)
     gfx.EffectAssignTexture(gfx.g_fxTexture, 0, target_2.texture.name)
+    gfx.TextureWrap(gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE)
+    gfx.TextureFilter(gl.NEAREST, gl.NEAREST)
     gfx.MeshRender(g_fullscreenQuad)
     gfx.unlock_target(target_2)
-    fps.Stop(g_profileRenderDefaultFramebuffer)
+    fps.StopProfile(g_profileRenderDefaultFramebuffer)
 
 }
 

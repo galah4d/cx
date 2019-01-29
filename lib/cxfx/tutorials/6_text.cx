@@ -56,17 +56,17 @@ func main()() {
 	var fontName str
 	fontName = "skycoinRegular"
 
-	var fontTexture Texture = gfx.TextureCreateFont(fontName, sprintf("%s/fonts/Skycoin-Regular.ttf", o.dataDir), 64, 32, 127, gltext.LeftToRight)
+	var fontTexture Texture = gfx.TextureCreateFont(fontName, sprintf("%s/fonts/Skycoin-Regular.ttf", o.dataDir), 64, 32, 127, gltext.LeftToRight, false)
 
 	for app.Running(&a) { // ISSUE : can't use member function
 		f.BeginUpdate(2.0D)
-		fps.Start(prfSwap)
+		fps.StartProfile(prfSwap)
 		{
 			a.BeginFrame()
-			fps.Start(prfFrame)
+			fps.StartProfile(prfFrame)
 			{
 				// Update ...
-				fps.Start(prfUpdate)
+				fps.StartProfile(prfUpdate)
 				if exit {
 					a.Exit()
 				}
@@ -91,20 +91,20 @@ func main()() {
 						0.0)
 
 				gfx.MeshEnd(mesh)
- 				fps.Stop(prfUpdate)
+ 				fps.StopProfile(prfUpdate)
 
 				// Render ...
-				fps.Start(prfRender)
+				fps.StartProfile(prfRender)
 				gfx.EffectUse(gfx.g_fxTexture)
 				gfx.EffectAssignTexture(gfx.g_fxTexture, 0, fontTexture.name)
 				gfx.MeshRender(mesh)
 				gfx.MeshUnlock(mesh)
-				fps.Stop(prfRender)
+				fps.StopProfile(prfRender)
 			}
-			fps.Stop(prfFrame)
+			fps.StopProfile(prfFrame)
 			a.EndFrame()
 		}
-		fps.Stop(prfSwap)
+		fps.StopProfile(prfSwap)
 		f.EndUpdate()
 	}
 

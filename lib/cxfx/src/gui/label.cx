@@ -1,6 +1,7 @@
 package gui
 
 import "app"
+import "gfx"
 import "mat"
 
 //-----------------------------------------------------------------------------
@@ -22,7 +23,7 @@ type LabelId struct {
 type Label struct {
 	id LabelId
 	font font_id
-	batch batch_id
+	batch gfx.BatchId
 	text str
 	rune i32
 	textSize i32
@@ -59,7 +60,7 @@ func LabelCreate(name str) (out LabelId) {
 	var label Label
 	label.id = out
 	label.font = invalid_font()
-	label.batch = invalid_batch()
+	label.batch = gfx.InvalidBatch()
 	label.text = ""
 	label.rune = -1
 	label.textSize = 16
@@ -285,7 +286,7 @@ func LabelResize(id LabelId) () {
 	g_labels[id.label].textPosition = position
 	//printf("LABEL_TEXT_POSITION %f, %f\n", position.x, position.y)
 	var fontTexture gfx.Texture = g_fonts[fontIndex].textures[textureIndex]
-	g_labels[id.label].batch = get_batch(fontTexture, true) // ##0 panic if g_fonts[fontIndex].textures[textureIndex] is used as arg0
+	g_labels[id.label].batch = gfx.GetBatch(gfx.g_fxTexture, fontTexture, 0, true, 4096 * 30) // ##0 panic if g_fonts[fontIndex].textures[textureIndex] is used as arg0
 	//ControlPrint("LabelResize :", id.base, false)
 }
 
@@ -309,12 +310,12 @@ func LabelRender(id LabelId, clip mat.v4, stack i32) () {
 
 	var control i32 = id.base.control
 	var renderPosition mat.v2 = g_labels[id.label].textPosition
-	var batch batch_id = g_labels[id.label].batch
+	var batch gfx.BatchId = g_labels[id.label].batch
 
-	if (is_valid_batch(batch)) {
-		panicIfNot(is_valid_batch(batch), "invalid batch")
+	if (gfx.IsValidBatch(batch)) {
+		panicIfNot(gfx.IsValidBatch(batch), "invalid batch")
 		//gfx.append_text(&(gfx.g_meshes[g_batches[batch.batch].mesh.mesh]), fontTexture, fontName, // ##pending
-		var meshId gfx.MeshId = g_batches[batch.batch].mesh
+		var meshId gfx.MeshId = gfx.BatchGetMesh(batch)
 		var renderBounds mat.v4 =  mat.v4_v2v2(renderPosition, g_controls[control].size)
 		//ControlPrint("LabelRender : renderBounds ", id.base, false)
 		var renderClips mat.v4 = gfx.push_scissor(g_controls[control].name, renderBounds)

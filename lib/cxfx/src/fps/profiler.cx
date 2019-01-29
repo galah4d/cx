@@ -2,22 +2,17 @@ package fps
 
 import "mat"
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
+// Globals ...
 var g_profiles []Profile
 var g_profileStack i32 = 0
 var g_profileTree []ProfileId
 
-//-----------------------------------------------------------------------------
 // ProfileId ...
-//-----------------------------------------------------------------------------
 type ProfileId struct {
 	index i32
 }
 
-//-----------------------------------------------------------------------------
 // Profile ...
-//-----------------------------------------------------------------------------
 type Profile struct {
 	name str
 	id ProfileId
@@ -32,9 +27,17 @@ type Profile struct {
 	offset i32
 }
 
-//-----------------------------------------------------------------------------
+// IsValidProfile ...
+func IsValidProfile(this ProfileId) (out bool) {
+	out = this.index >= 0 && this.index < len(g_profiles)
+}
+
+// InvalidProfile ...
+func InvalidProfile() (out ProfileId) {
+	out.index = -1
+}
+
 // CreateProfile ...
-//-----------------------------------------------------------------------------
 func CreateProfile(name str) (out ProfileId) {
 
 	var profileCount i32 = len(g_profiles)
@@ -58,40 +61,27 @@ func CreateProfile(name str) (out ProfileId) {
 	}
 }
 
-//-----------------------------------------------------------------------------
 // PrintProfiles ...
-//-----------------------------------------------------------------------------
 func PrintProfiles() {
 	for i := 0; i < len(g_profileTree); i = i + 1 {
-		Print(g_profileTree[i])
+		PrintProfile(g_profileTree[i])
 	}
 }
 
-//-----------------------------------------------------------------------------
 // ClearProfiles ...
-//-----------------------------------------------------------------------------
 func ClearProfiles(full bool) {
 	g_profileTree = resize(g_profileTree, 0)
 
 	var profileCount i32 = len(g_profiles)
 	for i := 0; i < profileCount; i = i + 1 {
 		var id ProfileId = g_profiles[i].id
-		Clear(id, full) // ISSUE : panic when calling fps.ClearProfile(&g_profiles[i], full)
+		ClearProfile(id, full) // ISSUE : panic when calling fps.ClearProfile(&g_profiles[i], full)
 	}
 }
 
-//-----------------------------------------------------------------------------
-// IsValid ...
-//-----------------------------------------------------------------------------
-func IsValid(this ProfileId) (out bool) {
-	out = this.index >= 0 && this.index < len(g_profiles)
-}
-
-//-----------------------------------------------------------------------------
-// Clear ...
-//-----------------------------------------------------------------------------
-func Clear(this ProfileId, full bool) { // ##1 perf pointer deref vs index
-	panicIfNot(IsValid(this), "ProfileId.Clear : invalid id")
+// ClearProfile ...
+func ClearProfile(this ProfileId, full bool) { // ##1 perf pointer deref vs index
+	panicIfNot(IsValidProfile(this), "ProfileId.Clear : invalid id")
 
 	g_profiles[this.index].begin = 0.0D
 	g_profiles[this.index].delta = 0.0D
@@ -107,11 +97,9 @@ func Clear(this ProfileId, full bool) { // ##1 perf pointer deref vs index
 	g_profiles[this.index].stack = 0
 }
 
-//-----------------------------------------------------------------------------
-// Print ...
-//-----------------------------------------------------------------------------
-func Print(this ProfileId) {
-	panicIfNot(IsValid(this), "ProfileId.Print : invalid id")
+// PrintProfile ...
+func PrintProfile(this ProfileId) {
+	panicIfNot(IsValidProfile(this), "ProfileId.Print : invalid id")
 	var cur f64 = g_profiles[this.index].delta
 	var count f64 = g_profiles[this.index].count
 	var sum f64 = g_profiles[this.index].sum
@@ -120,7 +108,7 @@ func Print(this ProfileId) {
 	var max f64 = g_profiles[this.index].max
 	var name str = g_profiles[this.index].name
 	var offset i32 = g_profiles[this.index].offset
-	if (count > 0) {
+	if (count > 0.0D) {
 		if (offset > 0) {
 			var i i32 = 0
 			for i = 0; i < offset; i = i + 1 {
@@ -139,11 +127,18 @@ func Print(this ProfileId) {
 	}
 }
 
-//-----------------------------------------------------------------------------
-// Start ...
-//-----------------------------------------------------------------------------
-func Start(this ProfileId) () {
-	panicIfNot(IsValid(this), "ProfileId.Start : invalid id")
+// CreateStartProfile ...
+func CreateStartProfile(this ProfileId, name str) (out ProfileId) {
+	out = this
+	if IsValidProfile(out) == false {
+		out = CreateProfile(name)
+	}
+	StartProfile(out)
+}
+
+// StartProfile ...
+func StartProfile(this ProfileId) () {
+	panicIfNot(IsValidProfile(this), "ProfileId.Start : invalid id")
 	g_profiles[this.index].begin = i64.f64(time.UnixNano()) / 1000000000.0D // ##1 refactor
 	var stack i32 = g_profiles[this.index].stack
 	g_profiles[this.index].stack = stack + 1
@@ -157,11 +152,9 @@ func Start(this ProfileId) () {
 	}
 }
 
-//-----------------------------------------------------------------------------
-// Stop ...
-//-----------------------------------------------------------------------------
-func Stop(this ProfileId) {
-	panicIfNot(IsValid(this), "ProfileId.Stop : invalid id")
+// StopProfile ...
+func StopProfile(this ProfileId) {
+	panicIfNot(IsValidProfile(this), "ProfileId.Stop : invalid id")
 	var end f64 = i64.f64(time.UnixNano()) / 1000000000.0D // ##1 refactor
 	var begin f64 = g_profiles[this.index].begin
 	var delta f64 = end - begin
@@ -181,7 +174,4 @@ func Stop(this ProfileId) {
 	panicIf(g_profileStack <= 0, "ProfileId.Stop : invalid stack")
 	g_profileStack = g_profileStack - 1
 }
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
 

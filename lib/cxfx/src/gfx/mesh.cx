@@ -1,24 +1,24 @@
 package gfx
 
-//-----------------------------------------------------------------------------
+import "fps"
+
+// TODO : custom vertex attributes.
+// TODO : stop using hardcoded vertex attributes in MeshAppend*
+// TODO : use DrawElement
+
 // Globals ...
-//-----------------------------------------------------------------------------
 var g_vaos []i32
 var g_vbos []i32
 var g_meshes []Mesh
 var g_freeMeshes []MeshId
 //var g_debugMesh MeshId
 
-//-----------------------------------------------------------------------------
 // MeshId ...
-//-----------------------------------------------------------------------------
 type MeshId struct {
 	mesh i32
 }
 
-//-----------------------------------------------------------------------------
 // Mesh ...
-//-----------------------------------------------------------------------------
 type Mesh struct {
 	id MeshId
 	vertices []f32
@@ -34,23 +34,17 @@ type Mesh struct {
 	index i32
 }
 
-//-----------------------------------------------------------------------------
 // InvalidMesh ...
-//-----------------------------------------------------------------------------
 func InvalidMesh() (out MeshId) {
 	out.mesh = -1
 }
 
-//-----------------------------------------------------------------------------
 // IsValidMesh ...
-//-----------------------------------------------------------------------------
 func IsValidMesh(id MeshId) (out bool) {
 	out = id.mesh >= 0 && id.mesh < len(g_meshes)
 }
 
-//-----------------------------------------------------------------------------
 // MeshPrint ...
-//-----------------------------------------------------------------------------
 func MeshPrint(message str, id MeshId) {
 	panicIfNot(IsValidMesh(id), "invalid id")
 	var index i32 = id.mesh
@@ -69,9 +63,7 @@ func MeshPrint(message str, id MeshId) {
 		len(g_meshes[index].vertices))
 }
 
-//-----------------------------------------------------------------------------
 // MeshIsEmpty ...
-//-----------------------------------------------------------------------------
 func MeshIsEmpty(id MeshId) (out bool) {
 	panicIfNot(IsValidMesh(id), "invalid id")
 	var mesh i32 = id.mesh
@@ -79,9 +71,7 @@ func MeshIsEmpty(id MeshId) (out bool) {
 	out = index <= 0
 }
 
-//-----------------------------------------------------------------------------
 // MeshLock ...
-//-----------------------------------------------------------------------------
 func MeshLock(primitive i32, attributes []i32, vertexCount i32) (out MeshId) {
 	var freeMeshCount i32 = len(g_freeMeshes)
 	if (freeMeshCount > 0) {
@@ -94,17 +84,13 @@ func MeshLock(primitive i32, attributes []i32, vertexCount i32) (out MeshId) {
 	panicIfNot(IsValidMesh(out), "invalid id")
 }
 
-//-----------------------------------------------------------------------------
 // MeshUnlock ...
-//-----------------------------------------------------------------------------
 func MeshUnlock(id MeshId) {
 	panicIfNot(IsValidMesh(id), "invalid id")
 	g_freeMeshes = append(g_freeMeshes, id)
 }
 
-//-----------------------------------------------------------------------------
 // MeshCreate ...
-//-----------------------------------------------------------------------------
 func MeshCreate(primitive i32, Xattributes []i32, vertexCount i32) (out MeshId) {
 	out.mesh = len(g_meshes)
 
@@ -193,18 +179,15 @@ func MeshCreate(primitive i32, Xattributes []i32, vertexCount i32) (out MeshId) 
 	panicIfNot(IsValidMesh(out), "invalid id")
 }
 
-//-----------------------------------------------------------------------------
 // MeshBegin ...
-//-----------------------------------------------------------------------------
 func MeshBegin(id MeshId) () {
 	panicIfNot(IsValidMesh(id), "invalid id")
 	var mesh i32 = id.mesh
+	//printf("MeshBegin %d, %d\n", mesh, len(g_meshes[mesh].vertices))
 	g_meshes[mesh].vertices = resize(g_meshes[mesh].vertices, 0)
 }
 
-//-----------------------------------------------------------------------------
 // MeshEnd ...
-//-----------------------------------------------------------------------------
 func MeshEnd(id MeshId) () {
 	panicIfNot(IsValidMesh(id), "invalid id")
 
@@ -231,14 +214,13 @@ func MeshEnd(id MeshId) () {
 		gl.BindBuffer(gl.ARRAY_BUFFER, g_meshes[mesh].vbo)
 		panicIf(GlError(), "gl.BindBuffer")
 
+		//printf("dataSize %d, vertexCount %d\n", g_meshes[mesh].dataSize, len(g_meshes[mesh].vertices))
 		gl.BufferSubData(gl.ARRAY_BUFFER, 0, g_meshes[mesh].dataSize, g_meshes[mesh].vertices)
 		panicIf(GlError(), "gl.BufferSubData")
 	}
 }
 
-//-----------------------------------------------------------------------------
 // MeshRender ...
-//-----------------------------------------------------------------------------
 func MeshRender(id MeshId) {
 	panicIfNot(IsValidMesh(id), "invalid id")
 	var mesh i32 = id.mesh
@@ -250,11 +232,9 @@ func MeshRender(id MeshId) {
 	panicIf(GlError(), "gl.DrawArrays")
 }
 
-//-----------------------------------------------------------------------------
-// MeshAppendLine ...
+// MeshAppendOrthoLine ...
 // TODO : pixel coordinates and clipping shouldn't be done in this function
-//-----------------------------------------------------------------------------
-func MeshAppendLine(id MeshId, line mat.v4, color mat.v4, clip mat.v4, depth f32) () {
+func MeshAppendOrthoLine(id MeshId, line mat.v4, color mat.v4, clip mat.v4, depth f32) () {
 	if (clip.z > 0.0 && clip.w > 0.0) {
 		panicIfNot(IsValidMesh(id), "invalid id")
 		var mesh i32 = id.mesh
@@ -263,8 +243,6 @@ func MeshAppendLine(id MeshId, line mat.v4, color mat.v4, clip mat.v4, depth f32
 		var clipRight f32 = clip.x + clip.z
 		var clipBottom f32 = clip.y
 		var clipTop f32 = clip.y + clip.w
-
-		var index i32 = len(g_meshes[mesh].vertices)
 
 		var x0 f32 = line.x
 		var y0 f32 = line.y
@@ -339,9 +317,7 @@ func MeshAppendLine(id MeshId, line mat.v4, color mat.v4, clip mat.v4, depth f32
 	}
 }
 
-//-----------------------------------------------------------------------------
 // MeshAppendRect ...
-//-----------------------------------------------------------------------------
 func MeshAppendRect(id MeshId, rect mat.v4, left mat.v4, right mat.v4, bottom mat.v4, top mat.v4, clip mat.v4, depth f32) () {
 	panicIfNot(IsValidMesh(id), "invalid id")
 	var x0 f32 = rect.x
@@ -349,17 +325,16 @@ func MeshAppendRect(id MeshId, rect mat.v4, left mat.v4, right mat.v4, bottom ma
 	var x1 f32 = x0 + rect.z
 	var y1 f32 = y0 + rect.w
 
-	MeshAppendLine(id, mat.v4_(x0, y0, x0, y1), left, clip, depth)
-	MeshAppendLine(id, mat.v4_(x1, y0, x1, y1), right, clip, depth)
-	MeshAppendLine(id, mat.v4_(x0, y0, x1, y0), bottom, clip, depth)
-	MeshAppendLine(id, mat.v4_(x0, y1, x1, y1), top, clip, depth)
+	MeshAppendOrthoLine(id, mat.v4_(x0, y0, x0, y1), left, clip, depth)
+	MeshAppendOrthoLine(id, mat.v4_(x1, y0, x1, y1), right, clip, depth)
+	MeshAppendOrthoLine(id, mat.v4_(x0, y0, x1, y0), bottom, clip, depth)
+	MeshAppendOrthoLine(id, mat.v4_(x0, y1, x1, y1), top, clip, depth)
 }
 
-//-----------------------------------------------------------------------------
-// MeshAppendQuad ...
+// MeshAppendOrthoQuad ...
 // TODO : pixel coordinate and clipping shouldn't be done in this function
-//-----------------------------------------------------------------------------
-func MeshAppendQuad(id MeshId, rect mat.v4, uv mat.v4, color mat.v4, clip mat.v4, depth f32) {
+// RECATOR : 
+func MeshAppendOrthoQuad(id MeshId, rect mat.v4, uv mat.v4, color mat.v4, clip mat.v4, depth f32) {
 	if (clip.z > 0.0 && clip.w > 0.0) {
 		panicIfNot(IsValidMesh(id), "invalid id")
 
@@ -369,7 +344,6 @@ func MeshAppendQuad(id MeshId, rect mat.v4, uv mat.v4, color mat.v4, clip mat.v4
 		var clipTop f32 = clip.y + clip.w
 
 		var mesh i32 = id.mesh
-		var index i32 = len(g_meshes[mesh].vertices)
 
 		var primitive i32 = g_meshes[mesh].primitive
 		panicIfNot(primitive == gl.TRIANGLES, "(*mesh).primitive == gl.TRIANGLES")
@@ -494,6 +468,121 @@ func MeshAppendQuad(id MeshId, rect mat.v4, uv mat.v4, color mat.v4, clip mat.v4
 	}
 }
 
+// MeshAppendOrthoQuad
+func MeshAppendPlane(id MeshId, position mat.v3, width mat.v3, height mat.v3, resx i32, resy i32, uv mat.v4, color mat.v4) {
+	panicIfNot(IsValidMesh(id), "invalid id")
+
+	var mesh i32 = id.mesh
+	var primitive i32 = g_meshes[mesh].primitive
+	panicIfNot(primitive == gl.TRIANGLES, "(*mesh).primitive == gl.TRIANGLES")
+
+	var vertices []f32 = g_meshes[mesh].vertices
+	for x := 0; x < resx - 1; x++ {
+		for y := 0; y < resy - 1; y++ {
+			var fw f32 = i32.f32(resx) - 1.0
+			var fh f32 = i32.f32(resy) - 1.0
+
+			var fx f32 = i32.f32(x)
+			var fy f32 = i32.f32(y)
+
+			var dx f32 = fx / fw
+			var dy f32 = fy / fh
+
+			var dx1 f32 = (fx + 1.0) / fw
+			var dy1 f32 = (fy + 1.0) / fh
+
+			var dw mat.v3 = mat.v3_mulf(width, dx)
+			var dw1 mat.v3 = mat.v3_mulf(width, dx1)
+
+			var dh mat.v3 = mat.v3_mulf(height, dy)
+			var dh1 mat.v3 = mat.v3_mulf(height, dy1)
+
+			var v0 mat.v3 = mat.v3_add(position, mat.v3_add(dw, dh))
+			var v1 mat.v3 = mat.v3_add(position, mat.v3_add(dw1, dh))
+			var v2 mat.v3 = mat.v3_add(position, mat.v3_add(dw, dh1))
+			var v3 mat.v3 = mat.v3_add(position, mat.v3_add(dw1, dh1))
+
+			var s0 f32 = uv.x + uv.z * dx
+			var t0 f32 = uv.y + uv.w * dy
+
+			var s1 f32 = uv.x + uv.z * dx1
+			var t1 f32 = uv.y + uv.w * dy
+
+			var s2 f32 = uv.x + uv.z * dx
+			var t2 f32 = uv.y + uv.w * dy1
+
+			var s3 f32 = uv.x + uv.z * dx1
+			var t3 f32 = uv.y + uv.w * dy1 // ISSUE : can redeclare v3 with another type
+
+			var r f32 = color.x
+			var g f32 = color.y
+			var b f32 = color.z
+			var a f32 = color.w
+
+			vertices = append(vertices, v0.x)
+			vertices = append(vertices, v0.y)
+			vertices = append(vertices, v0.z)
+			vertices = append(vertices, r)
+			vertices = append(vertices, g)
+			vertices = append(vertices, b)
+			vertices = append(vertices, a)
+			vertices = append(vertices, s0)
+			vertices = append(vertices, t0)
+
+			vertices = append(vertices, v1.x)
+			vertices = append(vertices, v1.y)
+			vertices = append(vertices, v1.z)
+			vertices = append(vertices, r)
+			vertices = append(vertices, g)
+			vertices = append(vertices, b)
+			vertices = append(vertices, a)
+			vertices = append(vertices, s1)
+			vertices = append(vertices, t1)
+
+			vertices = append(vertices, v2.x)
+			vertices = append(vertices, v2.y)
+			vertices = append(vertices, v2.z)
+			vertices = append(vertices, r)
+			vertices = append(vertices, g)
+			vertices = append(vertices, b)
+			vertices = append(vertices, a)
+			vertices = append(vertices, s2)
+			vertices = append(vertices, t2)
+
+			vertices = append(vertices, v2.x)
+			vertices = append(vertices, v2.y)
+			vertices = append(vertices, v2.z)
+			vertices = append(vertices, r)
+			vertices = append(vertices, g)
+			vertices = append(vertices, b)
+			vertices = append(vertices, a)
+			vertices = append(vertices, s2)
+			vertices = append(vertices, t2)
+
+			vertices = append(vertices, v1.x)
+			vertices = append(vertices, v1.y)
+			vertices = append(vertices, v1.z)
+			vertices = append(vertices, r)
+			vertices = append(vertices, g)
+			vertices = append(vertices, b)
+			vertices = append(vertices, a)
+			vertices = append(vertices, s1)
+			vertices = append(vertices, t1)
+
+			vertices = append(vertices, v3.x)
+			vertices = append(vertices, v3.y)
+			vertices = append(vertices, v3.z)
+			vertices = append(vertices, r)
+			vertices = append(vertices, g)
+			vertices = append(vertices, b)
+			vertices = append(vertices, a)
+			vertices = append(vertices, s3)
+			vertices = append(vertices, t3)
+		}
+	}
+	g_meshes[mesh].vertices = vertices
+}
+
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func appendV9(vertices []f32, x f32, y f32, z f32, r f32, g f32, b f32, a f32, u f32, v f32) (out []f32) {
@@ -509,10 +598,8 @@ func appendV9(vertices []f32, x f32, y f32, z f32, r f32, g f32, b f32, a f32, u
 	out = append(out, v)
 }
 
-//-----------------------------------------------------------------------------
 // MeshAppendCube ...
 // TODO : DrawElements
-//-----------------------------------------------------------------------------
 func MeshAppendCube(id MeshId, position mat.v3, size mat.v3, color mat.v4) {
 	panicIfNot(IsValidMesh(id), "invalid id")
 
@@ -614,13 +701,11 @@ func MeshAppendCube(id MeshId, position mat.v3, size mat.v3, color mat.v4) {
 	g_meshes[mesh].vertices = vertices
 }
 
-//-----------------------------------------------------------------------------
 // MeshAppendGlyph ...
-//-----------------------------------------------------------------------------
 func MeshAppendGlyph(id MeshId, texture Texture, name str, position mat.v2, scale mat.v2, color mat.v4, glyph i32, debug bool, color0 mat.v4, color1 mat.v4, clip mat.v4, depth f32) {
 //	printf("NAME %s\n", name)
 	panicIfNot(IsValidMesh(id), "invalid id")
-	var index i32 = 0
+	//var index i32 = 0
 	var size i32 = 0
 
 	var maxGlyphW i32 = 0;
@@ -647,7 +732,7 @@ func MeshAppendGlyph(id MeshId, texture Texture, name str, position mat.v2, scal
 
 	var tw f32 = i32.f32(texture.width)
 	var th f32 = i32.f32(texture.height)
-	var index i32 = 0
+	var index i32 = 0 // ISSUE : can redeclare index without error
 	var dummyIndex i32 = 0
 	var debugColor mat.v4
 
@@ -679,16 +764,14 @@ func MeshAppendGlyph(id MeshId, texture Texture, name str, position mat.v2, scal
 		}
 	}
 
-	//MeshAppendQuad(g_debugMesh, mat.v4_(quadX, quadY, quadAdvance, quadHeight), mat.v4_(qu0, qv0, qu1, qv1), red, clip, depth)
-	MeshAppendQuad(id, mat.v4_(quadX, quadY, quadAdvance, quadHeight), mat.v4_(qu0, qv0, qu1, qv1),  color, clip, depth)
+	//MeshAppendOrthoQuad(g_debugMesh, mat.v4_(quadX, quadY, quadAdvance, quadHeight), mat.v4_(qu0, qv0, qu1, qv1), red, clip, depth)
+	MeshAppendOrthoQuad(id, mat.v4_(quadX, quadY, quadAdvance, quadHeight), mat.v4_(qu0, qv0, qu1, qv1),  color, clip, depth)
 	index = index + size
 	quadX = quadX + quadAdvance
 	dummyIndex = dummyIndex + 1
 }
 
-//-----------------------------------------------------------------------------
 // MeshAppendText ...
-//-----------------------------------------------------------------------------
 func MeshAppendText(id MeshId, texture Texture, name str, position mat.v2, scale mat.v2, color mat.v4, text str, debug bool, color0 mat.v4, color1 mat.v4, clip mat.v4, depth f32) {
 //	printf("NAME %s\n", name)
 //	if (name == "awesomeBold_25") {
@@ -718,7 +801,7 @@ func MeshAppendText(id MeshId, texture Texture, name str, position mat.v2, scale
 
 	var tw f32 = i32.f32(texture.width)
 	var th f32 = i32.f32(texture.height)
-	var index i32 = 0
+	var index i32 = 0 // ISSUE : can redeclare index without error
 	var dummyIndex i32 = 0
 	var debugColor mat.v4
 
@@ -757,8 +840,8 @@ func MeshAppendText(id MeshId, texture Texture, name str, position mat.v2, scale
 				}
 			}
 
-			//MeshAppendQuad(g_debugMesh, mat.v4_(quadX, quadY, quadAdvance, quadHeight), mat.v4_(qu0, qv0, qu1, qv1), red, clip, depth)
-			MeshAppendQuad(id, mat.v4_(quadX, quadY, quadAdvance, quadHeight), mat.v4_(qu0, qv0, qu1, qv1),  color, clip, depth)
+			//MeshAppendOrthoQuad(g_debugMesh, mat.v4_(quadX, quadY, quadAdvance, quadHeight), mat.v4_(qu0, qv0, qu1, qv1), red, clip, depth)
+			MeshAppendOrthoQuad(id, mat.v4_(quadX, quadY, quadAdvance, quadHeight), mat.v4_(qu0, qv0, qu1, qv1),  color, clip, depth)
 			index = index + size
 			quadX = quadX + quadAdvance
 			dummyIndex = dummyIndex + 1

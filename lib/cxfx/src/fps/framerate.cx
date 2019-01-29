@@ -2,9 +2,7 @@ package fps
 
 import "time"
 
-//-----------------------------------------------------------------------------
 // Framerate ...
-//-----------------------------------------------------------------------------
 type Framerate struct {
 	currentTime f64
 	previousTime f64
@@ -14,15 +12,12 @@ type Framerate struct {
 	fps f64
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func DeltaTime(f *Framerate) (value f64) { // ##2 issue workaround
+// DeltaTime ...
+func DeltaTime(f *Framerate) (value f64) { // ISSUE workaround
 	value = (*f).deltaTime
 }
 
-//-----------------------------------------------------------------------------
 // Init ...
-//-----------------------------------------------------------------------------
 func (this *Framerate) Init(targetFps f64) {
 	this.currentTime = i64.f64(time.UnixNano()) / 1000000000.0D
 	this.previousTime = this.currentTime
@@ -35,9 +30,7 @@ func (this *Framerate) Init(targetFps f64) {
 	this.fps = 0.0D
 }
 
-//-----------------------------------------------------------------------------
 // BeginUpdate ...
-//-----------------------------------------------------------------------------
 func (this *Framerate) BeginUpdate(elapsed f64) {
 	var tmp i64 = time.UnixNano()
 	this.currentTime = i64.f64(tmp) / 1000000000.0D
@@ -61,11 +54,9 @@ func (this *Framerate) BeginUpdate(elapsed f64) {
 	ClearProfiles(full) // ISSUE : garbage value when : len(g_profiles)
 }
 
-//-----------------------------------------------------------------------------
 // EndUpdate ...
-//-----------------------------------------------------------------------------
 func (this *Framerate) EndUpdate() {
-	if this.frameTime > 0.0 {
+	if this.frameTime > 0.0D {
 		var updateTime f64 = i64.f64(time.UnixNano()) / 1000000000.0D
 
 		var deltaUpdateTime f64 = updateTime - this.currentTime

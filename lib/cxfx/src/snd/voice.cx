@@ -34,6 +34,8 @@ func IsValidVoice(id VoiceId) (out bool) {
 
 // VoiceState ...
 func VoiceState(id VoiceId) (out i32) {
+	panicIfNot(IsValidVoice(id), "invalid id")
+	out = g_voices[id.voice].state
 }
 
 // VoiceCreate ...
@@ -104,6 +106,7 @@ func VoicePlay(id VoiceId) {
 	} else {
 		panicIf(true, "invalid state")
 	}
+	g_voices[id.voice].state = VOICE_PLAYING
 }
 
 // VoicePause ...
@@ -121,10 +124,12 @@ func VoicePause(id VoiceId) {
 			al.PauseSources(sources)
 		}
 	}
+	g_voices[id.voice].state = VOICE_PAUSED
 }
 
 func removeVoice(id VoiceId) {
 	var used i32 = g_voices[id.voice].used
+	g_voices[id.voice].state = VOICE_STOPPED
 	panicIf(g_used[used].voice != id.voice, "")
 
 	var usedCount i32 = len(g_used)

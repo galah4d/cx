@@ -19,17 +19,17 @@ func main()() {
 	for running == true { // ISSUE : can't use 1, can't use true
 		f.BeginUpdate(2.0D)
 
-		fps.Start(prfFrame) // ISSUE : can't use member function
+		fps.StartProfile(prfFrame) // ISSUE : can't use member function
 
-		fps.Start(prfUpdate)
+		fps.StartProfile(prfUpdate)
 		// Update ...
-		fps.Stop(prfUpdate)
+		fps.StopProfile(prfUpdate)
 
-		fps.Start(prfRender)
+		fps.StartProfile(prfRender)
 		// Render ...
-		fps.Stop(prfRender)
+		fps.StopProfile(prfRender)
 
-		fps.Stop(prfFrame)
+		fps.StopProfile(prfFrame)
 
 		f.EndUpdate()
 	}

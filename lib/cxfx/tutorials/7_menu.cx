@@ -83,26 +83,26 @@ func main()() {
 
 	for app.Running(&a) { // ISSUE : can't use member function
 		f.BeginUpdate(2.0D)
-		fps.Start(prfSwap)
+		fps.StartProfile(prfSwap)
 		{
 			a.BeginFrame()
-			fps.Start(prfFrame)
+			fps.StartProfile(prfFrame)
 			{
 				// Update ...
-				fps.Start(prfUpdate)
+				fps.StartProfile(prfUpdate)
 				gui.update(f.deltaTime)
 				gui.resize()
-				fps.Stop(prfUpdate)
+				fps.StopProfile(prfUpdate)
 
 				// Render ...
-				fps.Start(prfRender)
+				fps.StartProfile(prfRender)
 				gui.render()
-				fps.Stop(prfRender)
+				fps.StopProfile(prfRender)
 			}
-			fps.Stop(prfFrame)
+			fps.StopProfile(prfFrame)
 			a.EndFrame()
 		}
-		fps.Stop(prfSwap)
+		fps.StopProfile(prfSwap)
 		f.EndUpdate()
 	}
 

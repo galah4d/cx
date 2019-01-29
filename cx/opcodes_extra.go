@@ -129,6 +129,7 @@ const (
 	OP_GL_CHECK_FRAMEBUFFER_STATUS
 	OP_GL_FRAMEBUFFER_TEXTURE_2D
 	OP_GL_FRAMEBUFFER_RENDERBUFFER
+	OP_GL_GENERATE_MIPMAP
 	OP_GL_BIND_VERTEX_ARRAY
 	OP_GL_DELETE_VERTEX_ARRAYS
 	OP_GL_GEN_VERTEX_ARRAYS
@@ -541,6 +542,9 @@ func init() {
 		[]*CXArgument{})
 	AddOpCode(OP_GL_FRAMEBUFFER_RENDERBUFFER, "gl.FramebufferRenderbuffer",
 		[]*CXArgument{newOpPar(TYPE_I32, false), newOpPar(TYPE_I32, false), newOpPar(TYPE_I32, false), newOpPar(TYPE_I32, false)},
+		[]*CXArgument{})
+	AddOpCode(OP_GL_GENERATE_MIPMAP, "gl.GenerateMipmap",
+		[]*CXArgument{newOpPar(TYPE_I32, false)},
 		[]*CXArgument{})
 	AddOpCode(OP_GL_BIND_VERTEX_ARRAY, "gl.BindVertexArray",
 		[]*CXArgument{newOpPar(TYPE_I32, false)},
@@ -971,6 +975,8 @@ func init() {
 				op_gl_FramebufferTexture2D(expr, fp)
 			case OP_GL_FRAMEBUFFER_RENDERBUFFER:
 				op_gl_FramebufferRenderbuffer(expr, fp)
+			case OP_GL_GENERATE_MIPMAP:
+				op_gl_GenerateMipmap(expr, fp)
 			case OP_GL_BIND_VERTEX_ARRAY:
 				op_gl_BindVertexArray(expr, fp)
 			case OP_GL_DELETE_VERTEX_ARRAYS:

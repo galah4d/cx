@@ -694,6 +694,10 @@ func op_gl_FramebufferRenderbuffer(expr *CXExpression, fp int) {
 	gl.FramebufferRenderbuffer(uint32(ReadI32(fp, inp1)), uint32(ReadI32(fp, inp2)), uint32(ReadI32(fp, inp3)), uint32(ReadI32(fp, inp4)))
 }
 
+func op_gl_GenerateMipmap(expr *CXExpression, fp int) {
+	gl.GenerateMipmap(uint32(ReadI32(fp, expr.Inputs[0])))
+}
+
 func op_gl_BindVertexArray(expr *CXExpression, fp int) {
 	inp1 := expr.Inputs[0]
 	if runtime.GOOS == "darwin" {

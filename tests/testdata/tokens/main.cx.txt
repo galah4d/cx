@@ -2204,19 +2204,15 @@ STRLIT Short variable declarations are not working with calls to methods or func
 INTLIT 0
 RPAREN 
 SCOLON 
- IDENT runTestEx
+ IDENT runTest
 LPAREN 
 STRLIT issue-101.cx
  COMMA 
  IDENT cx
 PERIOD 
- IDENT SUCCESS
+ IDENT COMPILATION_ERROR
  COMMA 
 STRLIT Panic when using equality operator between a bool and an i32
- COMMA 
- IDENT TEST_ISSUE
- COMMA 
-INTLIT 0
 RPAREN 
 SCOLON 
  IDENT runTestEx
@@ -2278,7 +2274,7 @@ PERIOD
 STRLIT Troubles when accessing a global var from another package
 RPAREN 
 SCOLON 
- IDENT runTestEx
+ IDENT runTest
 LPAREN 
 STRLIT issue-108.cx
  COMMA 
@@ -2287,10 +2283,6 @@ PERIOD
  IDENT SUCCESS
  COMMA 
 STRLIT same func names (but in different packages) collide
- COMMA 
- IDENT TEST_ISSUE
- COMMA 
-INTLIT 0
 RPAREN 
 SCOLON 
  IDENT runTest
@@ -2356,7 +2348,7 @@ PERIOD
 STRLIT Problem with struct literals in short variable declarations
 RPAREN 
 SCOLON 
- IDENT runTestEx
+ IDENT runTest
 LPAREN 
 STRLIT issue-132.cx
  COMMA 
@@ -2365,10 +2357,6 @@ PERIOD
  IDENT SUCCESS
  COMMA 
 STRLIT Panic when using the return value of a function in a short declaration
- COMMA 
- IDENT TEST_ISSUE
- COMMA 
-INTLIT 0
 RPAREN 
 SCOLON 
  IDENT runTestEx

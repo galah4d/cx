@@ -146,6 +146,7 @@ const (
 	OP_F32_LTEQ
 	OP_F32_EQ
 	OP_F32_UNEQ
+	OP_F32_RAND
 	OP_F32_COS
 	OP_F32_SIN
 	OP_F32_SQRT
@@ -175,6 +176,7 @@ const (
 	OP_F64_LTEQ
 	OP_F64_EQ
 	OP_F64_UNEQ
+	OP_F64_RAND
 	OP_F64_COS
 	OP_F64_SIN
 
@@ -691,6 +693,9 @@ func init() {
 	AddOpCode(OP_F32_UNEQ, "f32.uneq",
 		[]*CXArgument{newOpPar(TYPE_F32, false), newOpPar(TYPE_F32, false)},
 		[]*CXArgument{newOpPar(TYPE_BOOL, false)})
+	AddOpCode(OP_F32_RAND, "f32.rand",
+		[]*CXArgument{},
+		[]*CXArgument{newOpPar(TYPE_F32, false)})
 	AddOpCode(OP_F32_COS, "f32.cos",
 		[]*CXArgument{newOpPar(TYPE_F32, false)},
 		[]*CXArgument{newOpPar(TYPE_F32, false)})
@@ -777,6 +782,9 @@ func init() {
 	AddOpCode(OP_F64_UNEQ, "f64.uneq",
 		[]*CXArgument{newOpPar(TYPE_F64, false), newOpPar(TYPE_F64, false)},
 		[]*CXArgument{newOpPar(TYPE_BOOL, false)})
+	AddOpCode(OP_F64_RAND, "f64.rand",
+		[]*CXArgument{},
+		[]*CXArgument{newOpPar(TYPE_F64, false)})
 	AddOpCode(OP_F64_COS, "f64.cos",
 		[]*CXArgument{newOpPar(TYPE_F64, false)},
 		[]*CXArgument{newOpPar(TYPE_F64, false)})
@@ -1164,6 +1172,8 @@ func init() {
 			opF32Eq(expr, fp)
 		case OP_F32_UNEQ:
 			opF32Uneq(expr, fp)
+		case OP_F32_RAND:
+			opF32Rand(expr, fp)
 		case OP_F32_COS:
 			opF32Cos(expr, fp)
 		case OP_F32_SIN:
@@ -1220,6 +1230,8 @@ func init() {
 			opF64Eq(expr, fp)
 		case OP_F64_UNEQ:
 			opF64Uneq(expr, fp)
+		case OP_F64_RAND:
+			opF64Rand(expr, fp)
 		case OP_F64_COS:
 			opF64Cos(expr, fp)
 		case OP_F64_SIN:

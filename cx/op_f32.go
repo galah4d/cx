@@ -3,6 +3,7 @@ package base
 import (
 	"fmt"
 	"math"
+	"math/rand"
 	"strconv"
 
 	"github.com/skycoin/skycoin/src/cipher/encoder"
@@ -141,6 +142,12 @@ func opF32Uneq(expr *CXExpression, fp int) {
 	inp1, inp2, out1 := expr.Inputs[0], expr.Inputs[1], expr.Outputs[0]
 	outB1 := FromBool(ReadF32(fp, inp1) != ReadF32(fp, inp2))
 	WriteMemory(GetFinalOffset(fp, out1), outB1)
+}
+
+// The built-in rand function returns a pseudo-random number in [0.0,1.0) from the default Source
+//
+func opF32Rand(expr *CXExpression, fp int) {
+	WriteMemory(GetFinalOffset(fp, expr.Outputs[0]), FromF32(rand.Float32()))
 }
 
 // The built-in cos function returns the cosine of the operand.

@@ -23,9 +23,8 @@ func IsValidTarget(t Target) (out bool) {
 	out = t.framebuffer > -1
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func lock_target(w i32, h i32) (target Target) {
+// LockTarget ...
+func LockTarget(w i32, h i32) (target Target) {
 	var freeTargetCount i32 = len(g_freeTargets)
 	if (freeTargetCount > 0) {
 		var i i32 = 0
@@ -43,13 +42,12 @@ func lock_target(w i32, h i32) (target Target) {
 		}
    }
 
-	target = create_target(w, h)
+	target = CreateTarget(w, h)
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func unlock_target(target Target) {
-	panicIfNot(IsValidTarget(target), "unlock_target : invalid target")
+// UnlockTarget ...
+func UnlockTarget(target Target) {
+	panicIfNot(IsValidTarget(target), "invalid target")
 	var i i32 = 0
 	var freeTargetCount i32 = len(g_freeTargets)
 	for i = 0; i < freeTargetCount; i = i + 1 {
@@ -63,9 +61,8 @@ func unlock_target(target Target) {
 	g_freeTargets = append(g_freeTargets, target)
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func create_target(w i32, h i32) (target Target) {
+// CreateTarget ...
+func CreateTarget(w i32, h i32) (target Target) {
 	var framebuffer i32 = -1
 
 	framebuffer = gl.GenFramebuffers(1, framebuffer)
@@ -88,10 +85,9 @@ func create_target(w i32, h i32) (target Target) {
 	target.framebuffer = framebuffer
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func create_depth_buffer(format i32, w i32, h i32) (out i32) {
-	//panicIfNot(format == gl.DEPTH24 || format == gl.DEPTH24_STENCIL_8, "create_depth_buffer : untested format")
+// CreateDepthBuffer ...
+func CreateDepthBuffer(format i32, w i32, h i32) (out i32) {
+	//panicIfNot(format == gl.DEPTH24 || format == gl.DEPTH24_STENCIL_8, "untested format")
 	var renderbuffer i32 = -1
 
 	renderbuffer = gl.GenRenderbuffers(1, renderbuffer)

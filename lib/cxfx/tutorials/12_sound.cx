@@ -211,7 +211,7 @@ func main()() {
 	var height f32 = gfx.gfx_viewportSize.y
 	projection = mat.ProjectionMatrix(projection, 0.1, 10000.0, 0.5, height / width) // ISSUE : gfx.gfx_viewportSize.y / gfx.gfx_viewportSize.x)
 
-	depthBuffer = gfx.create_depth_buffer(gl.DEPTH_COMPONENT, o.width, o.height)
+	depthBuffer = gfx.CreateDepthBuffer(gl.DEPTH_COMPONENT, o.width, o.height)
 
 	cubeMesh = gfx.MeshLock(gl.TRIANGLES, gfx.g_vertexColorAttributes, 36)
 

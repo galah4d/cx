@@ -279,7 +279,7 @@ func Init(a *app.Application, width i32, height i32, dataDir str) {
     font_add_size(g_awesomeBoldFont, g_fontSizeHeader)
 
     // depth
-    g_depthStencilBuffer = gfx.create_depth_buffer(gl.DEPTH_COMPONENT, g_width, g_height)
+    g_depthStencilBuffer = gfx.CreateDepthBuffer(gl.DEPTH_COMPONENT, g_width, g_height)
 
     // textures
     //g_USTexture = gfx.TextureCreate(sprintf("%s/textures/flags/us.png", dataDir), gl.LINEAR, gl.LINEAR, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, 0, 0)
@@ -4763,7 +4763,7 @@ func render() () {
     fps.StartProfile(g_profileRenderCurrentScreen)
     var target_0 gfx.Target = gfx.InvalidTarget()
     if (IsValidScreen(g_currentScreen)) {
-        target_0 = gfx.lock_target(g_width, g_height)
+        target_0 = gfx.LockTarget(g_width, g_height)
         gfx.BindFrameBuffer(target_0.framebuffer)
         gfx.BindDepthBuffer(g_depthStencilBuffer)
         //gfx.BindStencilBuffer(g_depthStencilBuffer)
@@ -4779,7 +4779,7 @@ func render() () {
     var target_1 gfx.Target = gfx.InvalidTarget()
     fps.StartProfile(g_profileRenderNextScreen)
     if (IsValidScreen(g_nextScreen) && g_nextScreen.screen != g_currentScreen.screen) {
-        target_1 = gfx.lock_target(g_width, g_height)
+        target_1 = gfx.LockTarget(g_width, g_height)
         gfx.BindFrameBuffer(target_1.framebuffer)
         gfx.BindDepthBuffer(g_depthStencilBuffer)
         //gfx.BindStencilBuffer(g_depthStencilBuffer)
@@ -4795,7 +4795,7 @@ func render() () {
     fps.StartProfile(g_profileRenderScreenEffect)
     var target_2 gfx.Target = gfx.InvalidTarget()
     //if (gfx.IsValidTarget(target_0) && gfx.IsValidTarget(target_1)) {
-        target_2 = gfx.lock_target(g_width, g_height)
+        target_2 = gfx.LockTarget(g_width, g_height)
         gfx.BindFrameBuffer(target_2.framebuffer)
         gfx.Clear(gl.COLOR_BUFFER_BIT, gfx.gfx_zero, 0.0D, 0)
         gfx.ColorWrite(true, true, true, true)
@@ -4812,10 +4812,10 @@ func render() () {
         gfx.EffectAssignFloat(gfx.g_fxTrans_0, 0, f64.f32(g_transitionTime / g_transitionDuration))
         gfx.MeshRender(g_fullscreenQuad)
         if (gfx.IsValidTarget(target_0)) {
-            gfx.unlock_target(target_0)
+            gfx.UnlockTarget(target_0)
         }
         if (gfx.IsValidTarget(target_1)) {
-            gfx.unlock_target(target_1)
+            gfx.UnlockTarget(target_1)
         }
     /*} else if (gfx.IsValidTarget(target_0)) {
         target_2 = target_0
@@ -4831,7 +4831,7 @@ func render() () {
     var i i32 = 0
     var modalCount i32 = len(g_modals)
     for i = 0; i < modalCount; i = i + 1 {
-        var target Target = gfx.lock_target(g_width, g_height)
+        var target Target = gfx.LockTarget(g_width, g_height)
         gfx.BindFrameBuffer(target.framebuffer)
         gfx.BindDepthBuffer(g_depthStencilBuffer)
         //gfx.BindStencilBuffer(g_depthStencilBuffer)
@@ -4843,7 +4843,7 @@ func render() () {
         gfx.BindDepthBuffer(0)
         gfx.BindStencilBuffer(0)
 
-        var target_3 Target = gfx.lock_target(g_width, g_height)
+        var target_3 Target = gfx.LockTarget(g_width, g_height)
         gfx.BindFrameBuffer(target_3.framebuffer)
         gfx.Clear(gl.COLOR_BUFFER_BIT, gfx.gfx_zero, 0.0D, 0)
         gfx.ColorWrite(true, true, true, true)
@@ -4859,8 +4859,8 @@ func render() () {
         gfx.TextureFilter(gl.NEAREST, gl.NEAREST)
         gfx.EffectAssignFloat(gfx.g_fxTrans_1, 0, 1.0)
         gfx.MeshRender(g_fullscreenQuad)
-        gfx.unlock_target(target)
-        gfx.unlock_target(target_2)
+        gfx.UnlockTarget(target)
+        gfx.UnlockTarget(target_2)
         target_2 = target_3
     }
     fps.StopProfile(g_profileRenderModals)
@@ -4878,7 +4878,7 @@ func render() () {
     gfx.TextureWrap(gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE)
     gfx.TextureFilter(gl.NEAREST, gl.NEAREST)
     gfx.MeshRender(g_fullscreenQuad)
-    gfx.unlock_target(target_2)
+    gfx.UnlockTarget(target_2)
     fps.StopProfile(g_profileRenderDefaultFramebuffer)
 
 }

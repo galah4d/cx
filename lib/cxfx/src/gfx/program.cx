@@ -2,28 +2,20 @@ package gfx
 
 import "gl"
 
-//-----------------------------------------------------------------------------
 // Globals ...
-//-----------------------------------------------------------------------------
 var g_programs []i32
 
-//-----------------------------------------------------------------------------
 // Program ...
-//-----------------------------------------------------------------------------
 type Program struct {
 	name i32
 }
 
-//-----------------------------------------------------------------------------
 // NullProgram ...
-//-----------------------------------------------------------------------------
 func NullProgram()(out Program) {
 	out.name = 0
 }
 
-//-----------------------------------------------------------------------------
 // CreateProgram ...
-//-----------------------------------------------------------------------------
 func CreateProgram(vertex str, pixel str) (out Program) {
 	// vertex shader
 	var vertexShader i32 = gl.CreateShader(gl.VERTEX_SHADER)
@@ -72,18 +64,14 @@ func CreateProgram(vertex str, pixel str) (out Program) {
 	panicIf(GlError(), "gl.DeleteShader")
 }
 
-//-----------------------------------------------------------------------------
 // UseProgram ...
-//-----------------------------------------------------------------------------
 func UseProgram(program Program) {
 	//printf("use_program(%d)\n", program)
 	gl.UseProgram(program.name)
 	panicIf(GlError(), "gl.UseProgram")
 }
 
-//-----------------------------------------------------------------------------
 // BindAttribute ...
-////-----------------------------------------------------------------------------
 func BindAttribute(program Program, location i32, name str) () {
 
 	gl.BindAttribLocation(program.name, location, name)
@@ -94,20 +82,15 @@ func BindAttribute(program Program, location i32, name str) () {
 	panicIfNot(newLocation == location, "attribute not found\n")
 }
 
-//-----------------------------------------------------------------------------
 // BindUniform ...
-//-----------------------------------------------------------------------------
 func BindUniform(program Program, name str) (uniform i32) {
 	uniform = gl.GetUniformLocation(program.name, name) // ##2 crash find a way to test if str is present in gl.Strs
 	panicIf(GlError(), "gl.GetUniformLocation")
 	panicIfNot(uniform >= 0, "uniform>= 0")
 }
 
-//-----------------------------------------------------------------------------
 // BindTexture ...
-//-----------------------------------------------------------------------------
 func BindTexture(program Program, name str) (sampler i32) {
 	sampler = BindUniform(program, name)
 }
-
 

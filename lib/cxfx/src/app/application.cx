@@ -5,17 +5,13 @@ import "cx"
 import "glfw"
 import "os"
 
-//-----------------------------------------------------------------------------
-// HINTS ...
-//-----------------------------------------------------------------------------
+// Constants ...
 var APP_HINT_NONE i32       = 0
 var APP_HINT_DEBUG i32      = 1
 var APP_HINT_FULLSCREEN i32 = 2
 var APP_HINT_RESIZABLE i32  = 4
 
-//-----------------------------------------------------------------------------
 // Options ...
-//-----------------------------------------------------------------------------
 type Options struct {
 	width i32
 	height i32
@@ -24,9 +20,17 @@ type Options struct {
 	dataDir str
 }
 
-//-----------------------------------------------------------------------------
+// Application ...
+type Application struct {
+	options Options
+	exit bool
+	name str
+	window str
+	major i32
+	minor i32
+}
+
 // Help ...
-//-----------------------------------------------------------------------------
 func Help(message str, exitCode i32) {
 	printf(message)
 	printf("Usage:\n")
@@ -39,9 +43,7 @@ func Help(message str, exitCode i32) {
 	os.Exit(exitCode)
 }
 
-//-----------------------------------------------------------------------------
 // Parse ...
-//-----------------------------------------------------------------------------
 func (this *Options) Parse() {
 	var argc i32 = len(os.Args) // ISSUE : doubious compilation error : function 'len' expected receiving variable of type 'i32'; 'str' was provided
 
@@ -107,21 +109,7 @@ func (this *Options) Parse() {
 	}
 }
 
-//-----------------------------------------------------------------------------
-// Application ...
-//-----------------------------------------------------------------------------
-type Application struct {
-	options Options
-	exit bool
-	name str
-	window str
-	major i32
-	minor i32
-}
-
-//-----------------------------------------------------------------------------
 // Init ...
-//-----------------------------------------------------------------------------
 func (this *Application) Init(options Options, name str, window str, major i32, minor i32) {
 
 	this.options = options
@@ -151,53 +139,40 @@ func (this *Application) Init(options Options, name str, window str, major i32, 
 	// xPos, yPos := glfw.GetCursorPos("window")
 }
 
-//-----------------------------------------------------------------------------
 // Exit ...
-//-----------------------------------------------------------------------------
 func (this *Application) Exit() {
 	printf("exiting %s...\n", this.name)
 	this.exit = true
 }
 
-//-----------------------------------------------------------------------------
 // Running ...
-//-----------------------------------------------------------------------------
 func Running(this *Application) (out bool) { // ISSUE : member function does not contain expressions
 	out = (glfw.ShouldClose(this.window) == false && this.exit == false)
 }
 
-//-----------------------------------------------------------------------------
 // BeginFrame ...
-//-----------------------------------------------------------------------------
 func (this *Application) BeginFrame() {
 	glfw.MakeContextCurrent(this.window)
 }
 
-//-----------------------------------------------------------------------------
 // EndFrame ...
-//-----------------------------------------------------------------------------
 func (this *Application) EndFrame() {
 	glfw.PollEvents()
 	glfw.SwapBuffers(this.window)
 }
 
-//-----------------------------------------------------------------------------
 // SetKeyboardCallback ...
-//-----------------------------------------------------------------------------
 func (this *Application) SetKeyboardCallback(packageName str, functionName str) {
 	glfw.SetKeyCallbackEx(this.window, functionName, packageName)
 }
 
-//-----------------------------------------------------------------------------
 // SetMouseButtonCallback ...
-//-----------------------------------------------------------------------------
 func (this *Application) SetMouseButtonCallback(packageName str, functionName str) {
 	glfw.SetMouseButtonCallbackEx(this.window, functionName, packageName)
 }
 
-//-----------------------------------------------------------------------------
 // SetMousePositionCallback ...
-//-----------------------------------------------------------------------------
 func (this *Application) SetMousePositionCallback(packageName str, functionName str) {
 	glfw.SetCursorPosCallbackEx(this.window, functionName, packageName)
 }
+

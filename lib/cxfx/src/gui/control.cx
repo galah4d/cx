@@ -2,22 +2,16 @@ package gui
 
 import "mat"
 
-//-----------------------------------------------------------------------------
 // Globals ...
-//-----------------------------------------------------------------------------
 var g_controls []Control
 var g_cursorPos mat.v2
 
-//-----------------------------------------------------------------------------
 // ControlId ...
-//-----------------------------------------------------------------------------
 type ControlId struct {
 	control i32
 }
 
-//-----------------------------------------------------------------------------
 // Control ...
-//-----------------------------------------------------------------------------
 type Control struct {
 	id ControlId
 	name str
@@ -52,31 +46,23 @@ type Control struct {
 	children []ControlId
 }
 
-//-----------------------------------------------------------------------------
 // InvalidControl ...
-//-----------------------------------------------------------------------------
 func InvalidControl() (out ControlId) {
 	out.control = -1
 }
 
-//-----------------------------------------------------------------------------
 // NewControlId ...
-//-----------------------------------------------------------------------------
 func NewControlId(control i32) (out ControlId) {
 	out.control = control
 	panicIfNot(IsValidControl(out), "invalid id")
 }
 
-//-----------------------------------------------------------------------------
 // IsValidControl ...
-//-----------------------------------------------------------------------------
 func IsValidControl(id ControlId) (out bool) {
 	out = id.control >= 0 && id.control < len(g_controls)
 }
 
-//-----------------------------------------------------------------------------
 // ControlCreate ...
-//-----------------------------------------------------------------------------
 func ControlCreate(name str) (out ControlId) {
 	out = controlCreate(name, GUI_CONTROL, len(g_controls))
 }
@@ -119,9 +105,7 @@ func controlCreate(name str, gui_type i32, gui_index i32) (out ControlId) {
 	//ControlPrint("ControlCreate : ", out, true)
 }
 
-//-----------------------------------------------------------------------------
 // ControlPrint ...
-//-----------------------------------------------------------------------------
 func ControlPrint(message str, id ControlId, printSkin bool) {
 	panicIfNot(IsValidControl(id), "invalid control")
 	var index i32 = id.control
@@ -163,99 +147,75 @@ func ControlPrint(message str, id ControlId, printSkin bool) {
 	//}
 }
 
-//-----------------------------------------------------------------------------
 // ControlSetSkin ...
-//-----------------------------------------------------------------------------
 func ControlSetSkin(id ControlId, skin skin_id) {
 	panicIfNot(IsValidControl(id)   , "invalid id")
 	panicIfNot(is_valid_skin(skin), "invalid skin")
 	g_controls[id.control].skin = skin
 }
 
-//-----------------------------------------------------------------------------
 // ControlSetDock ...
-//-----------------------------------------------------------------------------
 func ControlSetDock(id ControlId, dock i32) {
 	panicIfNot(IsValidControl(id), "invalid id")
 	g_controls[id.control].dock = dock
 }
 
-//-----------------------------------------------------------------------------
 // ControlSetAlign ...
-//-----------------------------------------------------------------------------
 func ControlSetAlign(id ControlId, align i32) {
 	panicIfNot(IsValidControl(id), "invalid id")
 	g_controls[id.control].align = align
 }
 
-//-----------------------------------------------------------------------------
 // ControlSetAutosize ...
-//-----------------------------------------------------------------------------
 func ControlSetAutosize(id ControlId, autosize i32) {
 	panicIfNot(IsValidControl(id), "invalid id")
 	g_controls[id.control].autosize = autosize
 }
 
-//-----------------------------------------------------------------------------
 // ControlSetAutoscale ...
-//-----------------------------------------------------------------------------
 func ControlSetAutoscale(id ControlId, autoscale i32) {
 	panicIfNot(IsValidControl(id), "invalid id")
 	g_controls[id.control].autoscale = autoscale
 }
 
-//-----------------------------------------------------------------------------
 // ControlSetPosition ...
-//-----------------------------------------------------------------------------
 func ControlSetPosition(id ControlId, position v2) {
 	panicIfNot(IsValidControl(id), "invalid id")
 	g_controls[id.control].position = position
 }
 
-//-----------------------------------------------------------------------------
 // ControlSetSize ...
-//-----------------------------------------------------------------------------
 func ControlSetSize(id ControlId, size v2) {
 	panicIfNot(IsValidControl(id), "invalid id")
 	g_controls[id.control].size = size
 }
 
-//-----------------------------------------------------------------------------
 // ControlSetBounds ...
-//-----------------------------------------------------------------------------
 func ControlSetBounds(id ControlId, bounds v4) {
 	panicIfNot(IsValidControl(id), "invalid id")
 	g_controls[id.control].position = mat.v4_xy(bounds)
 	g_controls[id.control].size = mat.v4_zw(bounds)
 }
 
-//-----------------------------------------------------------------------------
 // ControlSetScale ...
-//-----------------------------------------------------------------------------
 func ControlSetScale(id ControlId, scale v2) {
 	panicIfNot(IsValidControl(id), "invalid id")
 	g_controls[id.control].scale = scale
 }
 
-//-----------------------------------------------------------------------------
 // ControlSetVisible ...
-//-----------------------------------------------------------------------------
 func ControlSetVisible(id ControlId, visible i32) {
 	panicIfNot(IsValidControl(id), "invalid id")
 	g_controls[id.control].visible = visible
 }
 
-//-----------------------------------------------------------------------------
 // ControlSetSelected ...
-//-----------------------------------------------------------------------------
 func ControlSetSelected(id ControlId, selected i32) {
 	panicIfNot(IsValidControl(id), "invalid id")
 	g_controls[id.control].selected = selected
 }
 
-//-----------------------------------------------------------------------------
 // ControlAddChild ...
-//-----------------------------------------------------------------------------
 func ControlAddChild(parent ControlId, child ControlId) {
 	panicIfNot(IsValidControl(parent), "invalid parent")
 	panicIfNot(IsValidControl(child), "invalid child")
@@ -265,50 +225,38 @@ func ControlAddChild(parent ControlId, child ControlId) {
 	g_controls[parent.control].children = append(g_controls[parent.control].children, child)
 }
 
-//-----------------------------------------------------------------------------
 // ControlClearChildren ...
-//-----------------------------------------------------------------------------
 func ControlClearChildren(id ControlId) {
 	panicIfNot(IsValidControl(id), "invalid id")
 	g_controls[id.control].children = resize(g_controls[id.control].children, 0)
 }
 
-//-----------------------------------------------------------------------------
 // ControlSetPadding ...
-//-----------------------------------------------------------------------------
 func ControlSetPadding(id ControlId, padding mat.v4) {
 	panicIfNot(IsValidControl(id), "invalid id")
 	g_controls[id.control].padding = padding // ##1 id viewport resize
 }
 
-//-----------------------------------------------------------------------------
 // ControlSetSpacing ...
-//-----------------------------------------------------------------------------
 func ControlSetSpacing(id ControlId, spacing mat.v2) {
 	panicIfNot(IsValidControl(id), "invalid id")
 	g_controls[id.control].spacing = mat.v2_mul(spacing, mat.v2_(1.0, gfx.gfx_ratio_y)) // ##1 id viewport resize
 }
 
-//-----------------------------------------------------------------------------
 // ControlSetFocusIndex ...
-//-----------------------------------------------------------------------------
 func ControlSetFocusIndex(id ControlId, value i32) {
 	panicIfNot(IsValidControl(id), "invalid id")
 	g_controls[id.control].focusIndex = value
 }
 
-//-----------------------------------------------------------------------------
 // ControlSetFocusable ...
-//-----------------------------------------------------------------------------
 func ControlSetFocusable(id ControlId, value i32) {
 	panicIfNot(IsValidControl(id), "invalid id")
 	g_controls[id.control].focusable = value
 	//ControlPrint("SET_FOCUSABLE : ", id, false)
 }
 
-//-----------------------------------------------------------------------------
 // ControlSetParentFocus ...
-//-----------------------------------------------------------------------------
 func ControlSetParentFocus(id ControlId, child ControlId, value i32) {
 	//printf("set_parent_focus : %d\n", id.control)
 	panicIfNot(IsValidControl(id), "invalid id")
@@ -373,9 +321,7 @@ func ControlSetParentFocus(id ControlId, child ControlId, value i32) {
 	}
 }*/
 
-//-----------------------------------------------------------------------------
 // ControlParentVisible ...
-//-----------------------------------------------------------------------------
 func ControlParentVisible(id ControlId) (out bool) {
 	panicIfNot(IsValidControl(id), "invalid id")
 	var visible i32 = g_controls[id.control].visible
@@ -390,9 +336,7 @@ func ControlParentVisible(id ControlId) (out bool) {
 	}
 }
 
-//-----------------------------------------------------------------------------
 // ControlHovered ...
-//-----------------------------------------------------------------------------
 func ControlHovered(id ControlId) (out i32) {
 	panicIfNot(IsValidControl(id), "invalid id")
 	out = 0
@@ -414,9 +358,7 @@ func ControlHovered(id ControlId) (out i32) {
 	}*/
 }
 
-//-----------------------------------------------------------------------------
 // ControlFocused ...
-//-----------------------------------------------------------------------------
 func ControlFocused(id ControlId) (out i32) { // ##pending issue bool
 	out = 0
 	panicIfNot(IsValidControl(id), "invalid id")

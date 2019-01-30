@@ -288,7 +288,7 @@ func LabelRender(id LabelId, clip mat.v4, stack i32) () {
 		var meshId gfx.MeshId = gfx.BatchGetMesh(batch)
 		var renderBounds mat.v4 =  mat.v4_v2v2(renderPosition, g_controls[control].size)
 		//ControlPrint("LabelRender : renderBounds ", id.base, false)
-		var renderClips mat.v4 = gfx.push_scissor(g_controls[control].name, renderBounds)
+		var renderClips mat.v4 = gfx.PushScissor(g_controls[control].name, renderBounds)
 		//gfx.g_debugMesh = g_opaqueVertexColoredTriangles
 		var rune i32 = g_labels[id.label].rune
 		if (rune >= 0) {
@@ -300,7 +300,7 @@ func LabelRender(id LabelId, clip mat.v4, stack i32) () {
 			renderPosition, g_controls[control].scale,
 			mat.v4_(1.0, 1.0, 1.0, 1.0), g_labels[id.label].text, true, g_labels[id.label].color_0, g_labels[id.label].color_1, renderClips, compute_depth(stack))
 		}
-		gfx.pop_scissor()
+		gfx.PopScissor()
 	}
 }
 

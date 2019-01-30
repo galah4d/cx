@@ -235,10 +235,10 @@ func ScreenRender(id ScreenId, clip mat.v4, stack i32) () {
 		gfx.MeshBegin(g_alphaVertexColoredTriangles)
 		gfx.BeginBatches()
 
-		clip = gfx.push_scissor(g_controls[id.base.control].name, gfx.gfx_viewportBounds)
+		clip = gfx.PushScissor(g_controls[id.base.control].name, gfx.gfx_viewportBounds)
 		//printf("SCREEN CLIP %f, %f, %f, %f\n", clip.x, clip.y, clip.z, clip.w)
 		control_render(id.base, clip, stack)
-		gfx.pop_scissor()
+		gfx.PopScissor()
 
 		//panicIfNot(gfx.g_scissorCount == 0, "invalid scissor stack")
 		gfx.EndBatches()

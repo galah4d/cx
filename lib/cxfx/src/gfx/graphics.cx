@@ -58,8 +58,6 @@ var gfx_scissorY i32 = 0
 var gfx_scissorWidth i32 = 0
 var gfx_scissorHeight i32 = 0
 
-var g_scissors[]mat.v4
-
 var g_vertexColorAttributes []i32
 
 var g_fxVertexColor EffectId = InvalidEffect()
@@ -488,7 +486,7 @@ func Init(width i32, height i32, dataDir str)() {
 // Free ...
 func Free()() {
 
-	//pop_scissor()
+	//PopScissor()
 
 	gl.Free("vsPassThrough")
 	gl.Free("psVertexColor")

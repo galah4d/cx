@@ -1530,7 +1530,7 @@ func control_render(id ControlId, clip mat.v4, stack i32) () {
     var visible i32 = g_controls[index].visible
     if (visible > 0) {
         var renderBounds mat.v4 = mat.v4_v2v2(g_controls[index].renderPosition, g_controls[index].size)
-        var renderClips mat.v4 = gfx.push_scissor(g_controls[index].name, renderBounds)
+        var renderClips mat.v4 = gfx.PushScissor(g_controls[index].name, renderBounds)
         //fps.StartProfile(g_profileControlRender)
         var skin skin_id = g_controls[index].skin
         panicIfNot(is_valid_skin(skin) || skin.skin == -1, "control_render : invalid control skin")
@@ -1625,7 +1625,7 @@ func control_render(id ControlId, clip mat.v4, stack i32) () {
                 }
             }
         }
-        gfx.pop_scissor()
+        gfx.PopScissor()
         //ControlPrint("after control_render : ", id, false)
         //fps.StopProfile(g_profileControlRenderChild)
     }
@@ -2608,11 +2608,11 @@ func graph_render(id graph_id, clip mat.v4, stack i32) () {
     var renderBounds mat.v4 = mat.v4_v2v2(g_controls[controlIndex].renderPosition, g_controls[controlIndex].size)
     //ControlPrint("graph_render : renderBounds ", id.base, false)
     //  printf("renderBounds %f, %f, %f, %f\n", renderBounds.x, renderBounds.y, renderBounds.z, renderBounds.w)
-    var renderClips mat.v4 = gfx.push_scissor(g_controls[controlIndex].name, renderBounds)
+    var renderClips mat.v4 = gfx.PushScissor(g_controls[controlIndex].name, renderBounds)
     //ControlPrint("graph_render : graphClips ", id.base, false)
     var graphClips mat.v4 = g_graphs[graphIndex].graphClips
     //  printf("graphClips %f, %f, %f, %f\n", graphClips.x, graphClips.y, graphClips.z, graphClips.w)
-    renderClips = gfx.push_scissor(g_controls[controlIndex].name, graphClips)
+    renderClips = gfx.PushScissor(g_controls[controlIndex].name, graphClips)
 
     var i i32 = 0
     var horzCount i32 = len(g_graphs[graphIndex].horz)
@@ -2635,8 +2635,8 @@ func graph_render(id graph_id, clip mat.v4, stack i32) () {
         //          i, color.x, color.y, color.z, color.w, bounds.x, bounds.y, bounds.z, bounds.w)
         gfx.MeshAppendOrthoLine(g_opaqueVertexColoredLines, bounds, color, renderClips, compute_depth(stack))
     }
-    gfx.pop_scissor()
-    gfx.pop_scissor()
+    gfx.PopScissor()
+    gfx.PopScissor()
 }
 
 //-----------------------------------------------------------------------------

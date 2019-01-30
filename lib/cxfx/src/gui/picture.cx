@@ -186,10 +186,10 @@ func PictureRender(id PictureId, clip mat.v4, stack i32) () {
 		var renderBounds mat.v4 = mat.v4_v2v2(renderPosition, mat.v2_(width, height))
 		//ControlPrint("PictureRender : renderBounds ", id.base, false)
 		//printf("renderBounds %f, %f, %f, %f\n", renderBounds.x, renderBounds.y, renderBounds.z, renderBounds.w)
-		var renderClips mat.v4 = gfx.push_scissor(g_controls[controlIndex].name, renderBounds)
+		var renderClips mat.v4 = gfx.PushScissor(g_controls[controlIndex].name, renderBounds)
 		var meshId gfx.MeshId = gfx.BatchGetMesh(batch)
 		gfx.MeshAppendOrthoQuad(meshId, renderBounds, mat.v4_(0.0, 0.0, 1.0, 1.0), color, renderClips, compute_depth(stack))
-		gfx.pop_scissor()
+		gfx.PopScissor()
 	}
 }
 

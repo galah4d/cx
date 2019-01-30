@@ -1,9 +1,11 @@
 package gfx
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func push_scissor(name str, bounds mat.v4) (out mat.v4) {
-	// panicIfNot(bounds.z > 0 && bounds.w > 0, "push_scissor : invalid bounds")
+// Globals ...
+var g_scissors[]mat.v4
+
+// PushScissor ...
+func PushScissor(name str, bounds mat.v4) (out mat.v4) {
+	// panicIfNot(bounds.z > 0 && bounds.w > 0, "PushScissor : invalid bounds")
 	out = bounds
 	var scissorCount i32 = len(g_scissors)
 	if (scissorCount > 0) {
@@ -82,11 +84,10 @@ func push_scissor(name str, bounds mat.v4) (out mat.v4) {
 	//SetScissor(bounds)
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func pop_scissor() {
+// PopScissor ...
+func PopScissor() {
 	var scissorCount i32 = len(g_scissors)
-	panicIfNot(scissorCount > 0, "pop_scissor : underflow")
+	panicIfNot(scissorCount > 0, "PopScissor : underflow")
 	g_scissors = resize(g_scissors, scissorCount - 1)
 	//if (scissorCount > 0) {
 	//	var scissor i32 = scissorCount - 1

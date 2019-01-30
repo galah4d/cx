@@ -5,7 +5,6 @@ import "fps"
 import "mat"
 import "gfx"
 import "gl" // ##1 hide gl dependency
-import "gltext" // ##1 hide gltext dependency
 import "gui"
 
 //-----------------------------------------------------------------------------

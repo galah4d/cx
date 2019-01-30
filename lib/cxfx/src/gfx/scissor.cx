@@ -79,7 +79,7 @@ func push_scissor(name str, bounds mat.v4) (out mat.v4) {
 	//var tmp mat.v4 =  g_scissors[scissorCount]
 	//printf("%d, tmp readback %f, %f, %f, %f\n", scissorCount, tmp.x, tmp.y, tmp.z, tmp.w)
 
-	//set_scissor(bounds)
+	//SetScissor(bounds)
 }
 
 //-----------------------------------------------------------------------------
@@ -90,7 +90,7 @@ func pop_scissor() {
 	g_scissors = resize(g_scissors, scissorCount - 1)
 	//if (scissorCount > 0) {
 	//	var scissor i32 = scissorCount - 1
-		//set_scissor(g_scissors[scissor])
+		//SetScissor(g_scissors[scissor])
 	//}
 }
 

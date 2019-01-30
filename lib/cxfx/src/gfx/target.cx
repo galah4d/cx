@@ -73,7 +73,7 @@ func create_target(w i32, h i32) (target Target) {
 
 	g_framebuffers = append(g_framebuffers, framebuffer)
 
-	bind_framebuffer(framebuffer)
+	BindFrameBuffer(framebuffer)
 	target.texture = TextureCreate("", gl.LINEAR, gl.LINEAR, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, w, h, false)
 
 	gl.FramebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, target.texture.name, 0)

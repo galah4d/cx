@@ -1,3 +1,5 @@
+## TODO : can't order files alphabetically without breaking tuto 7->14
+
 0_arguments:
 	cx\
 		../src/arg/argv.cx\
@@ -77,6 +79,7 @@
 		../src/gfx/program.cx\
 		../src/gfx/mesh.cx\
 		../src/gfx/texture.cx\
+		../src/gfx/text.cx\
 		../src/gfx/target.cx\
 		6_text.cx ++data=../resources
 
@@ -94,6 +97,7 @@
 		../src/gfx/program.cx\
 		../src/gfx/mesh.cx\
 		../src/gfx/texture.cx\
+		../src/gfx/text.cx\
 		../src/gfx/target.cx\
 		../src/gfx/scissor.cx\
 		../src/gui/layer.cx\
@@ -121,6 +125,7 @@
 		../src/gfx/program.cx\
 		../src/gfx/mesh.cx\
 		../src/gfx/texture.cx\
+		../src/gfx/text.cx\
 		../src/gfx/target.cx\
 		../src/gfx/scissor.cx\
 		../src/gui/layer.cx\
@@ -148,6 +153,7 @@
 		../src/gfx/program.cx\
 		../src/gfx/mesh.cx\
 		../src/gfx/texture.cx\
+		../src/gfx/text.cx\
 		../src/gfx/target.cx\
 		../src/gfx/scissor.cx\
 		../src/gui/layer.cx\
@@ -175,6 +181,7 @@
 		../src/gfx/program.cx\
 		../src/gfx/mesh.cx\
 		../src/gfx/texture.cx\
+		../src/gfx/text.cx\
 		../src/gfx/target.cx\
 		../src/gfx/scissor.cx\
 		../src/gui/layer.cx\
@@ -202,6 +209,7 @@
 		../src/gfx/program.cx\
 		../src/gfx/mesh.cx\
 		../src/gfx/texture.cx\
+		../src/gfx/text.cx\
 		../src/gfx/target.cx\
 		../src/gfx/scissor.cx\
 		../src/gui/layer.cx\
@@ -229,6 +237,7 @@
 		../src/gfx/program.cx\
 		../src/gfx/mesh.cx\
 		../src/gfx/texture.cx\
+		../src/gfx/text.cx\
 		../src/gfx/target.cx\
 		../src/gfx/scissor.cx\
 		../src/gui/layer.cx\
@@ -260,6 +269,7 @@
 		../src/gfx/program.cx\
 		../src/gfx/mesh.cx\
 		../src/gfx/texture.cx\
+		../src/gfx/text.cx\
 		../src/gfx/target.cx\
 		../src/gfx/scissor.cx\
 		../src/gui/layer.cx\
@@ -292,6 +302,7 @@
 		../src/gfx/program.cx\
 		../src/gfx/mesh.cx\
 		../src/gfx/texture.cx\
+		../src/gfx/text.cx\
 		../src/gfx/target.cx\
 		../src/gfx/scissor.cx\
 		../src/gui/layer.cx\

@@ -5,7 +5,6 @@ import "fps"
 import "mat"
 import "gfx"
 import "gl" // ##1 hide gl dependency
-import "gltext" // ##1 hide gltext dependency
 import "gui"
 
 //-----------------------------------------------------------------------------
@@ -156,9 +155,9 @@ func gameOnUpdate(controlIndex i32, action i32) {
 //-----------------------------------------------------------------------------
 func gameOnRender(controlIndex i32, action i32) {
 	var id gui.ControlId = gui.NewControlId(controlIndex)
-	gfx.disable_blending()
-	gfx.depth_state(true, gl.LESS, true)
-	gfx.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT, mat.v4_(0.3, 0.5, 0.6, 1.0), 1.0D, 0)
+	gfx.DisableBlending()
+	gfx.DepthState(true, gl.LESS, true)
+	gfx.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT, mat.v4_(0.3, 0.5, 0.6, 1.0), 1.0D, 0)
 	gfx.EffectUse(gfx.g_fxPerspectiveTexture)
 	gfx.EffectAssignTexture(gfx.g_fxPerspectiveTexture, 0, texture.name)
 	gfx.EffectAssignMatrix4(gfx.g_fxPerspectiveTexture, 0, world, false)

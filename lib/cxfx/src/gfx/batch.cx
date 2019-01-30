@@ -141,9 +141,9 @@ func RenderBatches(alpha bool) {
 			if (batchAlpha == alpha) {
 				//printf("RENDER_BATCH %d/%d\n", i + 1, renderBatchCount)
 				if (alpha == true) {
-					enable_blending(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+					EnableBlending(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 				} else {
-					disable_blending()
+					DisableBlending()
 				}
 				var effect EffectId = g_batches[batch].effect
 				EffectUse(effect)

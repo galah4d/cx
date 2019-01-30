@@ -182,9 +182,9 @@ func LabelMeasure(id LabelId) (width f32, height f32) { // ##1 factorize with La
 	var i32Height i32 = 0
 	var rune i32 = g_labels[id.label].rune
 	if (rune >= 0) {
-		i32Width, i32Height = gfx.measure_glyph(fontName, rune)
+		i32Width, i32Height = gfx.MeasureGlyph(fontName, rune)
 	} else {
-		i32Width, i32Height = gfx.measure_text(fontName, text)
+		i32Width, i32Height = gfx.MeasureText(fontName, text)
 	}
 
 	var pixelBounds mat.v2 = mat.v2_(i32.f32(i32Width), i32.f32(i32Height))
@@ -221,9 +221,9 @@ func LabelResize(id LabelId) () {
 	var i32Height i32 = 0
 	var rune i32 = g_labels[id.label].rune
 	if (rune >= 0) {
-		i32Width, i32Height = gfx.measure_glyph(fontName, rune)
+		i32Width, i32Height = gfx.MeasureGlyph(fontName, rune)
 	} else {
-		i32Width, i32Height = gfx.measure_text(fontName, text)
+		i32Width, i32Height = gfx.MeasureText(fontName, text)
 	}
 
 

@@ -1,7 +1,6 @@
 package gfx
 
 import "gl"
-import "gltext"
 import "mat"
 import "os"
 
@@ -175,8 +174,6 @@ func NewUniform(location i32, name str) (out Uniform) {
 	out.name = name
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
 func assignTexture(slot i32, sampler i32, texture i32) () {
 	gl.ActiveTexture(gl.TEXTURE0 + slot)
 	panicIf(GlError(), "gl.ActiveTexture")
@@ -186,34 +183,26 @@ func assignTexture(slot i32, sampler i32, texture i32) () {
 
 	gl.Uniform1i(sampler, slot)
 	panicIf(GlError(), "gl.Uniform1i")
-
-
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
 func assignFloat(slot i32, value f32) {
 	gl.Uniform1f(slot, value)
 	panicIf(GlError(), "gl.Uniform1f")
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
 func assignVector4(slot i32, value []f32) {
 	panicIf(len(value) % 4 != 0, "invalid strid")
 	gl.Uniform4fv(slot, len(value) / 4, value)
 }
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
+
 func assignMatrix4(slot i32, value []f32, transpose bool) {
 	panicIf(len(value) % 16 != 0, "invalid stride")
 	gl.UniformMatrix4fv(slot, len(value) / 16, transpose, value)
 	panicIf(GlError(), "gl.UniformMatrix4vf")
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func enable_blending(srcBlend i32, dstBlend i32) () {
+// EnableBlending ...
+func EnableBlending(srcBlend i32, dstBlend i32) () {
 	if (g_blend == false) {
 		g_blend = true
 		gl.Enable(gl.BLEND)
@@ -227,9 +216,8 @@ func enable_blending(srcBlend i32, dstBlend i32) () {
 	}
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func disable_blending() () {
+// DisableBlending ...
+func DisableBlending() () {
 	if (g_blend == true) {
 		g_blend = false
 		gl.Disable(gl.BLEND)
@@ -237,27 +225,24 @@ func disable_blending() () {
 	}
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func depth_state(test bool, compare i32, write bool) {
-	depth_test(test)
-	depth_func(compare)
-	depth_write(write)
+// DepthState ...
+func DepthState(test bool, compare i32, write bool) {
+	DepthTest(test)
+	DepthFunc(compare)
+	DepthWrite(write)
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func depth_test(value bool) {
+// DepthTest ...
+func DepthTest(value bool) {
 	if (value) {
-		enable_depth()
+		EnableDepth()
 	} else {
-		disable_depth()
+		DisableDepth()
 	}
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func enable_depth() () {
+// EnableDepth ...
+func EnableDepth() () {
 	if (g_depthTest == false) {
 		g_depthTest = true
 		gl.Enable(gl.DEPTH_TEST)
@@ -265,9 +250,8 @@ func enable_depth() () {
 	}
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func disable_depth() () {
+// DisableDepth ...
+func DisableDepth() () {
 	if (g_depthTest == true) {
 		g_depthTest = false
 		gl.Disable(gl.DEPTH_TEST)
@@ -275,9 +259,8 @@ func disable_depth() () {
 	}
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func depth_func(value i32) {
+// DepthFunc ...
+func DepthFunc(value i32) {
 	if (g_depthFunc != value) {
 		g_depthFunc = value
 		gl.DepthFunc(g_depthFunc)
@@ -285,9 +268,8 @@ func depth_func(value i32) {
 	}
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func depth_write(value bool) {
+// DepthWrite ...
+func DepthWrite(value bool) {
 	if (g_depthMask != value) {
 		g_depthMask = value
 		gl.DepthMask(g_depthMask)
@@ -295,28 +277,25 @@ func depth_write(value bool) {
 	}
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func stencil_state(test bool, compare i32, ref i32, mask i32, sfail i32, dpfail i32, dppass i32, write i32) {
-	stencil_test(test)
-	stencil_func(compare, ref, mask)
-	stencil_op(sfail, dpfail, dppass)
-	stencil_write(write)
+// StencilState ...
+func StencilState(test bool, compare i32, ref i32, mask i32, sfail i32, dpfail i32, dppass i32, write i32) {
+	StencilTest(test)
+	StencilFunc(compare, ref, mask)
+	StencilOp(sfail, dpfail, dppass)
+	StencilWrite(write)
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func stencil_test(value bool) {
+// StencilTest ...
+func StencilTest(value bool) {
 	if (value) {
-		enable_stencil()
+		EnableStencil()
 	} else {
-		disable_stencil()
+		DisableStencil()
 	}
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func enable_stencil() () {
+// EnableStencil ...
+func EnableStencil() () {
 	if (g_stencilTest == false) {
 		g_stencilTest = true
 		gl.Enable(gl.STENCIL_TEST)
@@ -324,9 +303,8 @@ func enable_stencil() () {
 	}
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func disable_stencil() () {
+// DisableStencil ...
+func DisableStencil() () {
 	if (g_stencilTest == true) {
 		g_stencilTest = false
 		gl.Disable(gl.STENCIL_TEST)
@@ -334,9 +312,8 @@ func disable_stencil() () {
 	}
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func stencil_func(compare i32, ref i32, mask i32) {
+// StencilFunc ...
+func StencilFunc(compare i32, ref i32, mask i32) {
 	if (g_stencilFunc != compare ||
 		g_stencilFuncRef != ref ||
 		g_stencilFuncMask != mask) {
@@ -348,9 +325,8 @@ func stencil_func(compare i32, ref i32, mask i32) {
 	}
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func stencil_op(sfail i32, dpfail i32, dppass i32) {
+// StencilOp ...
+func StencilOp(sfail i32, dpfail i32, dppass i32) {
 	if (g_stencilOpFail != sfail ||
 		g_stencilOpDepthFail != dpfail ||
 		g_stencilOpDepthPass != dppass) {
@@ -362,9 +338,8 @@ func stencil_op(sfail i32, dpfail i32, dppass i32) {
 	}
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func stencil_write(write i32) {
+// StencilWrite ...
+func StencilWrite(write i32) {
 	if (g_stencilWrite != write) {
 		g_stencilWrite = write
 		gl.StencilMask(g_stencilWrite)
@@ -372,9 +347,8 @@ func stencil_write(write i32) {
 	}
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func clear(buffers i32, color mat.v4, depth f64, stencil i32) () {
+// Clear ...
+func Clear(buffers i32, color mat.v4, depth f64, stencil i32) () {
 	if ((g_clearColor.x != color.x) ||
 		(g_clearColor.y != color.y) ||
 		(g_clearColor.z != color.z) ||
@@ -395,9 +369,8 @@ func clear(buffers i32, color mat.v4, depth f64, stencil i32) () {
 	panicIf(GlError(), "gl.Clear")
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func color_write(red bool, green bool, blue bool, alpha bool) {
+// ColorWrite ...
+func ColorWrite(red bool, green bool, blue bool, alpha bool) {
 	if (g_colorMaskRed != red ||
 		g_colorMaskGreen != green ||
 		g_colorMaskBlue != blue ||
@@ -475,7 +448,7 @@ func Init(width i32, height i32, dataDir str)() {
 	gl.ClearColor(g_clearColor.x, g_clearColor.y, g_clearColor.z, g_clearColor.w)
 	panicIf(GlError(), "gl.ClearColor")
 
-	set_viewport(gfx_viewportBounds)
+	SetViewport(gfx_viewportBounds)
 
 	g_fxVertexColor = CreateEffect("vsPassThrough", "psVertexColor")
 	EffectBindAttribute(g_fxVertexColor, 0, "i_v3Position")
@@ -568,9 +541,8 @@ func Free()() {
 	}
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func set_viewport(bounds mat.v4) {
+// SetViewport ...
+func SetViewport(bounds mat.v4) {
 
 	var x i32 = f32.i32(bounds.x)
 	var y i32 = f32.i32(bounds.y)
@@ -590,9 +562,8 @@ func set_viewport(bounds mat.v4) {
 	}
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func set_scissor(bounds mat.v4) {
+// SetScissor ...
+func SetScissor(bounds mat.v4) {
 
 	if (gfx_scissor == false) {
 		gfx_scissor = true
@@ -620,36 +591,21 @@ func set_scissor(bounds mat.v4) {
 	}
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func bind_depthbuffer(depthbuffer i32) {
+// BindDepthBuffer ...
+func BindDepthBuffer(depthbuffer i32) {
 	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthbuffer)
 	panicIf(GlError(), "gl.FramebufferRenderbuffer")
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func bind_stencilbuffer(stencilbuffer i32) {
+// BindStencilBuffer ...
+func BindStencilBuffer(stencilbuffer i32) {
 	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.STENCIL_ATTACHMENT, gl.RENDERBUFFER, stencilbuffer)
 	panicIf(GlError(), "glFramebufferRenderbuffer")
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func bind_framebuffer(framebuffer i32) {
+// BindFrameBuffer ...
+func BindFrameBuffer(framebuffer i32) {
 	gl.BindFramebuffer(gl.FRAMEBUFFER, framebuffer)
 	panicIf(GlError(), "gl.BindFramebuffer")
-}
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func measure_glyph(name str, glyph i32) (w i32, h i32) {
-	w, h = gltext.GlyphMetrics(name, glyph)
-}
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func measure_text(name str, text str) (w i32, h i32) {
-	w, h = gltext.Metrics(name, text)
 }
 

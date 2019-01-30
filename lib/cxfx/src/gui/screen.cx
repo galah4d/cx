@@ -251,7 +251,7 @@ func ScreenRender(id ScreenId, clip mat.v4, stack i32) () {
 		// opaque
 		fps.StartProfile(g_profileRenderOpaqueVertexColoredTriangles)
 		if gfx.MeshIsEmpty(g_opaqueVertexColoredTriangles) == false {
-			gfx.disable_blending()
+			gfx.DisableBlending()
 			gfx.EffectUse(gfx.g_fxVertexColor)
 			gfx.MeshRender(g_opaqueVertexColoredTriangles)
 		}
@@ -263,7 +263,7 @@ func ScreenRender(id ScreenId, clip mat.v4, stack i32) () {
 
 		fps.StartProfile(g_profileRenderOpaqueVertexColoredLines)
 		if gfx.MeshIsEmpty(g_opaqueVertexColoredLines) == false {
-			gfx.disable_blending()
+			gfx.DisableBlending()
 			gfx.EffectUse(gfx.g_fxVertexColor)
 			gfx.MeshRender(g_opaqueVertexColoredLines)
 		}
@@ -276,7 +276,7 @@ func ScreenRender(id ScreenId, clip mat.v4, stack i32) () {
 
 		fps.StartProfile(g_profileRenderAlphaVertexColoredTriangles)
 		if gfx.MeshIsEmpty(g_alphaVertexColoredTriangles) == false {
-			gfx.enable_blending(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+			gfx.EnableBlending(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 			gfx.EffectUse(gfx.g_fxVertexColor)
 			gfx.MeshRender(g_alphaVertexColoredTriangles)
 		}
@@ -284,10 +284,10 @@ func ScreenRender(id ScreenId, clip mat.v4, stack i32) () {
 	fps.StopProfile(g_profileRenderAlphaVertexColoredTriangles)
 
 
-	/*gfx.color_write(false, false, false, false)
-	  gfx.disable_depth()
-	  gfx.disable_blending()
-	  gfx.stencil_state(true, gl.ALWAYS, 256, 256, gl.KEEP, gl.REPLACE, gl.REPLACE, 256)
+	/*gfx.ColorWrite(false, false, false, false)
+	  gfx.DisableDepth()
+	  gfx.DisableBlending()
+	  gfx.StencilState(true, gl.ALWAYS, 256, 256, gl.KEEP, gl.REPLACE, gl.REPLACE, 256)
 
 	  var screenPair i32 = get_focus_pair(id)
 	  var currentFocus i32 = g_focused[screenPair].currentFocus

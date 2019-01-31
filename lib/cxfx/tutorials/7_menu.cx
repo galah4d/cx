@@ -89,13 +89,13 @@ func main()() {
 			{
 				// Update ...
 				fps.StartProfile(prfUpdate)
-				gui.update(f.deltaTime)
-				gui.resize()
+				gui.Update(f.deltaTime)
+				gui.Resize()
 				fps.StopProfile(prfUpdate)
 
 				// Render ...
 				fps.StartProfile(prfRender)
-				gui.render()
+				gui.Render()
 				fps.StopProfile(prfRender)
 			}
 			fps.StopProfile(prfFrame)

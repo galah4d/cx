@@ -165,7 +165,7 @@ func ScreenProcessEvent(id ScreenId, event *app.Event) (out i32) {
 	if onEvent.index >= 0 {
 		call_i32_i32(onEvent, id.base.control, -1)
 	}
-	out = control_process_event(id.base, event)
+	out = ControlProcessEvent(id.base, event)
 
 }
 
@@ -218,7 +218,7 @@ func ScreenUpdate(id ScreenId, deltaTime f64) () {
 // ScreenResize ...
 func ScreenResize(id ScreenId) () {
 	panicIfNot(IsValidScreen(id), "invalid id")
-	control_resize(id.base)
+	ControlResize(id.base)
 }
 
 // ScreenRender ...
@@ -237,7 +237,7 @@ func ScreenRender(id ScreenId, clip mat.v4, stack i32) () {
 
 		clip = gfx.PushScissor(g_controls[id.base.control].name, gfx.gfx_viewportBounds)
 		//printf("SCREEN CLIP %f, %f, %f, %f\n", clip.x, clip.y, clip.z, clip.w)
-		control_render(id.base, clip, stack)
+		ControlRender(id.base, clip, stack)
 		gfx.PopScissor()
 
 		//panicIfNot(gfx.g_scissorCount == 0, "invalid scissor stack")
@@ -303,4 +303,92 @@ func ScreenRender(id ScreenId, clip mat.v4, stack i32) () {
 	  gfx.MeshRender(g_opaqueVertexColoredTriangles)
 	  }*/
 }
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+/*func skip_screens()() {
+	var next bool = true
+	var skipId ScreenId = g_currentScreen
+	for (next == true) {
+		var nextId ScreenId = g_screens[skipId].on_next
+		if (IsValidScreen(nextId)) {
+			if (IsValidScreen(g_screens[nextId.screen].on_exit) ||
+				IsValidScreen(g_screens[nextId.screen].on_enter) ||
+				IsValidScreen(g_screens[nextId.screen].on_menu)) {
+				next = false
+			}
+			skipId = nextId
+		} else {
+			next = false
+		}
+	}
+	g_nextScreen = skipId
+}*/
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func hide_modal(id ScreenId) {
+	panicIfNot(IsValidScreen(id), "hide_modal : invalid screen")
+	var modalCount i32 = len(g_modals)
+	panicIfNot(modalCount > 0, "hide_modal : invalid count")
+	if (modalCount > 0) {
+		var modalIndex i32 = modalCount - 1
+		printf("MODAL_INDEX %d, COUNT %d\n", modalIndex, modalCount)
+		var modalScreen ScreenId = g_modals[modalIndex]
+		panicIfNot(modalScreen.screen == id.screen, "hide_modal : invalid screen")
+		if (modalScreen.screen == id.screen) {
+			printf("ScreenHide\n")
+			ScreenHide(modalScreen)
+			g_modals = resize(g_modals, modalIndex)
+			g_hotScreen = InvalidScreen()
+		}
+	}
+	printf("AFTER HIDE_MODEL\n")
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func modal_is_visible(id ScreenId) (out bool) {
+	out = false
+	panicIfNot(IsValidScreen(id), "modal_is_visible : invalid id")
+	var modal bool = g_screens[id.screen].modal
+	if (modal == true) {
+		var modalCount i32 = len(g_modals)
+		if (modalCount > 0) {
+			var lastIndex i32 = modalCount - 1
+			var left i32 = g_modals[lastIndex].screen
+			var right i32 = id.screen
+			//printf("left %d, right %d\n", left, right)
+			if (left == right) {
+				out = true
+			}
+		}
+	}
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func ScreenHide(id ScreenId) () {
+	panicIfNot(IsValidScreen(id), "ScreenHide : invalid screen")
+}
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+func ScreenShow(id ScreenId) () {
+	panicIfNot(IsValidScreen(id), "ScreenShow : invalid id")
+	g_hotScreen = id
+	ControlPrint("ScreenShow : ", id.base, false)
+	RebuildFocus(id)
+
+	var modal bool = g_screens[id.screen].modal
+	if (modal == true) {
+		var modalCount i32 = len(g_modals)
+		g_modals = append(g_modals, id)
+	} else {
+		g_nextScreen = id
+		g_transitionTime = 0.0D
+	}
+
+}
+
 

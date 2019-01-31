@@ -66,7 +66,7 @@ func PictureSetAlign(id PictureId, align i32) {
 // PictureProcessEvent ...
 func PictureProcessEvent(id PictureId, event *app.Event) (out i32) {
 	panicIfNot(IsValidPicture(id), "invalid id")
-	out = control_process_event(id.base, event)
+	out = ControlProcessEvent(id.base, event)
 }
 
 // PictureMeasure ...
@@ -104,7 +104,7 @@ func PictureResize(id PictureId) () {
 
 	var pixelBounds mat.v2 = mat.v2_(i32.f32(i32Width), i32.f32(i32Height))
 
-	control_resize_(id.base, pixelBounds, pixelBounds)
+	controlResize(id.base, pixelBounds, pixelBounds)
 	var controlIndex i32 = id.base.control
 	var position mat.v2 = g_controls[controlIndex].renderPosition
 	//var size mat.v2 = g_controls[controlIndex].renderSize
@@ -115,7 +115,7 @@ func PictureResize(id PictureId) () {
 
 	var newSize mat.v2 = mat.v2_mul(scale, pixelBounds)
 	//printf("NEW SIZE %f, %f - %f, %f -> %f, %f\n", pixelBounds.x, pixelBounds.y, newSize.x, newSize.y, size.x, size.y)
-	position.x, position.y = align_control(id.base, g_pictures[id.picture].pictureAlign, 0.0, 0.0, newSize.x, newSize.y, position.x, position.y, size.x, size.y, padding)
+	position.x, position.y = ControlAlign(id.base, g_pictures[id.picture].pictureAlign, 0.0, 0.0, newSize.x, newSize.y, position.x, position.y, size.x, size.y, padding)
 	//printf("PICTURE_POSITION %f, %f\n", position.x, position.y)
 	g_pictures[id.picture].picturePosition = position
 
@@ -129,17 +129,17 @@ func PictureResize(id PictureId) () {
 func PictureRender(id PictureId, clip mat.v4, stack i32) () {
 	panicIfNot(IsValidPicture(id), "invalid id")
 
-	control_render(id.base, clip, stack)
+	ControlRender(id.base, clip, stack)
 
 	var controlIndex i32 = id.base.control
 
 	var color mat.v4 = gfx.gfx_white
-	var skin skin_id = g_controls[controlIndex].skin
-	panicIfNot(is_valid_skin(skin) || skin.skin == -1, "invalid id")
-	if is_valid_skin(skin) {
-		var backLayer layer_id = g_skins[skin.skin].back
-		panicIfNot(is_valid_layer(backLayer) || backLayer.layer == -1, "invalid id")
-		if is_valid_layer(backLayer) {
+	var skin SkinId = g_controls[controlIndex].skin
+	panicIfNot(IsValidSkin(skin) || skin.skin == -1, "invalid id")
+	if IsValidSkin(skin) {
+		var backLayer LayerId = g_skins[skin.skin].back
+		panicIfNot(IsValidLayer(backLayer) || backLayer.layer == -1, "invalid id")
+		if IsValidLayer(backLayer) {
 			color = g_layers[backLayer.layer].surface
 		}
 	}
@@ -188,7 +188,7 @@ func PictureRender(id PictureId, clip mat.v4, stack i32) () {
 		//printf("renderBounds %f, %f, %f, %f\n", renderBounds.x, renderBounds.y, renderBounds.z, renderBounds.w)
 		var renderClips mat.v4 = gfx.PushScissor(g_controls[controlIndex].name, renderBounds)
 		var meshId gfx.MeshId = gfx.BatchGetMesh(batch)
-		gfx.MeshAppendOrthoQuad(meshId, renderBounds, mat.v4_(0.0, 0.0, 1.0, 1.0), color, renderClips, compute_depth(stack))
+		gfx.MeshAppendOrthoQuad(meshId, renderBounds, mat.v4_(0.0, 0.0, 1.0, 1.0), color, renderClips, ComputeDepth(stack))
 		gfx.PopScissor()
 	}
 }

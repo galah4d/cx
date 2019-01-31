@@ -67,7 +67,7 @@ func TextureCreateFont(name str, path str, scale i32, min i32, max i32, dir i32,
 func MeshAppendText(id MeshId, texture Texture, name str, position mat.v2, scale mat.v2, color mat.v4, text str, debug bool, color0 mat.v4, color1 mat.v4, clip mat.v4, depth f32) {
 //	printf("NAME %s\n", name)
 //	if (name == "awesomeBold_25") {
-	panicIfNot(IsValidMesh(id), "append_text : invalid id")
+	panicIfNot(IsValidMesh(id), "invalid id")
 	var index i32 = 0
 	var size i32 = 0
 

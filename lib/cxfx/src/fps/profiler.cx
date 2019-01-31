@@ -2,6 +2,8 @@ package fps
 
 import "mat"
 
+// TODO : rename *Profile in Profile*
+
 // Globals ...
 var g_profiles []Profile
 var g_profileStack i32 = 0
@@ -49,7 +51,7 @@ func CreateProfile(name str) (out ProfileId) {
 		if (name == profileName) {
 			out.index = -1
 			i = profileCount
-			panicIf(true, "CreateProfile : duplicate entry")
+			panicIf(true, "duplicate entry")
 		}
 	}
 
@@ -81,7 +83,7 @@ func ClearProfiles(full bool) {
 
 // ClearProfile ...
 func ClearProfile(this ProfileId, full bool) { // ##1 perf pointer deref vs index
-	panicIfNot(IsValidProfile(this), "ProfileId.Clear : invalid id")
+	panicIfNot(IsValidProfile(this), "invalid id")
 
 	g_profiles[this.index].begin = 0.0D
 	g_profiles[this.index].delta = 0.0D
@@ -93,13 +95,13 @@ func ClearProfile(this ProfileId, full bool) { // ##1 perf pointer deref vs inde
 		g_profiles[this.index].min = mat.F64_MAX
 	}
 	var stack i32 = g_profiles[this.index].stack
-	panicIf(stack !=  0, "ProfileId.Clear : invalid stack")
+	panicIf(stack !=  0, "invalid stack")
 	g_profiles[this.index].stack = 0
 }
 
 // PrintProfile ...
 func PrintProfile(this ProfileId) {
-	panicIfNot(IsValidProfile(this), "ProfileId.Print : invalid id")
+	panicIfNot(IsValidProfile(this), "invalid id")
 	var cur f64 = g_profiles[this.index].delta
 	var count f64 = g_profiles[this.index].count
 	var sum f64 = g_profiles[this.index].sum
@@ -138,7 +140,7 @@ func CreateStartProfile(this ProfileId, name str) (out ProfileId) {
 
 // StartProfile ...
 func StartProfile(this ProfileId) () {
-	panicIfNot(IsValidProfile(this), "ProfileId.Start : invalid id")
+	panicIfNot(IsValidProfile(this), "invalid id")
 	g_profiles[this.index].begin = i64.f64(time.UnixNano()) / 1000000000.0D // ##1 refactor
 	var stack i32 = g_profiles[this.index].stack
 	g_profiles[this.index].stack = stack + 1
@@ -154,7 +156,7 @@ func StartProfile(this ProfileId) () {
 
 // StopProfile ...
 func StopProfile(this ProfileId) {
-	panicIfNot(IsValidProfile(this), "ProfileId.Stop : invalid id")
+	panicIfNot(IsValidProfile(this), "invalid id")
 	var end f64 = i64.f64(time.UnixNano()) / 1000000000.0D // ##1 refactor
 	var begin f64 = g_profiles[this.index].begin
 	var delta f64 = end - begin
@@ -169,9 +171,9 @@ func StopProfile(this ProfileId) {
 	g_profiles[this.index].count = count + 1.0D
 	g_profiles[this.index].max = mat.max_f64(max, delta)
 	g_profiles[this.index].min = mat.min_f64(min, delta)
-	panicIf(stack <= 0, "ProfileId.Stop : invalid stack")
+	panicIf(stack <= 0, "invalid stack")
 	g_profiles[this.index].stack = stack - 1
-	panicIf(g_profileStack <= 0, "ProfileId.Stop : invalid stack")
+	panicIf(g_profileStack <= 0, "invalid stack")
 	g_profileStack = g_profileStack - 1
 }
 

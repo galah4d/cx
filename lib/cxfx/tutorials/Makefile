@@ -100,8 +100,10 @@
 		../src/gfx/text.cx\
 		../src/gfx/target.cx\
 		../src/gfx/scissor.cx\
+		../src/gui/callback.cx\
 		../src/gui/layer.cx\
 		../src/gui/skin.cx\
+		../src/gui/scope.cx\
 		../src/gui/font.cx\
 		../src/gui/animation.cx\
 		../src/gui/control.cx\
@@ -109,6 +111,17 @@
 		../src/gui/picture.cx\
 		../src/gui/screen.cx\
 		../src/gui/interface.cx\
+		../src/gui/focus.cx\
+		../src/gui/splitter.cx\
+		../src/gui/window.cx\
+		../src/gui/keyboard.cx\
+		../src/gui/partition.cx\
+		../src/gui/list.cx\
+		../src/gui/graph.cx\
+		../src/gui/lifter.cx\
+		../src/gui/scroller.cx\
+		../src/gui/binder.cx\
+		../src/gui/combo.cx\
 		7_menu.cx ++data=../resources
 
 8_button:
@@ -128,8 +141,10 @@
 		../src/gfx/text.cx\
 		../src/gfx/target.cx\
 		../src/gfx/scissor.cx\
+		../src/gui/callback.cx\
 		../src/gui/layer.cx\
 		../src/gui/skin.cx\
+		../src/gui/scope.cx\
 		../src/gui/font.cx\
 		../src/gui/animation.cx\
 		../src/gui/control.cx\
@@ -137,6 +152,17 @@
 		../src/gui/picture.cx\
 		../src/gui/screen.cx\
 		../src/gui/interface.cx\
+		../src/gui/focus.cx\
+		../src/gui/splitter.cx\
+		../src/gui/window.cx\
+		../src/gui/keyboard.cx\
+		../src/gui/partition.cx\
+		../src/gui/list.cx\
+		../src/gui/graph.cx\
+		../src/gui/lifter.cx\
+		../src/gui/scroller.cx\
+		../src/gui/binder.cx\
+		../src/gui/combo.cx\
 		8_button.cx ++data=../resources
 
 9_dialog:
@@ -156,8 +182,10 @@
 		../src/gfx/text.cx\
 		../src/gfx/target.cx\
 		../src/gfx/scissor.cx\
+		../src/gui/callback.cx\
 		../src/gui/layer.cx\
 		../src/gui/skin.cx\
+		../src/gui/scope.cx\
 		../src/gui/font.cx\
 		../src/gui/animation.cx\
 		../src/gui/control.cx\
@@ -165,6 +193,17 @@
 		../src/gui/picture.cx\
 		../src/gui/screen.cx\
 		../src/gui/interface.cx\
+		../src/gui/focus.cx\
+		../src/gui/splitter.cx\
+		../src/gui/window.cx\
+		../src/gui/keyboard.cx\
+		../src/gui/partition.cx\
+		../src/gui/list.cx\
+		../src/gui/graph.cx\
+		../src/gui/lifter.cx\
+		../src/gui/scroller.cx\
+		../src/gui/binder.cx\
+		../src/gui/combo.cx\
 		9_dialog.cx ++data=../resources
 
 10_custom_menu:
@@ -184,8 +223,10 @@
 		../src/gfx/text.cx\
 		../src/gfx/target.cx\
 		../src/gfx/scissor.cx\
+		../src/gui/callback.cx\
 		../src/gui/layer.cx\
 		../src/gui/skin.cx\
+		../src/gui/scope.cx\
 		../src/gui/font.cx\
 		../src/gui/animation.cx\
 		../src/gui/control.cx\
@@ -193,6 +234,17 @@
 		../src/gui/picture.cx\
 		../src/gui/screen.cx\
 		../src/gui/interface.cx\
+		../src/gui/focus.cx\
+		../src/gui/splitter.cx\
+		../src/gui/window.cx\
+		../src/gui/keyboard.cx\
+		../src/gui/partition.cx\
+		../src/gui/list.cx\
+		../src/gui/graph.cx\
+		../src/gui/lifter.cx\
+		../src/gui/scroller.cx\
+		../src/gui/binder.cx\
+		../src/gui/combo.cx\
 		10_custom_menu.cx ++data=../resources
 
 11_perspective:
@@ -212,8 +264,10 @@
 		../src/gfx/text.cx\
 		../src/gfx/target.cx\
 		../src/gfx/scissor.cx\
+		../src/gui/callback.cx\
 		../src/gui/layer.cx\
 		../src/gui/skin.cx\
+		../src/gui/scope.cx\
 		../src/gui/font.cx\
 		../src/gui/animation.cx\
 		../src/gui/control.cx\
@@ -221,6 +275,17 @@
 		../src/gui/picture.cx\
 		../src/gui/screen.cx\
 		../src/gui/interface.cx\
+		../src/gui/focus.cx\
+		../src/gui/splitter.cx\
+		../src/gui/window.cx\
+		../src/gui/keyboard.cx\
+		../src/gui/partition.cx\
+		../src/gui/list.cx\
+		../src/gui/graph.cx\
+		../src/gui/lifter.cx\
+		../src/gui/scroller.cx\
+		../src/gui/binder.cx\
+		../src/gui/combo.cx\
 		11_perspective.cx ++data=../resources
 
 12_sound:
@@ -240,8 +305,10 @@
 		../src/gfx/text.cx\
 		../src/gfx/target.cx\
 		../src/gfx/scissor.cx\
+		../src/gui/callback.cx\
 		../src/gui/layer.cx\
 		../src/gui/skin.cx\
+		../src/gui/scope.cx\
 		../src/gui/font.cx\
 		../src/gui/animation.cx\
 		../src/gui/control.cx\
@@ -249,6 +316,17 @@
 		../src/gui/picture.cx\
 		../src/gui/screen.cx\
 		../src/gui/interface.cx\
+		../src/gui/focus.cx\
+		../src/gui/splitter.cx\
+		../src/gui/window.cx\
+		../src/gui/keyboard.cx\
+		../src/gui/partition.cx\
+		../src/gui/list.cx\
+		../src/gui/graph.cx\
+		../src/gui/lifter.cx\
+		../src/gui/scroller.cx\
+		../src/gui/binder.cx\
+		../src/gui/combo.cx\
 		../src/snd/sounds.cx\
 		../src/snd/audio.cx\
 		../src/snd/voice.cx\
@@ -272,8 +350,10 @@
 		../src/gfx/text.cx\
 		../src/gfx/target.cx\
 		../src/gfx/scissor.cx\
+		../src/gui/callback.cx\
 		../src/gui/layer.cx\
 		../src/gui/skin.cx\
+		../src/gui/scope.cx\
 		../src/gui/font.cx\
 		../src/gui/animation.cx\
 		../src/gui/control.cx\
@@ -281,6 +361,17 @@
 		../src/gui/picture.cx\
 		../src/gui/screen.cx\
 		../src/gui/interface.cx\
+		../src/gui/focus.cx\
+		../src/gui/splitter.cx\
+		../src/gui/window.cx\
+		../src/gui/keyboard.cx\
+		../src/gui/partition.cx\
+		../src/gui/list.cx\
+		../src/gui/graph.cx\
+		../src/gui/lifter.cx\
+		../src/gui/scroller.cx\
+		../src/gui/binder.cx\
+		../src/gui/combo.cx\
 		../src/snd/sounds.cx\
 		../src/snd/audio.cx\
 		../src/snd/voice.cx\
@@ -305,8 +396,10 @@
 		../src/gfx/text.cx\
 		../src/gfx/target.cx\
 		../src/gfx/scissor.cx\
+		../src/gui/callback.cx\
 		../src/gui/layer.cx\
 		../src/gui/skin.cx\
+		../src/gui/scope.cx\
 		../src/gui/font.cx\
 		../src/gui/animation.cx\
 		../src/gui/control.cx\
@@ -314,6 +407,17 @@
 		../src/gui/picture.cx\
 		../src/gui/screen.cx\
 		../src/gui/interface.cx\
+		../src/gui/focus.cx\
+		../src/gui/splitter.cx\
+		../src/gui/window.cx\
+		../src/gui/keyboard.cx\
+		../src/gui/partition.cx\
+		../src/gui/list.cx\
+		../src/gui/graph.cx\
+		../src/gui/lifter.cx\
+		../src/gui/scroller.cx\
+		../src/gui/binder.cx\
+		../src/gui/combo.cx\
 		../src/snd/sounds.cx\
 		../src/snd/audio.cx\
 		../src/snd/voice.cx\

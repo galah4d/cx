@@ -5,7 +5,7 @@ var g_scissors[]mat.v4
 
 // PushScissor ...
 func PushScissor(name str, bounds mat.v4) (out mat.v4) {
-	// panicIfNot(bounds.z > 0 && bounds.w > 0, "PushScissor : invalid bounds")
+	// panicIfNot(bounds.z > 0 && bounds.w > 0, "invalid bounds")
 	out = bounds
 	var scissorCount i32 = len(g_scissors)
 	if (scissorCount > 0) {
@@ -87,7 +87,7 @@ func PushScissor(name str, bounds mat.v4) (out mat.v4) {
 // PopScissor ...
 func PopScissor() {
 	var scissorCount i32 = len(g_scissors)
-	panicIfNot(scissorCount > 0, "PopScissor : underflow")
+	panicIfNot(scissorCount > 0, "underflow")
 	g_scissors = resize(g_scissors, scissorCount - 1)
 	//if (scissorCount > 0) {
 	//	var scissor i32 = scissorCount - 1

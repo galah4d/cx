@@ -16,7 +16,7 @@ type LabelId struct {
 // Label ...
 type Label struct {
 	id LabelId
-	font font_id
+	font FontId
 	batch gfx.BatchId
 	text str
 	rune i32
@@ -47,7 +47,7 @@ func LabelCreate(name str) (out LabelId) {
 
 	var label Label
 	label.id = out
-	label.font = invalid_font()
+	label.font = InvalidFont()
 	label.batch = gfx.InvalidBatch()
 	label.text = ""
 	label.rune = -1
@@ -63,9 +63,9 @@ func LabelCreate(name str) (out LabelId) {
 }
 
 // LabelSetFont ...
-func LabelSetFont(id LabelId, font font_id) {
+func LabelSetFont(id LabelId, font FontId) {
 	panicIfNot(IsValidLabel(id), "invalid id")
-	panicIfNot(is_valid_font(font), "invalid font")
+	panicIfNot(IsValidFont(font), "invalid font")
 	g_labels[id.label].font = font
 }
 
@@ -112,7 +112,7 @@ func LabelSetOnState(i_id LabelId, packageName str, functionName str) {
 // LabelProcessEvent ...
 func LabelProcessEvent(id LabelId, event *app.Event) (out i32) {
 	panicIfNot(IsValidLabel(id), "invalid label")
-	out = control_process_event(id.base, event)
+	out = ControlProcessEvent(id.base, event)
 
 	if (out == app.EVENT_UNUSED) {
 		var index i32 = id.base.control
@@ -167,13 +167,13 @@ func LabelMeasure(id LabelId) (width f32, height f32) { // ##1 factorize with La
 	var i32Hheight i32
 	var text str = g_labels[id.label].text
 
-	var fontId font_id = g_labels[id.label].font
+	var fontId FontId = g_labels[id.label].font
 	var fontIndex i32 = fontId.font
-	panicIfNot(is_valid_font(fontId), "invalid font")
+	panicIfNot(IsValidFont(fontId), "invalid font")
 
 	var fontSize i32 = g_labels[id.label].textSize
 	//printf("fontID %d, fontSize %d\n", fontId.font, fontSize)
-	var textureIndex i32 = font_get_texture_index(fontId, fontSize)
+	var textureIndex i32 = FontGetTextureIndex(fontId, fontSize)
 
 	//printf("fontIndex %d, textureIndex %d\n", fontIndex, textureIndex)
 	var fontName str = g_fonts[fontIndex].names[textureIndex] // ##0 auto select best size
@@ -207,13 +207,13 @@ func LabelResize(id LabelId) () {
 	var i32Hheight i32
 	var text str = g_labels[id.label].text
 
-	var fontId font_id = g_labels[id.label].font
+	var fontId FontId = g_labels[id.label].font
 	var fontIndex i32 = fontId.font
-	panicIfNot(is_valid_font(fontId), "invalid font")
+	panicIfNot(IsValidFont(fontId), "invalid font")
 
 	var fontSize i32 = g_labels[id.label].textSize
 	//printf("fontID %d, fontSize %d\n", fontId.font, fontSize)
-	var textureIndex i32 = font_get_texture_index(fontId, fontSize)
+	var textureIndex i32 = FontGetTextureIndex(fontId, fontSize)
 
 	//printf("fontIndex %d, textureIndex %d\n", fontIndex, textureIndex)
 	var fontName str = g_fonts[fontIndex].names[textureIndex] // ##0 auto select best size
@@ -238,7 +238,7 @@ func LabelResize(id LabelId) () {
 	/*if (id.base.control == 36) {
 	  printf("AUTOBOUNDS %f, %f, PADDING %f, %f\n", bounds.x, bounds.y, paddingX, paddingY)
 	  }*/
-	control_resize_(id.base, pixelBounds, autoBounds)
+	controlResize(id.base, pixelBounds, autoBounds)
 
 	var position mat.v2 = g_controls[controlIndex].renderPosition
 	//var size mat.v2 = g_controls[controlIndex].renderSize
@@ -252,7 +252,7 @@ func LabelResize(id LabelId) () {
 	  printf("PIXEL_BOUNDS %f, %f, AUTO_BOUNSD %f, %f, SCALE %f, %f\n", pixelBounds.x, pixelBounds.y, autoBounds.x, autoBounds.y, scale.x, scale.y)
 	  }*/
 
-	position.x, position.y = align_control(id.base, g_labels[id.label].textAlign, 0.0, 0.0, newSize.x, newSize.y, position.x, position.y, size.x, size.y, padding)
+	position.x, position.y = ControlAlign(id.base, g_labels[id.label].textAlign, 0.0, 0.0, newSize.x, newSize.y, position.x, position.y, size.x, size.y, padding)
 	//position.y = position.y - newSize.y / 2.0
 	g_labels[id.label].textPosition = position
 	//printf("LABEL_TEXT_POSITION %f, %f\n", position.x, position.y)
@@ -265,13 +265,13 @@ func LabelResize(id LabelId) () {
 func LabelRender(id LabelId, clip mat.v4, stack i32) () {
 	panicIfNot(IsValidLabel(id), "invalid id")
 	//ControlPrint("LabelRender : ", id.base, false)
-	control_render(id.base, clip, stack)
+	ControlRender(id.base, clip, stack)
 
-	var fontId font_id = g_labels[id.label].font
-	panicIfNot(is_valid_font(fontId), "invalid font")
+	var fontId FontId = g_labels[id.label].font
+	panicIfNot(IsValidFont(fontId), "invalid font")
 
 	var fontSize i32 = g_labels[id.label].textSize
-	var textureIndex i32 = font_get_texture_index(fontId, fontSize)
+	var textureIndex i32 = FontGetTextureIndex(fontId, fontSize)
 
 	var fontTexture gfx.Texture = g_fonts[fontId.font].textures[textureIndex] // ##0 auto select best size
 	var fontName str = g_fonts[fontId.font].names[textureIndex]
@@ -294,11 +294,11 @@ func LabelRender(id LabelId, clip mat.v4, stack i32) () {
 		if (rune >= 0) {
 			gfx.MeshAppendGlyph(meshId, fontTexture, fontName,
 			renderPosition, g_controls[control].scale,
-			mat.v4_(1.0, 1.0, 1.0, 1.0), rune, true, g_labels[id.label].color_0, g_labels[id.label].color_1, renderClips, compute_depth(stack))
+			mat.v4_(1.0, 1.0, 1.0, 1.0), rune, true, g_labels[id.label].color_0, g_labels[id.label].color_1, renderClips, ComputeDepth(stack))
 		} else {
 			gfx.MeshAppendText(meshId, fontTexture, fontName,
 			renderPosition, g_controls[control].scale,
-			mat.v4_(1.0, 1.0, 1.0, 1.0), g_labels[id.label].text, true, g_labels[id.label].color_0, g_labels[id.label].color_1, renderClips, compute_depth(stack))
+			mat.v4_(1.0, 1.0, 1.0, 1.0), g_labels[id.label].text, true, g_labels[id.label].color_0, g_labels[id.label].color_1, renderClips, ComputeDepth(stack))
 		}
 		gfx.PopScissor()
 	}

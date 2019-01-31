@@ -42,12 +42,12 @@ func TemplateCreate(name str) (out TemplateId) {
 	template.id = out
 
 	g_templates = append(g_templates, template)
-	panicIfNot(IsValidTemplate(out), "create_template : invalid id")
+	panicIfNot(IsValidTemplate(out), "invalid id")
 }
 
 // TemplateProcessEvent ...
 func TemplateProcessEvent(id TemplateId, event *app.Event) (out i32) {
-	panicIfNot(IsValidTemplate(id), "TemplateProcessEvent : invalid id")
+	panicIfNot(IsValidTemplate(id), "invalid id")
 	var visible i32 = g_controls[id.base.control].visible
 	if (visible > 0) {
 		out = ControlProcessEvent(id.base, event)
@@ -56,7 +56,7 @@ func TemplateProcessEvent(id TemplateId, event *app.Event) (out i32) {
 
 // TemplateResize ...
 func TemplateResize(id TemplateId) () {
-	panicIfNot(IsValidTemplate(id), "resize_template : invalid id")
+	panicIfNot(IsValidTemplate(id), "invalid id")
 	var visible i32 = g_controls[id.base.control].visible
 	if (visible > 0) {
 		ControlResize(id.base)
@@ -65,7 +65,7 @@ func TemplateResize(id TemplateId) () {
 
 // TemplateRender ...
 func TemplateRender(id TemplateId, clip mat.v4, stack i32) () {
-	panicIfNot(IsValidTemplate(id), "render_template : invalid id")
+	panicIfNot(IsValidTemplate(id), "invalid id")
 	var visible i32 = g_controls[id.base.control].visible
 	if (visible > 0) {
 		ControlRender(id.base, clip, stack)

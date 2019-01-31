@@ -368,7 +368,7 @@ func ControlFocused(id ControlId) (out i32) { // ##pending issue bool
 }
 
 func controlResize(id ControlId, pixelBounds mat.v2, autoBounds mat.v2) () {
-	panicIfNot(IsValidControl(id), "ControlResize : invalid id")
+	panicIfNot(IsValidControl(id), "invalid id")
 	var visible i32 = g_controls[id.control].visible
 	if (visible > 0) {
 	//ControlPrint("controlResize begin : ", id, false)
@@ -443,7 +443,7 @@ func controlResize(id ControlId, pixelBounds mat.v2, autoBounds mat.v2) () {
 			} else if (guiType == GUI_LIFTER) {
 				lifter_resize(lifter_id_(child, guiIndex))
 			} else if (guiType == GUI_BINDER) {
-				binder_resize(binder_id_(child, guiIndex))
+				BinderResize(NewBinderId(child, guiIndex))
 			} else if (guiType == GUI_COMBO) {
 				combo_resize(combo_id_(child, guiIndex))
 			} else {
@@ -664,7 +664,7 @@ func ControlAlign(id ControlId, align i32, posx f32, posy f32, width f32, height
 
 // ControlRedock
 func ControlRedock(id ControlId, padding mat.v4) () {
-	panicIfNot(IsValidControl(id), "ControlRedock : invalid id")
+	panicIfNot(IsValidControl(id), "invalid id")
 	var visible i32 = g_controls[id.control].visible
 	if (visible > 0) {
 		/*if (id.control == 85) {
@@ -694,7 +694,7 @@ func ControlRedock(id ControlId, padding mat.v4) () {
 		var paddingY f32 = paddingBottom + paddingTop
 
 		/*if (dock != DOCK_NONE) {
-		  panicIfNot(align == ALIGN_NONE, "ControlRedock : incompatible align & dock options")
+		  panicIfNot(align == ALIGN_NONE, "incompatible align & dock options")
 		  }*/
 
 		if (dock == DOCK_FILL) {
@@ -703,7 +703,7 @@ func ControlRedock(id ControlId, padding mat.v4) () {
 			h = g_dock.top - g_dock.bottom - paddingY
 			y = g_dock.bottom + paddingBottom
 			//panicIfNot(mat.is_nan(y) == false, "DOCK_FILL y nan")
-			//panicIfNot(autosize == AUTOSIZE_NONE, "ControlRedock : DOCK_FILL is not compatible with AUTOSIZE")
+			//panicIfNot(autosize == AUTOSIZE_NONE, "DOCK_FILL is not compatible with AUTOSIZE")
 			/*if (index == 153) {
 			  ControlPrint("DOCK_FILL : ", id, false)
 			  }*/
@@ -714,14 +714,14 @@ func ControlRedock(id ControlId, padding mat.v4) () {
 			y = g_dock.top - h - paddingTop
 			//panicIfNot(mat.is_nan(y) == false, "DOCK_LEFT y nan")
 			g_dock.left = x + w
-			//panicIfNot((autosize & AUTOSIZE_Y) == 0, "ControlRedock : DOCK_LEFT is not compatible with AUTOSIZE_Y")
+			//panicIfNot((autosize & AUTOSIZE_Y) == 0, "DOCK_LEFT is not compatible with AUTOSIZE_Y")
 		} else if (dock == DOCK_RIGHT) {
 			w = size.x
 			x = g_dock.right - w - paddingLeft
 			h = g_dock.top - g_dock.bottom - paddingY
 			y = g_dock.top - h - paddingTop
 			g_dock.right = x
-			//panicIfNot((autosize & AUTOSIZE_Y) == 0, "ControlRedock : DOCK_RIGHT is not compatible with AUTOSIZE_Y")
+			//panicIfNot((autosize & AUTOSIZE_Y) == 0, "DOCK_RIGHT is not compatible with AUTOSIZE_Y")
 		} else if (dock == DOCK_TOP) {
 			x = g_dock.left + paddingLeft
 			w = g_dock.right - g_dock.left - paddingX
@@ -732,7 +732,7 @@ func ControlRedock(id ControlId, padding mat.v4) () {
 			  printf("DOCK_TOP %f, %f, %f, %f\n", g_dock.top, h, paddingTop, y)
 			  }*/
 			g_dock.top = y
-			//panicIfNot((autosize & AUTOSIZE_X) == 0, "ControlRedock : DOCK_TOP is not compatible with AUTOSIZE_X")
+			//panicIfNot((autosize & AUTOSIZE_X) == 0, "DOCK_TOP is not compatible with AUTOSIZE_X")
 			//ControlPrint("DOCK_TOP : ", id, false)
 			//printf("DOCK_TOP %f, %f, %f\n", g_dock.top, y, h)
 		} else if (dock == DOCK_BOTTOM) {
@@ -742,7 +742,7 @@ func ControlRedock(id ControlId, padding mat.v4) () {
 			y = g_dock.bottom + paddingBottom// + h
 			g_dock.bottom = y + h
 			//panicIfNot(mat.is_nan(y) == false, "DOCK_BOTTOM y nan")
-			//panicIfNot((autosize & AUTOSIZE_X) == 0, "ControlRedock : DOCK_BOTTOM is not compatible with AUTOSIZE_X")
+			//panicIfNot((autosize & AUTOSIZE_X) == 0, "DOCK_BOTTOM is not compatible with AUTOSIZE_X")
 			//ControlPrint("DOCK_BOTTOM : ", id, false)
 		} else if (dock == DOCK_NONE) {
 			x = position.x
@@ -789,7 +789,7 @@ func ControlRedock(id ControlId, padding mat.v4) () {
 		var count i32 = len(g_controls[index].children)
 		for i := 0; i < count; i = i + 1 {
 			var child ControlId = g_controls[index].children[i]
-			panicIfNot(IsValidControl(child), "ControlRedock : invalid child control")
+			panicIfNot(IsValidControl(child), "invalid child control")
 			var childVisible i32 = g_controls[child.control].visible
 			if (childVisible > 0) {
 				///printf("REDOCK_CHILD %d/%d\n", i + 1, count)
@@ -839,7 +839,7 @@ func ControlRedock(id ControlId, padding mat.v4) () {
 				} else {
 					//ControlPrint("ControlRedock parent : ", id, false)
 					//ControlPrint("ControlRedock child : ", child, false)
-					panicIfNot(false, "ControlRedock : unknown gui type")
+					panicIfNot(false, "unknown gui type")
 				}
 			}
 		}
@@ -880,7 +880,7 @@ func ControlRedock(id ControlId, padding mat.v4) () {
 func ControlRender(id ControlId, clip mat.v4, stack i32) () {
 	//fps.StartProfile(g_profileRenderControlFull)
 
-	panicIfNot(IsValidControl(id), "ControlRender : invalid control index")
+	panicIfNot(IsValidControl(id), "invalid control index")
 
 	var index i32 = id.control
 	var visible i32 = g_controls[index].visible
@@ -889,7 +889,7 @@ func ControlRender(id ControlId, clip mat.v4, stack i32) () {
 		var renderClips mat.v4 = gfx.PushScissor(g_controls[index].name, renderBounds)
 		//fps.StartProfile(g_profileControlRender)
 		var skin SkinId = g_controls[index].skin
-		panicIfNot(IsValidSkin(skin) || skin.skin == -1, "ControlRender : invalid control skin")
+		panicIfNot(IsValidSkin(skin) || skin.skin == -1, "invalid control skin")
 		if IsValidSkin(skin) {
 			var depth f32 = ComputeDepth(stack)
 			var focused i32 = g_controls[index].focused
@@ -935,7 +935,7 @@ func ControlRender(id ControlId, clip mat.v4, stack i32) () {
 		var count i32 = len(g_controls[index].children)
 		for i := 0; i < count; i = i + 1 {
 			var child ControlId = g_controls[index].children[i]
-			panicIfNot(IsValidControl(child), "ControlRender : invalid child control")
+			panicIfNot(IsValidControl(child), "invalid child control")
 			var childVisible i32 = g_controls[child.control].visible
 			if (childVisible > 0) {
 				var guiType i32 = g_controls[child].gui_type
@@ -970,12 +970,12 @@ func ControlRender(id ControlId, clip mat.v4, stack i32) () {
 				} else if (guiType == GUI_LIFTER) {
 					lifter_render(lifter_id_(child, guiIndex), renderBounds, childStack)
 				} else if (guiType == GUI_BINDER) {
-					binder_render(binder_id_(child, guiIndex), renderBounds, childStack)
+					BinderRender(NewBinderId(child, guiIndex), renderBounds, childStack)
 				} else if (guiType == GUI_COMBO) {
 					combo_render(combo_id_(child, guiIndex), renderBounds, childStack)
 				} else {
 					printf("GUI TYPE %d\n", guiType)
-					panicIfNot(false, "ControlRender : unknown gui type")
+					panicIfNot(false, "unknown gui type")
 				}
 			}
 		}
@@ -987,7 +987,7 @@ func ControlRender(id ControlId, clip mat.v4, stack i32) () {
 }
 
 func ControlProcessEvent(id ControlId, event *app.Event) (out i32) {
-	panicIfNot(IsValidControl(id), "ControlProcessEvent : invalid id")
+	panicIfNot(IsValidControl(id), "invalid id")
 	out = app.EVENT_UNUSED
 
 	/*if (id.control == 158) {
@@ -1023,7 +1023,7 @@ func ControlProcessEvent(id ControlId, event *app.Event) (out i32) {
 		var count i32 = len(g_controls[index].children)
 		for i := 0; i < count; i = i + 1 {
 			var child ControlId = g_controls[index].children[i]
-			panicIfNot(IsValidControl(child), "ControlProcessEvent : invalid child control")
+			panicIfNot(IsValidControl(child), "invalid child control")
 			var childVisible i32 = g_controls[child.control].visible
 			if (childVisible > 0) {
 				var guiType i32 = g_controls[child.control].gui_type
@@ -1057,12 +1057,12 @@ func ControlProcessEvent(id ControlId, event *app.Event) (out i32) {
 				} else if (guiType == GUI_LIFTER) {
 					out = lifter_process_event(lifter_id_(child, guiIndex), event)
 				} else if (guiType == GUI_BINDER) {
-					out = binder_process_event(binder_id_(child, guiIndex), event)
+					out = BinderProcessEvent(NewBinderId(child, guiIndex), event)
 				} else if (guiType == GUI_COMBO) {
 					out = combo_process_event(combo_id_(child, guiIndex), event)
 				} else {
 					printf("GUI TYPE %d\n", guiType)
-					panicIfNot(false, "ControlProcessEvent : unknown gui type")
+					panicIfNot(false, "unknown gui type")
 				}
 			}
 

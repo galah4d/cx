@@ -30,7 +30,7 @@ type list_s struct {
 func list_id_(base ControlId, list i32) (out list_id) {
 	out.base = base
 	out.list = list
-	panicIfNot(is_valid_list(out), "list_id_: invalid id")
+	panicIfNot(is_valid_list(out), "invalid id")
 }
 
 //-----------------------------------------------------------------------------
@@ -86,13 +86,13 @@ func list_create(name str) (out list_id) {
 	list.previousSelectedItem = -1
 	list.previousSelectedLine = -1
 	g_lists = append(g_lists, list)
-	panicIfNot(is_valid_list(out), "list_create : invalid id")
+	panicIfNot(is_valid_list(out), "invalid id")
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func list_add_column(id list_id, name str, color mat.v4, size i32, skin SkinId) {
-	panicIfNot(is_valid_list(id), "list_add_column : invalid id")
+	panicIfNot(is_valid_list(id), "invalid id")
 
 	var listIndex i32 = id.list
 	var columnCount i32 = g_lists[listIndex].columnCount
@@ -121,7 +121,7 @@ func list_add_column(id list_id, name str, color mat.v4, size i32, skin SkinId) 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func list_clear_lines(id list_id) {
-	panicIfNot(is_valid_list(id), "list_clear_lines : invalid id")
+	panicIfNot(is_valid_list(id), "invalid id")
 
 	var lines ControlId = g_lists[id.list].lines
 	ControlClearChildren(lines)
@@ -151,7 +151,7 @@ func list_add_line(id list_id, skin SkinId) (out ControlId) {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func list_line_add_label(id ControlId, text str, align i32, color mat.v4, size i32, skin SkinId) {
-	panicIfNot(IsValidControl(id), "list_line_add_label : invalid id")
+	panicIfNot(IsValidControl(id), "invalid id")
 
 	var lineName str = g_controls[id.control].name
 	var itemCount i32 = len(g_controls[id.control].children)
@@ -176,7 +176,7 @@ func list_line_add_label(id ControlId, text str, align i32, color mat.v4, size i
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func list_line_add_picture(id ControlId, align i32, animation AnimationId) {
-	panicIfNot(IsValidControl(id), "list_line_add_picture : invalid id")
+	panicIfNot(IsValidControl(id), "invalid id")
 
 	var lineName str = g_controls[id.control].name
 	var itemCount i32 = len(g_controls[id.control].children)
@@ -203,8 +203,8 @@ func list_line_add_picture(id ControlId, align i32, animation AnimationId) {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func list_child_focused(id list_id, child ControlId, value i32) {
-	panicIfNot(is_valid_list(id), "list_child_focus : invalid id")
-	panicIfNot(IsValidControl(child), "list_child_focus : invalid child id")
+	panicIfNot(is_valid_list(id), "invalid id")
+	panicIfNot(IsValidControl(child), "invalid child id")
 	if (value > 0) {
 
 		var header ControlId = g_lists[id.list].header
@@ -296,7 +296,7 @@ func list_child_focused(id list_id, child ControlId, value i32) {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func list_process_event(id list_id, event *app.Event) (out i32) {
-	panicIfNot(is_valid_list(id), "list_process_event : invalid id")
+	panicIfNot(is_valid_list(id), "invalid id")
 	out = ControlProcessEvent(id.base, event)
 
 
@@ -405,7 +405,7 @@ func list_process_event(id list_id, event *app.Event) (out i32) {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func list_resize(id list_id) () {
-	panicIfNot(is_valid_list(id), "resize_list : invalid id")
+	panicIfNot(is_valid_list(id), "invalid id")
 
 	var listIndex i32 = id.list
 	var header ControlId = g_lists[listIndex].header
@@ -573,7 +573,7 @@ func list_resize(id list_id) () {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func list_render(id list_id, clip mat.v4, stack i32) () {
-	panicIfNot(is_valid_list(id), "render_list : invalid id")
+	panicIfNot(is_valid_list(id), "invalid id")
 	ControlRender(id.base, clip, stack)
 }
 

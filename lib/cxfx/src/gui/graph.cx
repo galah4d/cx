@@ -30,7 +30,7 @@ type graph_s struct {
 func graph_id_(base ControlId, graph i32) (out graph_id) {
 	out.base = base
 	out.graph = graph
-	panicIfNot(is_valid_graph(out), "graph_id_: invalid id")
+	panicIfNot(is_valid_graph(out), "invalid id")
 }
 
 //-----------------------------------------------------------------------------
@@ -66,13 +66,13 @@ func graph_create(name str) (out graph_id) {
 	graph.labelCount = 0
 
 	g_graphs = append(g_graphs, graph)
-	panicIfNot(is_valid_graph(out), "graph_create : invalid id")
+	panicIfNot(is_valid_graph(out), "invalid id")
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func graph_get_label(id graph_id) (label LabelId) {
-	panicIfNot(is_valid_graph(id), "graph_get_label : invalid id")
+	panicIfNot(is_valid_graph(id), "invalid id")
 	var size i32 = len(g_graphs[id.graph].labels)
 	var count i32 = g_graphs[id.graph].labelCount
 	if count < size {
@@ -88,7 +88,7 @@ func graph_get_label(id graph_id) (label LabelId) {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func graph_process_event(id graph_id, event *app.Event) (out i32) {
-	panicIfNot(is_valid_graph(id), "graph_process_event : invalid id")
+	panicIfNot(is_valid_graph(id), "invalid id")
 	//ControlPrint("graph_process_event : ", id.base, false)
 
 	out = ControlProcessEvent(id.base, event)
@@ -164,7 +164,7 @@ func graph_process_event(id graph_id, event *app.Event) (out i32) {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func graph_resize(id graph_id) () {
-	panicIfNot(is_valid_graph(id), "graph_resize : invalid id")
+	panicIfNot(is_valid_graph(id), "invalid id")
 	ControlClearChildren(id.base)
 	ControlResize(id.base)
 
@@ -339,7 +339,7 @@ func graph_resize(id graph_id) () {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func graph_render(id graph_id, clip mat.v4, stack i32) () {
-	panicIfNot(is_valid_graph(id), "graph_render : invalid id")
+	panicIfNot(is_valid_graph(id), "invalid id")
 	ControlRender(id.base, clip, stack)
 
 	var controlIndex i32 = id.base.control

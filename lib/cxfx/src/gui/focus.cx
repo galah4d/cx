@@ -19,7 +19,7 @@ type Focus struct {
 
 // BuildFocusList ...
 func BuildFocusList(focusedScreenIndex i32, parent ControlId) {
-	panicIfNot(IsValidControl(parent), "BuildFocusList : invalid parent")
+	panicIfNot(IsValidControl(parent), "invalid parent")
 	//ControlPrint("BuildFocusList : ", parent, false)
 	var index i32 = parent.control
 
@@ -29,7 +29,7 @@ func BuildFocusList(focusedScreenIndex i32, parent ControlId) {
 	var childCount i32 = len(g_controls[index].children)
 	for i = 0; i < childCount; i = i + 1 {
 		var child ControlId = g_controls[index].children[i]
-		panicIfNot(IsValidControl(child), "BuildFocusList : invalid child")
+		panicIfNot(IsValidControl(child), "invalid child")
 		var childIndex i32 = child.control
 		var focusIndex i32 = g_controls[childIndex].focusIndex
 		if (focusIndex >= 0) {
@@ -90,7 +90,7 @@ func BuildFocusList(focusedScreenIndex i32, parent ControlId) {
 
 // RebuildFocus ...
 func RebuildFocus(id ScreenId) {
-	panicIfNot(IsValidScreen(id), "RebuildFocus : invalid id")
+	panicIfNot(IsValidScreen(id), "invalid id")
 	//ControlPrint("RebuildFocus : ", id.base, false)
 	var i i32 = 0
 
@@ -131,7 +131,7 @@ func RebuildFocus(id ScreenId) {
 	}
 
 //	printf("lookup %d, %d, id %d, %d\n", lookup.screen, lookup.base.control, id.screen, id.base.control)
-	panicIfNot(lookup.base.control == id.base.control, "RebuildFocus : internal error")
+	panicIfNot(lookup.base.control == id.base.control, "internal error")
 
   //  printf("HERE %d\n", lookupIndex)
 	g_focused[lookupIndex].currentFocus = -1
@@ -169,7 +169,7 @@ func RebuildFocus(id ScreenId) {
 
 // SetCurrentFocus ...
 func SetCurrentFocus(key ScreenId, screenIndex i32, value ControlId, controlIndex i32, remove i32) {
-	panicIfNot(IsValidScreen(key), "SetCurrentFocus : invalid key")
+	panicIfNot(IsValidScreen(key), "invalid key")
 
 	var currentFocus i32 = g_focused[screenIndex].currentFocus
 	var focusCount i32 = len(g_focused[screenIndex].focusList)
@@ -177,7 +177,7 @@ func SetCurrentFocus(key ScreenId, screenIndex i32, value ControlId, controlInde
 	if (currentFocus >= 0 && currentFocus < focusCount) {
 		if (remove > 0) {
 		var focusId ControlId = g_focused[screenIndex].focusList[currentFocus]
-		panicIfNot(IsValidControl(focusId), "SetCurrentFocus : invalid current id")
+		panicIfNot(IsValidControl(focusId), "invalid current id")
 		g_controls[focusId.control].focused = 0
 		ControlPrint("remove_focus : ", focusId, false)
 		ControlSetParentFocus(focusId, focusId, 0)
@@ -229,7 +229,7 @@ func ForceFocus(id ControlId) {
 // GetFocusList ...
 func GetFocusList(id ScreenId) (out i32) {
 	out = -1
-	panicIfNot(IsValidScreen(id), "GetFocusList: invalid id")
+	panicIfNot(IsValidScreen(id), "invalid id")
 	//ControlPrint("GetFocusList : ", id.base, false)
 	var focusedCount i32 = len(g_focused)
 	var i i32 = 0
@@ -244,7 +244,7 @@ func GetFocusList(id ScreenId) (out i32) {
 
 // SetNextFocus ...
 func SetNextFocus(id ScreenId) {
-	panicIfNot(IsValidScreen(id), "screen_next_focus : invalid id")
+	panicIfNot(IsValidScreen(id), "invalid id")
 	ControlPrint("SetNextFocus : ", id.base, false)
 	var pair i32 = GetFocusList(id)
 	var focusedCount i32 = len(g_focused)
@@ -270,7 +270,7 @@ func SetNextFocus(id ScreenId) {
 
 // SetPreviousFocus ...
 func SetPreviousFocus(id ScreenId) {
-	panicIfNot(IsValidScreen(id), "screen_previous_focus : invalid id")
+	panicIfNot(IsValidScreen(id), "invalid id")
 	ControlPrint("SetPreviousFocus : ", id.base, false)
 	var pair i32 = GetFocusList(id)
 	var focusedCount i32 = len(g_focused)
@@ -300,7 +300,7 @@ func SetPreviousFocus(id ScreenId) {
 
 /*
 func controlActivate(id ControlId) {
-	panicIfNot(IsValidControl(id), "controlActivate : invalid id")
+	panicIfNot(IsValidControl(id), "invalid id")
 	ControlPrint("controlActivate : ", id, false)
 
 	var index i32 = id.control
@@ -309,7 +309,7 @@ func controlActivate(id ControlId) {
 		var guiIndex i32 = g_controls[index].gui_index
 		ControlPrint("window found : ", id, false)
 		var windowId window_id = window_id_(NewControlId(index), guiIndex)
-		panicIfNot(is_valid_window(windowId), "controlActivate : invalid window id")
+		panicIfNot(is_valid_window(windowId), "invalid window id")
 		RebuildFocus(windowId)
 	} else {
 		var focusIndex i32 = g_controls[index].focusIndex
@@ -334,7 +334,7 @@ func getCurrentFocus(id ControlId) (out ControlId) {
 		}
 	}
 
-	panicIfNot(IsValidControl(id), "control_focus : invalid id")
+	panicIfNot(IsValidControl(id), "invalid id")
 	ControlPrint("control_focus : ", id, false)
 
 	var index i32 = id.control

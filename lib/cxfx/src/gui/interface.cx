@@ -666,7 +666,7 @@ func Render() () {
 	} else if (gfx.IsValidTarget(target_1)) {
 		target_2 = target_1
 	} else {
-		panicIfNot(false, "render : invalid target")
+		panicIfNot(false, "invalid target")
 	}*/
 
 	fps.StopProfile(g_profileRenderScreenEffect)

@@ -33,7 +33,7 @@ type keyboard_s struct {
 func keyboard_id_(base ControlId, keyboard i32) (out keyboard_id) {
 	out.base = base
 	out.keyboard = keyboard
-	panicIfNot(is_valid_keyboard(out), "keyboard_id_: invalid id")
+	panicIfNot(is_valid_keyboard(out), "invalid id")
 }
 
 //-----------------------------------------------------------------------------
@@ -89,13 +89,13 @@ func create_keyboard(name str) (out keyboard_id) {
 	ControlSetPadding(out.base, mat.v4_(5.0, 5.0, 5.0, 5.0))
 	g_keyboards = append(g_keyboards, keyboard)
 
-	panicIfNot(is_valid_keyboard(out), "create_keyboard : invalid id")
+	panicIfNot(is_valid_keyboard(out), "invalid id")
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func keyboard_get_key_index(id keyboard_id, key i32) (index i32) {
-	panicIfNot(is_valid_keyboard(id), "keyboard_process_event : invalid id")
+	panicIfNot(is_valid_keyboard(id), "invalid id")
 
 	index = -1
 	var keys []i32 = g_keyboards[id.keyboard].dvorak.keys
@@ -111,7 +111,7 @@ func keyboard_get_key_index(id keyboard_id, key i32) (index i32) {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func keyboard_process_event(id keyboard_id, event *app.Event) (out i32) {
-	panicIfNot(is_valid_keyboard(id), "keyboard_process_event : invalid id")
+	panicIfNot(is_valid_keyboard(id), "invalid id")
 	out = ControlProcessEvent(id.base, event)
 
 	var action i32 = (*event).keyboard.action
@@ -147,7 +147,7 @@ func keyboard_process_event(id keyboard_id, event *app.Event) (out i32) {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func keyboard_resize(id keyboard_id) () {
-	panicIfNot(is_valid_keyboard(id), "keyboard_resize : invalid id")
+	panicIfNot(is_valid_keyboard(id), "invalid id")
 
 	var rowCount i32 = 13
 	var lineCount i32 = 4
@@ -203,7 +203,7 @@ func keyboard_resize(id keyboard_id) () {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func keyboard_render(id keyboard_id, clip mat.v4, stack i32) () {
-	panicIfNot(is_valid_keyboard(id), "keyboard_render : invalid id")
+	panicIfNot(is_valid_keyboard(id), "invalid id")
 	ControlRender(id.base, clip, stack)
 }
 

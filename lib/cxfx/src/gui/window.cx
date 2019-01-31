@@ -27,7 +27,7 @@ type window_s struct {
 func window_id_(base ControlId, window i32) (out window_id) {
 	out.base = base
 	out.window = window
-	panicIfNot(is_valid_window(out), "window_id_: invalid id")
+	panicIfNot(is_valid_window(out), "invalid id")
 }
 
 //-----------------------------------------------------------------------------
@@ -39,18 +39,18 @@ func is_valid_window(id window_id) (out bool) {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func window_set_caption(id window_id, text str) () {
-	panicIfNot(is_valid_window(id), " window_set_caption : invalid id")
+	panicIfNot(is_valid_window(id), "invalid id")
 	LabelSetText(g_windows[id.window].caption, text)
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func window_set_containee(id window_id, containee ControlId) {
-	panicIfNot(is_valid_window(id), "window_set_containee : invalid id")
-	panicIfNot(IsValidControl(containee), "window_set_containee : invalid containee")
+	panicIfNot(is_valid_window(id), "invalid id")
+	panicIfNot(IsValidControl(containee), "invalid containee")
 
 	var container ControlId = g_windows[id.window].container
-	panicIfNot(IsValidControl(container), "window_set_containee : invalid container")
+	panicIfNot(IsValidControl(container), "invalid container")
 
 	ControlAddChild(container, containee)
 }
@@ -110,13 +110,13 @@ func window_create(name str) (out window_id) {
 	}
 
 	g_windows = append(g_windows, window)
-	panicIfNot(is_valid_window(out), "window_create : invalid id")
+	panicIfNot(is_valid_window(out), "invalid id")
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func window_add_button(id window_id, name str, caption str, packageName str, functionName str) {
-	panicIfNot(is_valid_window(id), "window_add_button : invalid id")
+	panicIfNot(is_valid_window(id), "invalid id")
 
    var button LabelId = LabelCreate(name)
    ControlSetSkin(button.base, g_buttonSkin)
@@ -139,21 +139,21 @@ func window_add_button(id window_id, name str, caption str, packageName str, fun
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func window_process_event(id window_id, event *app.Event) (out i32) {
-	panicIfNot(is_valid_window(id), "window_process_event : invalid id")
+	panicIfNot(is_valid_window(id), "invalid id")
 	out = ControlProcessEvent(id.base, event)
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func window_resize(id window_id) () {
-	panicIfNot(is_valid_window(id), "window_resize : invalid id")
+	panicIfNot(is_valid_window(id), "invalid id")
 	ControlResize(id.base)
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func window_render(id window_id, clip mat.v4, stack i32) () {
-	panicIfNot(is_valid_window(id), "window_render : invalid id")
+	panicIfNot(is_valid_window(id), "invalid id")
 	ControlRender(id.base, clip, stack)
 }
 

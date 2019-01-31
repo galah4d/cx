@@ -328,14 +328,14 @@ func ScreenRender(id ScreenId, clip mat.v4, stack i32) () {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func hide_modal(id ScreenId) {
-	panicIfNot(IsValidScreen(id), "hide_modal : invalid screen")
+	panicIfNot(IsValidScreen(id), "invalid screen")
 	var modalCount i32 = len(g_modals)
-	panicIfNot(modalCount > 0, "hide_modal : invalid count")
+	panicIfNot(modalCount > 0, "invalid count")
 	if (modalCount > 0) {
 		var modalIndex i32 = modalCount - 1
 		printf("MODAL_INDEX %d, COUNT %d\n", modalIndex, modalCount)
 		var modalScreen ScreenId = g_modals[modalIndex]
-		panicIfNot(modalScreen.screen == id.screen, "hide_modal : invalid screen")
+		panicIfNot(modalScreen.screen == id.screen, "invalid screen")
 		if (modalScreen.screen == id.screen) {
 			printf("ScreenHide\n")
 			ScreenHide(modalScreen)
@@ -350,7 +350,7 @@ func hide_modal(id ScreenId) {
 //-----------------------------------------------------------------------------
 func modal_is_visible(id ScreenId) (out bool) {
 	out = false
-	panicIfNot(IsValidScreen(id), "modal_is_visible : invalid id")
+	panicIfNot(IsValidScreen(id), "invalid id")
 	var modal bool = g_screens[id.screen].modal
 	if (modal == true) {
 		var modalCount i32 = len(g_modals)
@@ -369,13 +369,13 @@ func modal_is_visible(id ScreenId) (out bool) {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func ScreenHide(id ScreenId) () {
-	panicIfNot(IsValidScreen(id), "ScreenHide : invalid screen")
+	panicIfNot(IsValidScreen(id), "invalid screen")
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func ScreenShow(id ScreenId) () {
-	panicIfNot(IsValidScreen(id), "ScreenShow : invalid id")
+	panicIfNot(IsValidScreen(id), "invalid id")
 	g_hotScreen = id
 	ControlPrint("ScreenShow : ", id.base, false)
 	RebuildFocus(id)

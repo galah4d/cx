@@ -26,7 +26,7 @@ type combo_s struct {
 func combo_id_(base ControlId, combo i32) (out combo_id) {
 	out.base = base
 	out.combo = combo
-	panicIfNot(is_valid_combo(out), "combo_id_: invalid id")
+	panicIfNot(is_valid_combo(out), "invalid id")
 }
 
 //-----------------------------------------------------------------------------
@@ -49,21 +49,21 @@ var g_combos[] combo_s
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func combo_get_text(id combo_id) (out LabelId) {
-	panicIfNot(is_valid_combo(id), "combo_get_text : invalid id")
+	panicIfNot(is_valid_combo(id), "invalid id")
 	out = g_combos[id.combo].label
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func combo_get_pic(id combo_id) (out LabelId) {
-	panicIfNot(is_valid_combo(id), "combo_get_pic : invalid id")
+	panicIfNot(is_valid_combo(id), "invalid id")
 	out = g_combos[id.combo].picture
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func combo_get_list(id combo_id) (out list_id) {
-	panicIfNot(is_valid_combo(id), "combo_get_list : invalid id")
+	panicIfNot(is_valid_combo(id), "invalid id")
 	out = g_combos[id.combo].list
 }
 
@@ -148,14 +148,14 @@ func combo_create(name str) (out combo_id) {
 	splitter_set_controls(splitter, picture.base, label.base)
 
 	g_combos = append(g_combos, combo)
-	panicIfNot(is_valid_combo(out), "create_combo : invalid id")
+	panicIfNot(is_valid_combo(out), "invalid id")
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func combo_process_event(id combo_id, event *app.Event) (out i32) {
 	out = app.EVENT_UNUSED
-	panicIfNot(is_valid_combo(id), "combo_process_event : invalid id")
+	panicIfNot(is_valid_combo(id), "invalid id")
 	var visible i32 = g_controls[id.base.control].visible
 
 	if (visible > 0) {
@@ -201,7 +201,7 @@ func combo_process_event(id combo_id, event *app.Event) (out i32) {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func combo_resize(id combo_id) () {
-	panicIfNot(is_valid_combo(id), "resize_combo : invalid id")
+	panicIfNot(is_valid_combo(id), "invalid id")
 	var visible i32 = g_controls[id.base.control].visible
 	if (visible > 0) {
 		var list list_id = g_combos[id.combo].list
@@ -237,7 +237,7 @@ func combo_resize(id combo_id) () {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func combo_render(id combo_id, clip mat.v4, stack i32) () {
-	panicIfNot(is_valid_combo(id), "render_combo : invalid id")
+	panicIfNot(is_valid_combo(id), "invalid id")
 	var visible i32 = g_controls[id.base.control].visible
 	if (visible > 0) {
 		ControlRender(id.base, clip, stack)

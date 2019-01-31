@@ -24,7 +24,7 @@ type scroller_s struct {
 func scroller_id_(base ControlId, scroller i32) (out scroller_id) {
 	out.base = base
 	out.scroller = scroller
-	panicIfNot(is_valid_scroller(out), "scroller_id_: invalid id")
+	panicIfNot(is_valid_scroller(out), "invalid id")
 }
 
 //-----------------------------------------------------------------------------
@@ -36,8 +36,8 @@ func is_valid_scroller(id scroller_id) (out bool) {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func scroller_set_containee(id scroller_id, containee ControlId) {
-	panicIfNot(is_valid_scroller(id), "scroller_set_containee : invalid id")
-	panicIfNot(IsValidControl(containee), "scroller_set_containee : invalid control")
+	panicIfNot(is_valid_scroller(id), "invalid id")
+	panicIfNot(IsValidControl(containee), "invalid control")
 	var container ControlId = g_scrollers[id.scroller].container
 	ControlClearChildren(container)
 	ControlAddChild(container, containee)
@@ -95,13 +95,13 @@ func scroller_create(name str) (out scroller_id) {
 	scroller.container = container
 
 	g_scrollers = append(g_scrollers, scroller)
-	panicIfNot(is_valid_scroller(out), "create_scroller : invalid id")
+	panicIfNot(is_valid_scroller(out), "invalid id")
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func scroller_process_event(id scroller_id, event *app.Event) (out i32) {
-	panicIfNot(is_valid_scroller(id), "scroller_process_event : invalid id")
+	panicIfNot(is_valid_scroller(id), "invalid id")
 	//ControlPrint("SCROLLER", id.base, false)
 	out = app.EVENT_UNUSED
 	var vlift lifter_id = g_scrollers[id.scroller].vlift
@@ -143,7 +143,7 @@ func scroller_process_event(id scroller_id, event *app.Event) (out i32) {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func scroller_resize(id scroller_id) () {
-	panicIfNot(is_valid_scroller(id), "resize_scroller : invalid id")
+	panicIfNot(is_valid_scroller(id), "invalid id")
 
 	//ControlPrint("scroller_resize : ", id.base, false)
 	var container ControlId = g_scrollers[id.scroller].container
@@ -239,7 +239,7 @@ func scroller_resize(id scroller_id) () {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func scroller_render(id scroller_id, clip mat.v4, stack i32) () {
-	panicIfNot(is_valid_scroller(id), "render_scroller : invalid id")
+	panicIfNot(is_valid_scroller(id), "invalid id")
 		ControlRender(id.base, clip, stack)
 }
 

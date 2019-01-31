@@ -31,7 +31,7 @@ type lifter_s struct {
 func lifter_id_(base ControlId, lifter i32) (out lifter_id) {
 	out.base = base
 	out.lifter = lifter
-	panicIfNot(is_valid_lifter(out), "lifter_id_: invalid id")
+	panicIfNot(is_valid_lifter(out), "invalid id")
 }
 
 //-----------------------------------------------------------------------------
@@ -50,7 +50,7 @@ func invalid_lifter() (out lifter_id) {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func lifter_set_size(id lifter_id, value f32) {
-	panicIfNot(is_valid_lifter(id), "lifter_set_size : invalid id")
+	panicIfNot(is_valid_lifter(id), "invalid id")
 	g_lifters[id.lifter].size = value
 }
 
@@ -81,21 +81,21 @@ func lifter_create(name str) (out lifter_id) {
 	ControlSetFocusable(carret, 1)
 
 	g_lifters = append(g_lifters, lifter)
-	panicIfNot(is_valid_lifter(out), "create_lifter : invalid id")
+	panicIfNot(is_valid_lifter(out), "invalid id")
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func lifter_set_direction(id lifter_id, direction i32) {
-	panicIfNot(is_valid_lifter(id), "lifter_set_direction : invalid id")
-	panicIfNot(direction == LIFT_VERT || direction == LIFT_HORZ, "lifter_set_direction : unknown direction")
+	panicIfNot(is_valid_lifter(id), "invalid id")
+	panicIfNot(direction == LIFT_VERT || direction == LIFT_HORZ, "unknown direction")
 	g_lifters[id.lifter].direction = direction
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func lifter_process_event(id lifter_id, event *app.Event) (out i32) {
-	panicIfNot(is_valid_lifter(id), "lifter_process_event : invalid id")
+	panicIfNot(is_valid_lifter(id), "invalid id")
 	out = ControlProcessEvent(id.base, event)
 
 	var mouseAction i32 = (*event).mouse.action
@@ -137,7 +137,7 @@ func lifter_process_event(id lifter_id, event *app.Event) (out i32) {
 							out = app.EVENT_CONSUMED
 							ForceFocus(carret)
 						} else {
-							panicIfNot(false, "lifter_process_event : unknown direction")
+							panicIfNot(false, "unknown direction")
 						}
 					} else if (key == app.KEYCODE_RIGHT ||
 							   key == app.KEYCODE_DOWN) {
@@ -147,7 +147,7 @@ func lifter_process_event(id lifter_id, event *app.Event) (out i32) {
 							out = app.EVENT_CONSUMED
 							ForceFocus(carret)
 						} else {
-							panicIfNot(false, "lifter_process_event : unknown direction")
+							panicIfNot(false, "unknown direction")
 						}
 					}
 					lifter_set_offset(id, offset)
@@ -175,7 +175,7 @@ func lifter_process_event(id lifter_id, event *app.Event) (out i32) {
 						} else if (direction == LIFT_VERT) {
 							dragDelta = delta.y
 						} else {
-							panic(false, true, "lifter_process_event : invalid direction")
+							panic(false, true, "invalid direction")
 						}
 						printf("app.MOUSE_MOVE : %f, %f, %f, %f, %f\n", delta.x, delta.y, dragOffset, dragDelta, dragOffset + dragDelta)
 						lifter_set_offset(id, dragOffset + dragDelta)
@@ -190,7 +190,7 @@ func lifter_process_event(id lifter_id, event *app.Event) (out i32) {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func lifter_get_amount(id lifter_id) (out f32) {
-	panicIfNot(is_valid_lifter(id), "lifter_get_amount : invalid id")
+	panicIfNot(is_valid_lifter(id), "invalid id")
 	var direction i32 = g_lifters[id.lifter].direction
 	var carret ControlId = g_lifters[id.lifter].carret
 	if (direction == LIFT_HORZ) {
@@ -205,7 +205,7 @@ func lifter_get_amount(id lifter_id) (out f32) {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func lifter_set_amount(id lifter_id, value f32) {
-	panicIfNot(is_valid_lifter(id), "lifter_set_amount : invalid id")
+	panicIfNot(is_valid_lifter(id), "invalid id")
 	var direction i32 = g_lifters[id.lifter].direction
 	var carret ControlId = g_lifters[id.lifter].carret
 	if (direction == LIFT_HORZ) {
@@ -220,7 +220,7 @@ func lifter_set_amount(id lifter_id, value f32) {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func lifter_get_max_amount(id lifter_id) (out f32) {
-	panicIfNot(is_valid_lifter(id), "lifter_get_amount : invalid id")
+	panicIfNot(is_valid_lifter(id), "invalid id")
 	var direction i32 = g_lifters[id.lifter].direction
 	var size mat.v2 = g_controls[id.base.control].size
 	if (direction == LIFT_HORZ) {
@@ -235,7 +235,7 @@ func lifter_get_max_amount(id lifter_id) (out f32) {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func lifter_set_max_amount(id lifter_id, value f32) {
-	panicIfNot(is_valid_lifter(id), "lifter_set_amount : invalid id")
+	panicIfNot(is_valid_lifter(id), "invalid id")
 	var direction i32 = g_lifters[id.lifter].direction
 	if (direction == LIFT_HORZ) {
 		g_controls[id.base.control].size.x = value
@@ -249,7 +249,7 @@ func lifter_set_max_amount(id lifter_id, value f32) {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func lifter_get_offset(id lifter_id) (out f32) {
-	panicIfNot(is_valid_lifter(id), "lifter_get_amount : invalid id")
+	panicIfNot(is_valid_lifter(id), "invalid id")
 	out = g_lifters[id.lifter].offset
 	/*var direction i32 = g_lifters[id.lifter].direction
 	var carret ControlId = g_lifters[id.lifter].carret
@@ -265,7 +265,7 @@ func lifter_get_offset(id lifter_id) (out f32) {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func lifter_set_offset(id lifter_id, value f32) {
-	panicIfNot(is_valid_lifter(id), "lifter_set_amount : invalid id")
+	panicIfNot(is_valid_lifter(id), "invalid id")
 
 	var offset f32 = value
 	var maxAmount f32 = lifter_get_max_amount(id)
@@ -291,7 +291,7 @@ func lifter_set_offset(id lifter_id, value f32) {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func lifter_get_max_offset(id lifter_id) (out f32) {
-	panicIfNot(is_valid_lifter(id), "lifter_get_max_offset : invalid id")
+	panicIfNot(is_valid_lifter(id), "invalid id")
 	var maxAmount f32 = lifter_get_max_amount(id)
 	var amount f32 = lifter_get_amount(id)
 	out = maxAmount - amount
@@ -300,7 +300,7 @@ func lifter_get_max_offset(id lifter_id) (out f32) {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func lifter_resize(id lifter_id) () {
-	panicIfNot(is_valid_lifter(id), "resize_lifter : invalid id")
+	panicIfNot(is_valid_lifter(id), "invalid id")
 
 	var lifterIndex i32 = id.lifter
 	var direction i32 = g_lifters[lifterIndex].direction
@@ -331,7 +331,7 @@ func lifter_resize(id lifter_id) () {
 		g_controls[carret.control].position.y = offsetY
 		g_controls[carretIndex].size.x = lifterSize
 	} else {
-		panicIfNot(false, "lifter_resize : unknown direction")
+		panicIfNot(false, "unknown direction")
 	}
 
 	lifter_set_offset(id, offset)
@@ -340,7 +340,7 @@ func lifter_resize(id lifter_id) () {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func lifter_render(id lifter_id, clip mat.v4, stack i32) () {
-	panicIfNot(is_valid_lifter(id), "render_lifter : invalid id")
+	panicIfNot(is_valid_lifter(id), "invalid id")
 	ControlRender(id.base, clip, stack)
 }
 

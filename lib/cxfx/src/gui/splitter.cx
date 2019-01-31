@@ -33,7 +33,7 @@ var SPLIT_VERT i32 = 6
 func splitter_id_(base ControlId, splitter i32) (out splitter_id) {
 	out.base = base
 	out.splitter = splitter
-	panicIfNot(is_valid_splitter(out), "splitter_id_: invalid id")
+	panicIfNot(is_valid_splitter(out), "invalid id")
 }
 
 //-----------------------------------------------------------------------------
@@ -45,14 +45,14 @@ func is_valid_splitter(id splitter_id) (out bool) {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func splitter_set_direction(id splitter_id, direction i32) {
-	panicIfNot(is_valid_splitter(id), "splitter_set_direction : invalid id")
+	panicIfNot(is_valid_splitter(id), "invalid id")
 	g_splitters[id.splitter].direction = direction
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func splitter_set_controls(id splitter_id, master ControlId, slave ControlId) {
-	panicIfNot(is_valid_splitter(id), "splitter_set_master : invalid id")
+	panicIfNot(is_valid_splitter(id), "invalid id")
 	ControlClearChildren(id.base)
 	g_splitters[id.splitter].master = master
 	ControlAddChild(id.base, master)
@@ -78,20 +78,20 @@ func splitter_create(name str) (out splitter_id) {
 	splitter.slave = InvalidControl()
 
 	g_splitters = append(g_splitters, splitter)
-	panicIfNot(is_valid_splitter(out), "splitter_create : invalid id")
+	panicIfNot(is_valid_splitter(out), "invalid id")
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func splitter_process_event(id splitter_id, event *app.Event) (out i32) {
-	panicIfNot(is_valid_splitter(id), "splitter_process_event : invalid id")
+	panicIfNot(is_valid_splitter(id), "invalid id")
 	out = ControlProcessEvent(id.base, event)
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func splitter_resize(id splitter_id) () {
-	panicIfNot(is_valid_splitter(id), "resize_splitter : invalid id")
+	panicIfNot(is_valid_splitter(id), "invalid id")
 	ControlResize(id.base)
 	//ControlPrint("splitter_resize : ", id.base, false)
 	var splitterIndex i32 = id.splitter
@@ -103,10 +103,10 @@ func splitter_resize(id splitter_id) () {
 
 	//ControlPrint("splitter_resize : ", id.base, false)
 	//printf("MASTER %d\n", master.control)
-	panicIfNot(IsValidControl(master), "splitter_resize : invalid master")
+	panicIfNot(IsValidControl(master), "invalid master")
 	var masterIndex i32 = master.control
 
-	panicIfNot(IsValidControl(slave), "splitter_resize : invalid slave")
+	panicIfNot(IsValidControl(slave), "invalid slave")
 	var slaveIndex i32 = slave.control
 
 	var controlIndex i32 = id.base.control
@@ -178,14 +178,14 @@ func splitter_resize(id splitter_id) () {
 		g_controls[slaveIndex].renderPosition = slavePosition
 		g_controls[slaveIndex].size = slaveSize
 	} else {
-		panicIfNot(false, "splitter_resize : not implemented")
+		panicIfNot(false, "not implemented")
 	}
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func splitter_render(id splitter_id, clip mat.v4, stack i32) () {
-	panicIfNot(is_valid_splitter(id), "render_splitter : invalid id")
+	panicIfNot(is_valid_splitter(id), "invalid id")
 	ControlRender(id.base, clip, stack)
 
 	//var direction i32 = g_splitters[id.splitter].direction

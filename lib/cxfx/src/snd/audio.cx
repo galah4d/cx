@@ -64,7 +64,7 @@ func AudioCreate(path str)(out AudioId) {
 	} else if numChannels == 2 {
 		mono = false
 	} else {
-		panicIf(true, "not supported : numChannels")
+		panicIf(true, "numChannels")
 	}
 
 	var bit8 bool
@@ -73,7 +73,7 @@ func AudioCreate(path str)(out AudioId) {
 	} else if bitsPerSample == 16 {
 		bit8 = false
 	} else {
-		panicIf(true, "not supported : bitsPerSample")
+		panicIf(true, "bitsPerSample")
 	}
 
 	var alFormat i32
@@ -92,9 +92,9 @@ func AudioCreate(path str)(out AudioId) {
 			}
 		}
 	} else if audioFormat == al.WavFormatIEEEFloat {
-		panicIf(true, "not supported : WavFormatIEEEFloat")
+		panicIf(true, "WavFormatIEEEFloat")
 	} else {
-		panicIf(true, "not supported : audioFormat")
+		panicIf(true, "audioFormat")
 	}
 
 	//printf("buffer %d, audioFormat %d, alFormat %d, numChannels %d, sampleRate %d, byteRate %d, blockAlign %d, bitsPerSample %d, samples %d, duration %d\n",

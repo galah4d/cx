@@ -276,8 +276,6 @@ func ControlSetParentFocus(id ControlId, child ControlId, value i32) {
 			var dummy i32 = 0
 		} else if (guiType == GUI_LABEL) {
 			var dummy i32 = 0
-		} else if (guiType == GUI_PARTITION) {
-			var dummy i32 = 0
 		} else if (guiType == GUI_KEYBOARD) {
 			var dummy i32 = 0
 		} else if (guiType == GUI_WINDOW) {
@@ -287,7 +285,7 @@ func ControlSetParentFocus(id ControlId, child ControlId, value i32) {
 		} else if (guiType == GUI_SPLITTER) {
 			var dummy i32 = 0
 		} else if (guiType == GUI_LIST) {
-			list_child_focused(list_id_(parent, guiIndex), child, value)
+			ListChildFocus(NewListId(parent, guiIndex), child, value)
 		} else if (guiType == GUI_SCROLLER) {
 			var dummy i32 = 0
 		} else if (guiType == GUI_LIFTER) {
@@ -426,26 +424,24 @@ func controlResize(id ControlId, pixelBounds mat.v2, autoBounds mat.v2) () {
 				PictureResize(NewPictureId(child, guiIndex))
 			} else if (guiType == GUI_LABEL) {
 				LabelResize(NewLabelId(child, guiIndex))
-			} else if (guiType == GUI_PARTITION) {
-				partition_resize(partition_id_(child, guiIndex))
 			} else if (guiType == GUI_KEYBOARD) {
-				keyboard_resize(keyboard_id_(child, guiIndex))
+				KeyboardResize(NewKeyboardId(child, guiIndex))
 			} else if (guiType == GUI_WINDOW) {
-				window_resize(window_id_(child, guiIndex))
+				WindowResize(NewWindowId(child, guiIndex))
 			} else if (guiType == GUI_GRAPH) {
-				graph_resize(graph_id_(child, guiIndex))
+				GraphResize(NewGraphId(child, guiIndex))
 			} else if (guiType == GUI_SPLITTER) {
-				splitter_resize(splitter_id_(child, guiIndex))
+				SplitterResize(NewSplitterId(child, guiIndex))
 			} else if (guiType == GUI_LIST) {
-				list_resize(list_id_(child, guiIndex))
+				ListResize(NewListId(child, guiIndex))
 			} else if (guiType == GUI_SCROLLER) {
-				scroller_resize(scroller_id_(child, guiIndex))
+				ScrollerResize(NewScrollerId(child, guiIndex))
 			} else if (guiType == GUI_LIFTER) {
-				lifter_resize(lifter_id_(child, guiIndex))
+				LifterResize(NewLifterId(child, guiIndex))
 			} else if (guiType == GUI_BINDER) {
 				BinderResize(NewBinderId(child, guiIndex))
 			} else if (guiType == GUI_COMBO) {
-				combo_resize(combo_id_(child, guiIndex))
+				ComboResize(NewComboId(child, guiIndex))
 			} else {
 				printf("GUI TYPE %d\n", guiType)
 					panicIfNot(false, "unknown gui type")
@@ -580,8 +576,6 @@ func ControlMeasure(id ControlId) (width f32, height f32) {
 		width, height = PictureMeasure(NewPictureId(id, guiIndex))
 	} else if (guiType == GUI_LABEL) {
 		width, height = LabelMeasure(NewLabelId(id, guiIndex))
-	} else if (guiType == GUI_PARTITION) {
-		panicIfNot(false, "not implemented")
 	} else if (guiType == GUI_KEYBOARD) {
 		panicIfNot(false, "not implemented")
 	} else if (guiType == GUI_WINDOW) {
@@ -808,19 +802,12 @@ func ControlRedock(id ControlId, padding mat.v4) () {
 				} else if (guiType == GUI_SCREEN) {
 					panicIfNot(false, "unidd recursive screen")
 				} else if (guiType == GUI_PICTURE) {
-					//redock_picture(NewPictureId(child, guiIndex))
 					ControlRedock(NewControlId(childControl), parentPadding)
 				} else if (guiType == GUI_LABEL) {
-					//redock_label(NewLabelId(child, guiIndex))
-					ControlRedock(NewControlId(childControl), parentPadding)
-				} else if (guiType == GUI_PARTITION) {
-					//redock_partition(partition_id_(child, guiIndex))
 					ControlRedock(NewControlId(childControl), parentPadding)
 				} else if (guiType == GUI_KEYBOARD) {
-					//redock_keyboard(keyboard_id_(child, guiIndex))
 					ControlRedock(NewControlId(childControl), parentPadding)
 				} else if (guiType == GUI_WINDOW) {
-					//redock_window(window_id_(child, guiIndex))
 					ControlRedock(NewControlId(childControl), parentPadding)
 				} else if (guiType == GUI_GRAPH) {
 					ControlRedock(NewControlId(childControl), parentPadding)
@@ -953,26 +940,24 @@ func ControlRender(id ControlId, clip mat.v4, stack i32) () {
 					PictureRender(NewPictureId(child, guiIndex), renderBounds, childStack)
 				} else if (guiType == GUI_LABEL) {
 					LabelRender(NewLabelId(child, guiIndex), renderBounds, childStack)
-				} else if (guiType == GUI_PARTITION) {
-					partition_render(partition_id_(child, guiIndex), renderBounds, childStack)
 				} else if (guiType == GUI_KEYBOARD) {
-					keyboard_render(keyboard_id_(child, guiIndex), renderBounds, childStack)
+					KeyboardRender(NewKeyboardId(child, guiIndex), renderBounds, childStack)
 				} else if (guiType == GUI_WINDOW) {
-					window_render(window_id_(child, guiIndex), renderBounds, childStack)
+					WindowRender(NewWindowId(child, guiIndex), renderBounds, childStack)
 				} else if (guiType == GUI_GRAPH) {
-					graph_render(graph_id_(child, guiIndex), renderBounds, childStack)
+					GraphRender(NewGraphId(child, guiIndex), renderBounds, childStack)
 				} else if (guiType == GUI_SPLITTER) {
-					splitter_render(splitter_id_(child, guiIndex), renderBounds, childStack)
+					SplitterRender(NewSplitterId(child, guiIndex), renderBounds, childStack)
 				} else if (guiType == GUI_LIST) {
-					list_render(list_id_(child, guiIndex), renderBounds, childStack)
+					ListRender(NewListId(child, guiIndex), renderBounds, childStack)
 				} else if (guiType == GUI_SCROLLER) {
-					scroller_render(scroller_id_(child, guiIndex), renderBounds, childStack)
+					ScrollerRender(NewScrollerId(child, guiIndex), renderBounds, childStack)
 				} else if (guiType == GUI_LIFTER) {
-					lifter_render(lifter_id_(child, guiIndex), renderBounds, childStack)
+					LifterRender(NewLifterId(child, guiIndex), renderBounds, childStack)
 				} else if (guiType == GUI_BINDER) {
 					BinderRender(NewBinderId(child, guiIndex), renderBounds, childStack)
 				} else if (guiType == GUI_COMBO) {
-					combo_render(combo_id_(child, guiIndex), renderBounds, childStack)
+					ComboRender(NewComboId(child, guiIndex), renderBounds, childStack)
 				} else {
 					printf("GUI TYPE %d\n", guiType)
 					panicIfNot(false, "unknown gui type")
@@ -1040,26 +1025,24 @@ func ControlProcessEvent(id ControlId, event *app.Event) (out i32) {
 					out = PictureProcessEvent(NewPictureId(child, guiIndex), event)
 				} else if (guiType == GUI_LABEL) {
 					out = LabelProcessEvent(NewLabelId(child, guiIndex), event)
-				} else if (guiType == GUI_PARTITION) {
-					out = partition_process_event(partition_id_(child, guiIndex), event)
 				} else if (guiType == GUI_KEYBOARD) {
-					out = keyboard_process_event(keyboard_id_(child, guiIndex), event)
+					out = KeyboardProcessEvent(NewKeyboardId(child, guiIndex), event)
 				} else if (guiType == GUI_WINDOW) {
-					out = window_process_event(window_id_(child, guiIndex), event)
+					out = WindowProcessEvent(NewWindowId(child, guiIndex), event)
 				} else if (guiType == GUI_GRAPH) {
-					out = graph_process_event(graph_id_(child, guiIndex), event)
+					out = GraphProcessEvent(NewGraphId(child, guiIndex), event)
 				} else if (guiType == GUI_SPLITTER) {
-					out = splitter_process_event(splitter_id_(child, guiIndex), event)
+					out = SplitterProcessEvent(NewSplitterId(child, guiIndex), event)
 				} else if (guiType == GUI_LIST) {
-					out = list_process_event(list_id_(child, guiIndex), event)
+					out = ListProcessEvent(NewListId(child, guiIndex), event)
 				} else if (guiType == GUI_SCROLLER) {
-					out = scroller_process_event(scroller_id_(child, guiIndex), event)
+					out = ScrollerProcessEvent(NewScrollerId(child, guiIndex), event)
 				} else if (guiType == GUI_LIFTER) {
-					out = lifter_process_event(lifter_id_(child, guiIndex), event)
+					out = LifterProcessEvent(NewLifterId(child, guiIndex), event)
 				} else if (guiType == GUI_BINDER) {
 					out = BinderProcessEvent(NewBinderId(child, guiIndex), event)
 				} else if (guiType == GUI_COMBO) {
-					out = combo_process_event(combo_id_(child, guiIndex), event)
+					out = ComboProcessEvent(NewComboId(child, guiIndex), event)
 				} else {
 					printf("GUI TYPE %d\n", guiType)
 					panicIfNot(false, "unknown gui type")

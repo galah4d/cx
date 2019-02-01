@@ -73,7 +73,7 @@ func onExitDialogNo(controlIndex i32, action i32) {
 		printf("NO PRESSED\n")
 	} else if (action == app.KEY_RELEASE) {
 		printf("NO RELEASED\n")
-		gui.hide_modal(exitScreen)
+		gui.ScreenHideModal(exitScreen)
 		printf("HERE\n")
 	} else if (action == app.KEY_REPEAT) {
 		printf("NO REPEAT\n")
@@ -91,7 +91,7 @@ func onExitDialogYes(controlIndex i32, action i32) {
 		printf("YES PRESSED\n")
 	} else if (action == app.KEY_RELEASE) {
 		printf("YES RELEASED\n")
-		gui.hide_modal(exitScreen)
+		gui.ScreenHideModal(exitScreen)
 		exit = true
 	} else if (action == app.KEY_REPEAT) {
 		printf("YES REPEAT\n")
@@ -203,18 +203,18 @@ func main()() {
 	gui.ScreenSetModal(exitScreen, true)
 
 	{
-		var exitWindow gui.window_id = gui.window_create("exitWindow")
+		var exitWindow gui.WindowId = gui.WindowCreate("exitWindow")
 		gui.ControlAddChild(exitScreen.base, exitWindow.base)
 		gui.ControlSetSkin(exitWindow.base, gui.g_windowSkin)
 		gui.ControlSetAutosize(exitWindow.base, gui.AUTOSIZE)
 		gui.ControlSetAlign(exitWindow.base, gui.ALIGN_CENTER)
-		gui.window_set_caption(exitWindow, "cxfx")
-		gui.window_add_button(exitWindow, "no", "No", "main", "onExitDialogNo")
-		gui.window_add_button(exitWindow, "yes", "Yes", "main", "onExitDialogYes")
+		gui.WindowSetCaption(exitWindow, "cxfx")
+		gui.WindowAddButton(exitWindow, "no", "No", "main", "onExitDialogNo")
+		gui.WindowAddButton(exitWindow, "yes", "Yes", "main", "onExitDialogYes")
 
 		{
 			var exitLabel gui.LabelId = gui.LabelCreate("exitLabel")
-			gui.window_set_containee(exitWindow, exitLabel.base)
+			gui.WindowSetContainee(exitWindow, exitLabel.base)
 			gui.ControlSetDock(exitLabel.base, gui.DOCK_FILL)
 			gui.ControlSetAutosize(exitLabel.base, gui.AUTOSIZE)
 			gui.LabelSetFont(exitLabel, gui.g_regularFont)

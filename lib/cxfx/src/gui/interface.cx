@@ -9,6 +9,7 @@ import "mat"
 
 // TODO : use callbacks instead of hardcoded if/else (compile only used type)
 // TODO : user controls
+// TODO : json serialization
 
 // Constants ...
 var GUI_INVALID     i32 =  0
@@ -16,16 +17,15 @@ var GUI_CONTROL     i32 =  1
 var GUI_SCREEN      i32 =  2
 var GUI_PICTURE     i32 =  3
 var GUI_LABEL       i32 =  4
-var GUI_PARTITION   i32 =  5
-var GUI_KEYBOARD    i32 =  6
-var GUI_WINDOW      i32 =  7
-var GUI_GRAPH       i32 =  8
-var GUI_SPLITTER    i32 =  9
-var GUI_LIST        i32 = 10
-var GUI_SCROLLER    i32 = 11
-var GUI_LIFTER      i32 = 12
-var GUI_BINDER      i32 = 13
-var GUI_COMBO       i32 = 14
+var GUI_KEYBOARD    i32 =  5
+var GUI_WINDOW      i32 =  6
+var GUI_GRAPH       i32 =  7
+var GUI_SPLITTER    i32 =  8
+var GUI_LIST        i32 =  9
+var GUI_SCROLLER    i32 = 10
+var GUI_LIFTER      i32 = 11
+var GUI_BINDER      i32 = 12
+var GUI_COMBO       i32 = 13
 
 var STATE_CLOSED    i32 = 0
 var STATE_SHOWING   i32 = 1
@@ -439,7 +439,7 @@ func ProcessEvent(event *app.Event) () {
 		if (ScreenProcessEvent(modalScreen, event) == app.EVENT_UNUSED) {
 			if ((key == app.KEYCODE_ESCAPE && action == app.KEY_PRESS) ||
 				(button == app.BUTTON_LEFT && buttonAction == app.MOUSE_PRESS && floating == true)) {
-				hide_modal(modalScreen)
+				ScreenHideModal(modalScreen)
 				g_hotScreen = g_currentScreen
 			} else {
 				currentScreen = modalScreen

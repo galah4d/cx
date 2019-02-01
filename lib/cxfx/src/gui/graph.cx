@@ -1,17 +1,17 @@
 package gui
 
-//-----------------------------------------------------------------------------
-// GRAPH
-//-----------------------------------------------------------------------------
-type graph_id struct {
+// Globals ...
+var g_graphs []Graph
+
+// GraphId ...
+type GraphId struct {
 	base ControlId
 	graph i32
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-type graph_s struct {
-	id graph_id
+// Graph ...
+type Graph struct {
+	id GraphId
 	unit mat.v2
 	scale mat.v2
 	offset mat.v2
@@ -20,43 +20,36 @@ type graph_s struct {
 	coord mat.v2
 	labels [] LabelId
 	labelCount i32
-	horz [] graph_line_s
-	vert [] graph_line_s
+	horz [] GraphLine
+	vert [] GraphLine
 	graphClips mat.v4
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func graph_id_(base ControlId, graph i32) (out graph_id) {
-	out.base = base
-	out.graph = graph
-	panicIfNot(is_valid_graph(out), "invalid id")
-}
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func is_valid_graph(id graph_id) (out bool) {
-	out = id.graph >= 0 && id.graph < len(g_graphs) && IsValidControl(id.base)
-}
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-var g_graphs []graph_s
-
-type graph_line_s struct {
+type GraphLine struct {
 	color mat.v4
 	bounds mat.v4
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func graph_create(name str) (out graph_id) {
+// NewGraphId ...
+func NewGraphId(base ControlId, graph i32) (out GraphId) {
+	out.base = base
+	out.graph = graph
+	panicIfNot(IsValidGraph(out), "invalid id")
+}
+
+// IsValidGraph ...
+func IsValidGraph(id GraphId) (out bool) {
+	out = id.graph >= 0 && id.graph < len(g_graphs) && IsValidControl(id.base)
+}
+
+// GraphCreate ...
+func GraphCreate(name str) (out GraphId) {
 	out.base = controlCreate(name, GUI_GRAPH, out.graph)
 	ControlSetFocusable(out.base, 1)
 
 	out.graph = len(g_graphs)
 
-	var graph graph_s
+	var graph Graph
 	graph.id = out
 	graph.unit = mat.v2_(50.0, 50.0)
 	graph.scale = mat.v2_(1.0, 1.0)
@@ -66,13 +59,12 @@ func graph_create(name str) (out graph_id) {
 	graph.labelCount = 0
 
 	g_graphs = append(g_graphs, graph)
-	panicIfNot(is_valid_graph(out), "invalid id")
+	panicIfNot(IsValidGraph(out), "invalid id")
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func graph_get_label(id graph_id) (label LabelId) {
-	panicIfNot(is_valid_graph(id), "invalid id")
+// GraphGetLabel ...
+func GraphGetLabel(id GraphId) (label LabelId) {
+	panicIfNot(IsValidGraph(id), "invalid id")
 	var size i32 = len(g_graphs[id.graph].labels)
 	var count i32 = g_graphs[id.graph].labelCount
 	if count < size {
@@ -85,11 +77,10 @@ func graph_get_label(id graph_id) (label LabelId) {
 	g_graphs[id.graph].labelCount = count + 1
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func graph_process_event(id graph_id, event *app.Event) (out i32) {
-	panicIfNot(is_valid_graph(id), "invalid id")
-	//ControlPrint("graph_process_event : ", id.base, false)
+// GraphProcessEvent ...
+func GraphProcessEvent(id GraphId, event *app.Event) (out i32) {
+	panicIfNot(IsValidGraph(id), "invalid id")
+	//ControlPrint("GraphProcessEvent : ", id.base, false)
 
 	out = ControlProcessEvent(id.base, event)
 	if (out == app.EVENT_UNUSED) {
@@ -161,10 +152,9 @@ func graph_process_event(id graph_id, event *app.Event) (out i32) {
 	}
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func graph_resize(id graph_id) () {
-	panicIfNot(is_valid_graph(id), "invalid id")
+// GraphResize ...
+func GraphResize(id GraphId) () {
+	panicIfNot(IsValidGraph(id), "invalid id")
 	ControlClearChildren(id.base)
 	ControlResize(id.base)
 
@@ -235,7 +225,7 @@ func graph_resize(id graph_id) () {
 
 	g_graphs[graphIndex].graphClips = mat.v4_(graphPosition.x, graphPosition.y, size.x - coord.x, size.y - coord.y)
 
-	var graphLine graph_line_s
+	var graphLine GraphLine
 	var font FontId
 
 	i = 0
@@ -266,7 +256,7 @@ func graph_resize(id graph_id) () {
 		graphLine.bounds = mat.v4_(x, graphPosition.y, x, endY)
 		g_graphs[graphIndex].horz = append(g_graphs[graphIndex].horz, graphLine)
 
-		var label LabelId = graph_get_label(id)
+		var label LabelId = GraphGetLabel(id)
 		ControlAddChild(id.base, label.base)
 		ControlSetBounds(label.base, labelBounds)
 		ControlSetAutoscale(label.base, AUTOSCALE)
@@ -315,7 +305,7 @@ func graph_resize(id graph_id) () {
 		graphLine.bounds = mat.v4_(graphPosition.x, y, endX, y)
 		g_graphs[graphIndex].vert = append(g_graphs[graphIndex].vert, graphLine)
 
-		var label LabelId = graph_get_label(id)
+		var label LabelId = GraphGetLabel(id)
 		ControlAddChild(id.base, label.base)
 		ControlSetBounds(label.base, labelBounds)
 		ControlSetAutoscale(label.base, AUTOSCALE)
@@ -336,20 +326,19 @@ func graph_resize(id graph_id) () {
 	//ControlResize(id.base)
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func graph_render(id graph_id, clip mat.v4, stack i32) () {
-	panicIfNot(is_valid_graph(id), "invalid id")
+// GraphRender ...
+func GraphRender(id GraphId, clip mat.v4, stack i32) () {
+	panicIfNot(IsValidGraph(id), "invalid id")
 	ControlRender(id.base, clip, stack)
 
 	var controlIndex i32 = id.base.control
 	var graphIndex i32 = id.graph
 
 	var renderBounds mat.v4 = mat.v4_v2v2(g_controls[controlIndex].renderPosition, g_controls[controlIndex].size)
-	//ControlPrint("graph_render : renderBounds ", id.base, false)
+	//ControlPrint("GraphRender : renderBounds ", id.base, false)
 	//  printf("renderBounds %f, %f, %f, %f\n", renderBounds.x, renderBounds.y, renderBounds.z, renderBounds.w)
 	var renderClips mat.v4 = gfx.PushScissor(g_controls[controlIndex].name, renderBounds)
-	//ControlPrint("graph_render : graphClips ", id.base, false)
+	//ControlPrint("GraphRender : graphClips ", id.base, false)
 	var graphClips mat.v4 = g_graphs[graphIndex].graphClips
 	//  printf("graphClips %f, %f, %f, %f\n", graphClips.x, graphClips.y, graphClips.z, graphClips.w)
 	renderClips = gfx.PushScissor(g_controls[controlIndex].name, graphClips)

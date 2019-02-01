@@ -115,7 +115,6 @@
 		../src/gui/splitter.cx\
 		../src/gui/window.cx\
 		../src/gui/keyboard.cx\
-		../src/gui/partition.cx\
 		../src/gui/list.cx\
 		../src/gui/graph.cx\
 		../src/gui/lifter.cx\
@@ -156,7 +155,6 @@
 		../src/gui/splitter.cx\
 		../src/gui/window.cx\
 		../src/gui/keyboard.cx\
-		../src/gui/partition.cx\
 		../src/gui/list.cx\
 		../src/gui/graph.cx\
 		../src/gui/lifter.cx\
@@ -197,7 +195,6 @@
 		../src/gui/splitter.cx\
 		../src/gui/window.cx\
 		../src/gui/keyboard.cx\
-		../src/gui/partition.cx\
 		../src/gui/list.cx\
 		../src/gui/graph.cx\
 		../src/gui/lifter.cx\
@@ -238,7 +235,6 @@
 		../src/gui/splitter.cx\
 		../src/gui/window.cx\
 		../src/gui/keyboard.cx\
-		../src/gui/partition.cx\
 		../src/gui/list.cx\
 		../src/gui/graph.cx\
 		../src/gui/lifter.cx\
@@ -279,7 +275,6 @@
 		../src/gui/splitter.cx\
 		../src/gui/window.cx\
 		../src/gui/keyboard.cx\
-		../src/gui/partition.cx\
 		../src/gui/list.cx\
 		../src/gui/graph.cx\
 		../src/gui/lifter.cx\
@@ -320,7 +315,6 @@
 		../src/gui/splitter.cx\
 		../src/gui/window.cx\
 		../src/gui/keyboard.cx\
-		../src/gui/partition.cx\
 		../src/gui/list.cx\
 		../src/gui/graph.cx\
 		../src/gui/lifter.cx\
@@ -365,7 +359,6 @@
 		../src/gui/splitter.cx\
 		../src/gui/window.cx\
 		../src/gui/keyboard.cx\
-		../src/gui/partition.cx\
 		../src/gui/list.cx\
 		../src/gui/graph.cx\
 		../src/gui/lifter.cx\
@@ -411,7 +404,6 @@
 		../src/gui/splitter.cx\
 		../src/gui/window.cx\
 		../src/gui/keyboard.cx\
-		../src/gui/partition.cx\
 		../src/gui/list.cx\
 		../src/gui/graph.cx\
 		../src/gui/lifter.cx\

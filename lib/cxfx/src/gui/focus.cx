@@ -308,7 +308,7 @@ func controlActivate(id ControlId) {
 	if (guiType == GUI_WINDOW) {
 		var guiIndex i32 = g_controls[index].gui_index
 		ControlPrint("window found : ", id, false)
-		var windowId window_id = window_id_(NewControlId(index), guiIndex)
+		var windowId WindowId = WindowId_(NewControlId(index), guiIndex)
 		panicIfNot(is_valid_window(windowId), "invalid window id")
 		RebuildFocus(windowId)
 	} else {

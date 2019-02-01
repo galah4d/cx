@@ -1,21 +1,21 @@
 package gui
 
-//-----------------------------------------------------------------------------
-// LIST
-//-----------------------------------------------------------------------------
-type list_id struct {
+// Globals ...
+var g_lists[] List
+
+// ListId ...
+type ListId struct {
 	base ControlId
 	list i32
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-type list_s struct {
-	id list_id
+// List ...
+type List struct {
+	id ListId
 
 	header ControlId
 	columnCount i32
-	scroller scroller_id
+	scroller ScrollerId
 	lines ControlId
 	lineCount i32
 	offset mat.v2
@@ -25,74 +25,21 @@ type list_s struct {
 	previousSelectedItem i32
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func list_id_(base ControlId, list i32) (out list_id) {
+// NewListId ...
+func NewListId(base ControlId, list i32) (out ListId) {
 	out.base = base
 	out.list = list
-	panicIfNot(is_valid_list(out), "invalid id")
+	panicIfNot(IsValidList(out), "invalid id")
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func is_valid_list(id list_id) (out bool) {
+// IsValidList ...
+func IsValidList(id ListId) (out bool) {
 	out = id.list >= 0 && id.list < len(g_lists) && IsValidControl(id.base)
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-var g_lists[] list_s
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func list_create(name str) (out list_id) {
-	out.list = len(g_lists)
-	out.base = controlCreate(name, GUI_LIST, out.list)
-
-	var list list_s
-	list.id = out
-
-	var controlIndex i32 = out.base.control
-	//ControlSetPadding(out.base, mat.v4_(0.01, 0.01, 0.01, 0.01))
-
-	var header ControlId = ControlCreate("header")
-	ControlAddChild(out.base, header)
-	ControlSetDock(header, DOCK_TOP)
-	//ControlSetSize(header, mat.v2_(0.0, 28.0))
-	ControlSetAutosize(header, AUTOSIZE_Y)
-	ControlSetSkin(header, g_blackSkin)
-	list.header = header
-
-	{
-		var scroller scroller_id = scroller_create("scroller")
-		ControlAddChild(out.base, scroller.base)
-		ControlSetDock(scroller.base, DOCK_FILL)
-		//ControlSetAutosize(scroller.base, AUTOSIZE_Y)
-
-		var lines ControlId = ControlCreate("lines")
-		//ControlSetDock(lines, DOCK_FILL)
-		ControlSetAutosize(lines, AUTOSIZE_Y)
-		ControlSetSkin(lines, g_blackSkin)
-		list.lines = lines
-
-		scroller_set_containee(scroller, lines)
-		list.scroller = scroller
-	}
-
-	list.columnCount = 0
-	list.lineCount = 0
-	list.selectedItem = -1
-	list.selectedLine = -1
-	list.previousSelectedItem = -1
-	list.previousSelectedLine = -1
-	g_lists = append(g_lists, list)
-	panicIfNot(is_valid_list(out), "invalid id")
-}
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func list_add_column(id list_id, name str, color mat.v4, size i32, skin SkinId) {
-	panicIfNot(is_valid_list(id), "invalid id")
+// ListAddColumn ...
+func ListAddColumn(id ListId, name str, color mat.v4, size i32, skin SkinId) {
+	panicIfNot(IsValidList(id), "invalid id")
 
 	var listIndex i32 = id.list
 	var columnCount i32 = g_lists[listIndex].columnCount
@@ -111,26 +58,24 @@ func list_add_column(id list_id, name str, color mat.v4, size i32, skin SkinId) 
 	LabelSetColor(column, color)
 	LabelSetAlign(column, ALIGN_CENTER)
 
-	//ControlPrint("list_add_column : ", column.base, false)
+	//ControlPrint("ListAddColumn : ", column.base, false)
 	g_lists[listIndex].columnCount = columnCount + 1
 	var header ControlId = g_lists[listIndex].header
 	ControlAddChild(header, column.base)
 	//printf("childCount %d\n", g_controls[header.control].childCount)
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func list_clear_lines(id list_id) {
-	panicIfNot(is_valid_list(id), "invalid id")
+// ListClearLines ...
+func ListClearLines(id ListId) {
+	panicIfNot(IsValidList(id), "invalid id")
 
 	var lines ControlId = g_lists[id.list].lines
 	ControlClearChildren(lines)
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func list_add_line(id list_id, skin SkinId) (out ControlId) {
-	panicIfNot(is_valid_list(id), "list_add_line")
+// ListAddLine ...
+func ListAddLine(id ListId, skin SkinId) (out ControlId) {
+	panicIfNot(IsValidList(id), "invalid id")
 	var listIndex i32 = id.list
 	var lineCount i32 = g_lists[listIndex].lineCount
 	var line ControlId = ControlCreate(sprintf("line_%d", lineCount))
@@ -148,9 +93,8 @@ func list_add_line(id list_id, skin SkinId) (out ControlId) {
 	out = line
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func list_line_add_label(id ControlId, text str, align i32, color mat.v4, size i32, skin SkinId) {
+// ListLineAddLabel ...
+func ListLineAddLabel(id ControlId, text str, align i32, color mat.v4, size i32, skin SkinId) {
 	panicIfNot(IsValidControl(id), "invalid id")
 
 	var lineName str = g_controls[id.control].name
@@ -173,9 +117,8 @@ func list_line_add_label(id ControlId, text str, align i32, color mat.v4, size i
 	LabelSetAlign(label, align)
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func list_line_add_picture(id ControlId, align i32, animation AnimationId) {
+// ListLineAddPicture ...
+func ListLineAddPicture(id ControlId, align i32, animation AnimationId) {
 	panicIfNot(IsValidControl(id), "invalid id")
 
 	var lineName str = g_controls[id.control].name
@@ -200,10 +143,9 @@ func list_line_add_picture(id ControlId, align i32, animation AnimationId) {
 	LabelSetAlign(label, align)*/
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func list_child_focused(id list_id, child ControlId, value i32) {
-	panicIfNot(is_valid_list(id), "invalid id")
+// ListChildFocuse...
+func ListChildFocus(id ListId, child ControlId, value i32) {
+	panicIfNot(IsValidList(id), "invalid id")
 	panicIfNot(IsValidControl(child), "invalid child id")
 	if (value > 0) {
 
@@ -252,7 +194,7 @@ func list_child_focused(id list_id, child ControlId, value i32) {
 		var selectedItem i32 = g_lists[id.list].selectedItem
 
 
-			//ControlPrint("list_child_focused panel : ", panel, false)
+			//ControlPrint("ListChildFocused panel : ", panel, false)
 			var columnCount i32 = g_controls[header.control].childCount
 			var lineCount i32 = g_controls[panel.control].childCount
 
@@ -284,8 +226,8 @@ func list_child_focused(id list_id, child ControlId, value i32) {
 				g_controls[selectedLineId.control].selected = 1
 				g_controls[selectedItemId.control].selected = 1
 				if (selectedItemId.control != child.control) {
-					ControlPrint("list_child_focused : ForceFocus SELECTED : ", selectedItemId, false)
-					ControlPrint("list_child_focused : ForceFocus CHILD : ", child, false)
+					ControlPrint("ListChildFocused : ForceFocus SELECTED : ", selectedItemId, false)
+					ControlPrint("ListChildFocused : ForceFocus CHILD : ", child, false)
 					ForceFocus(selectedItemId)
 				}
 			}
@@ -293,10 +235,54 @@ func list_child_focused(id list_id, child ControlId, value i32) {
 	}
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func list_process_event(id list_id, event *app.Event) (out i32) {
-	panicIfNot(is_valid_list(id), "invalid id")
+// ListCreate ...
+func ListCreate(name str) (out ListId) {
+	out.list = len(g_lists)
+	out.base = controlCreate(name, GUI_LIST, out.list)
+
+	var list List
+	list.id = out
+
+	var controlIndex i32 = out.base.control
+	//ControlSetPadding(out.base, mat.v4_(0.01, 0.01, 0.01, 0.01))
+
+	var header ControlId = ControlCreate("header")
+	ControlAddChild(out.base, header)
+	ControlSetDock(header, DOCK_TOP)
+	//ControlSetSize(header, mat.v2_(0.0, 28.0))
+	ControlSetAutosize(header, AUTOSIZE_Y)
+	ControlSetSkin(header, g_blackSkin)
+	list.header = header
+
+	{
+		var scroller ScrollerId = ScrollerCreate("scroller")
+		ControlAddChild(out.base, scroller.base)
+		ControlSetDock(scroller.base, DOCK_FILL)
+		//ControlSetAutosize(scroller.base, AUTOSIZE_Y)
+
+		var lines ControlId = ControlCreate("lines")
+		//ControlSetDock(lines, DOCK_FILL)
+		ControlSetAutosize(lines, AUTOSIZE_Y)
+		ControlSetSkin(lines, g_blackSkin)
+		list.lines = lines
+
+		ScrollerSetContainee(scroller, lines)
+		list.scroller = scroller
+	}
+
+	list.columnCount = 0
+	list.lineCount = 0
+	list.selectedItem = -1
+	list.selectedLine = -1
+	list.previousSelectedItem = -1
+	list.previousSelectedLine = -1
+	g_lists = append(g_lists, list)
+	panicIfNot(IsValidList(out), "invalid id")
+}
+
+// ListProcessEvent ...
+func ListProcessEvent(id ListId, event *app.Event) (out i32) {
+	panicIfNot(IsValidList(id), "invalid id")
 	out = ControlProcessEvent(id.base, event)
 
 
@@ -399,19 +385,18 @@ func list_process_event(id list_id, event *app.Event) (out i32) {
 			g_lists[id.list].selectedItem = -1
 		}
 	}
-	//printf("list_process_event : OUT %d\n", out)
+	//printf("ListProcessEvent : OUT %d\n", out)
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func list_resize(id list_id) () {
-	panicIfNot(is_valid_list(id), "invalid id")
+// ListResize ...
+func ListResize(id ListId) () {
+	panicIfNot(IsValidList(id), "invalid id")
 
 	var listIndex i32 = id.list
 	var header ControlId = g_lists[listIndex].header
 	var headerIndex i32 = header.control
 
-	var scroller scroller_id = g_lists[listIndex].scroller
+	var scroller ScrollerId = g_lists[listIndex].scroller
 	var scrollerContainer ControlId = g_scrollers[scroller.scroller].container
 	var scrollerPanel ControlId = g_scrollers[scroller.scroller].panel
 
@@ -422,9 +407,9 @@ func list_resize(id list_id) () {
 	var i i32 = 0
 
 	/*if (id.base.control == 36) {
-		printf("--------------------------------> list_resize\n")
-		ControlPrint("list_resize : ", id.base, false)
-		ControlPrint("list_resize : LINES ", lines, false)
+		printf("--------------------------------> ListResize\n")
+		ControlPrint("ListResize : ", id.base, false)
+		ControlPrint("ListResize : LINES ", lines, false)
 		printf("columnCount %d, lineCount %d, listIndex %d, headerIndex %d, linesIndex %d\n", columnCount, lineCount, listIndex, headerIndex, linesIndex)
 	}*/
 
@@ -436,7 +421,7 @@ func list_resize(id list_id) () {
 	var maxWidth f32 = 0.0
 		var column ControlId = g_controls[headerIndex].children[i]
 		/*if (id.base.control == 36) {
-			ControlPrint("list_resize : column ", column, false)
+			ControlPrint("ListResize : column ", column, false)
 		}*/
 		var columnIndex i32 = column.control
 		g_controls[column.control].selected = 0
@@ -451,11 +436,11 @@ func list_resize(id list_id) () {
 			var line ControlId = g_controls[linesIndex].children[k]
 			var lineIndex i32 = line.control
 			/*if (id.base.control == 36) {
-				ControlPrint("list_resize : line ", line, false)
+				ControlPrint("ListResize : line ", line, false)
 			}*/
 
 			var item ControlId = g_controls[lineIndex].children[i]
-			//ControlPrint("list_resize : item ", item, false)
+			//ControlPrint("ListResize : item ", item, false)
 			var itemIndex i32 = item.control
 
 			width, height = ControlMeasure(item)
@@ -570,10 +555,9 @@ func list_resize(id list_id) () {
 	//printf("columnCount %d\n", g_controls[headerIndex].childCount)
 }
 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func list_render(id list_id, clip mat.v4, stack i32) () {
-	panicIfNot(is_valid_list(id), "invalid id")
+// ListRender ...
+func ListRender(id ListId, clip mat.v4, stack i32) () {
+	panicIfNot(IsValidList(id), "invalid id")
 	ControlRender(id.base, clip, stack)
 }
 

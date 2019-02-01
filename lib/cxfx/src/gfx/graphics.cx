@@ -4,6 +4,8 @@ import "gl"
 import "mat"
 import "os"
 
+// TODO : print gl extensions on init
+
 // Globals ...
 var g_sizeofFloat i32 = 4
 

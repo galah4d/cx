@@ -85,25 +85,13 @@ var g_fullscreenQuad                gfx.MeshId
 var g_skycoinTexture gfx.Texture
 var g_skycoinAnim AnimationId
 
-//var g_USTexture gfx.Texture
-//var g_USAnim AnimationId
-
-//var g_JPTexture gfx.Texture
-//var g_JPAnim AnimationId
-
-//var g_BRTexture gfx.Texture
-//var g_BRAnim AnimationId
-
-var g_pumpcxTexture_0 gfx.Texture
-var g_pumpcxTexture_1 gfx.Texture
-
-var g_pumpcxAnim AnimationId
-var g_dumpcxAnim AnimationId
+var g_synthAnim AnimationId
+var g_synthAnim AnimationId
 
 var g_depthStencilBuffer i32 = -1
 
-var g_width i32 // ##0 handle resize events
-var g_height i32 // ##0 handle resize events
+var g_width i32 // TODO handle resize events
+var g_height i32 // TODO handle resize events
 
 var g_black             mat.v4 = mat.rgba_ui8( 30,  34,  39, 255)
 var g_white             mat.v4 = mat.rgba_ui8(255, 251, 251, 255)
@@ -274,25 +262,9 @@ func Init(a *app.Application, width i32, height i32, dataDir str) {
 	g_depthStencilBuffer = gfx.CreateDepthBuffer(gl.DEPTH_COMPONENT, g_width, g_height)
 
 	// textures
-	//g_USTexture = gfx.TextureCreate(sprintf("%s/textures/flags/us.png", dataDir), gl.LINEAR, gl.LINEAR, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, 0, 0)
-	//g_JPTexture = gfx.TextureCreate(sprintf("%s/textures/flags/jp.png", dataDir), gl.LINEAR, gl.LINEAR, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, 0, 0)
-	//g_BRTexture = gfx.TextureCreate(sprintf("%s/textures/flags/br.png", dataDir), gl.LINEAR, gl.LINEAR, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, 0, 0)
-
-	//g_USAnim = AnimationCreateFromTexture(g_USTexture)
-	//g_JPAnim = AnimationCreateFromTexture(g_JPTexture)
-	//g_BRAnim = AnimationCreateFromTexture(g_BRTexture)
-
 	g_skycoinTexture = gfx.TextureCreate(sprintf("%s/textures/Skycoin-Cloud-BW-Vertical-on_black@2x.png", dataDir), gl.LINEAR, gl.LINEAR, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, 0, 0, true)
 
-	//g_pumpcxTexture_0 = gfx.TextureCreate("textures/pumpcx_0.png", gl.LINEAR, gl.LINEAR, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, 0, 0)
-	//g_pumpcxTexture_1 = gfx.TextureCreate("textures/pumpcx_1.png", gl.LINEAR, gl.LINEAR, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, 0, 0)
-	//g_pumpcxAnim = AnimationCreate()
-	//AnimationAddFrame(g_pumpcxAnim, 10, 0, g_pumpcxTexture_0)
-	//AnimationAddFrame(g_pumpcxAnim, 10, 0, g_pumpcxTexture_1)
-
-	g_dumpcxAnim = AnimationCreateFromPath(sprintf("%s/textures/dumpcx.gif", dataDir))
-	g_pumpcxAnim = g_dumpcxAnim
-
+	g_synthAnim = AnimationCreateFromPath(sprintf("%s/textures/synth.gif", dataDir))
 	g_skycoinAnim = AnimationCreateFromTexture(g_skycoinTexture)
 
 	// layers

@@ -35,6 +35,8 @@
 	SelectStatement SelectStatement
 	SelectStatements []SelectStatement
 
+	ReturnExpressions ReturnExpressions
+
 	arrayArguments [][]*CXExpression
 
         function *CXFunction
@@ -86,6 +88,8 @@
                         /* Pointers */
                         ADDR
 
+%type   <i32>           int_value
+
 %type   <tok>           after_period
 %type   <tok>           unary_operator
 %type   <tok>           assignment_operator
@@ -128,6 +132,8 @@
 %type   <expressions>   slice_literal_expression_list
 %type   <expressions>   slice_literal_expression
 
+%type	<ReturnExpressions>	return_expression
+
 %type   <expressions>   selector
 
 %type   <expressions>   struct_literal_fields
@@ -159,8 +165,9 @@
 %type   <stringA>       infer_action, infer_actions
 %type   <expressions>   infer_clauses
                         
-                        // for struct literals
+			// for struct literals
 %right                   IDENTIFIER LBRACE
+// %left REF_OP
 // %right                  IDENTIFIER
                         
 /* %start                  translation_unit */
@@ -192,11 +199,11 @@ debugging:
                 }
         ;
 
-stepping:       TSTEP INT_LITERAL INT_LITERAL
+stepping:       TSTEP int_value int_value
                 {
 			Stepping(int($2), int($3), true)
                 }
-        |       STEP INT_LITERAL
+        |       STEP int_value
                 {
 			Stepping(int($2), 0, false)
                 }
@@ -280,7 +287,7 @@ global_declaration:
 struct_declaration:
                 TYPE IDENTIFIER STRUCT struct_fields
                 {
-			DeclareStruct($2, $4)
+		        DeclareStruct($2, $4)
                 }
                 ;
 
@@ -641,7 +648,7 @@ infer_action_arg:
                 {
 			$$ = $1
                 }
-        |       INT_LITERAL
+        |       int_value
                 {
 			$$ = strconv.Itoa(int($1))
                 }
@@ -730,7 +737,15 @@ infer_clauses:
                 ;
 
 
-
+int_value:
+            INT_LITERAL
+            {
+		    $$ = $1
+            }
+        |   SUB_OP INT_LITERAL
+            {
+		    $$ = -$2
+            }
 
 primary_expression:
                 IDENTIFIER
@@ -823,15 +838,10 @@ postfix_expression:
                 {
 			$$ = PostfixExpressionIncDec($1, false)
                 }
-
         |       postfix_expression PERIOD IDENTIFIER
                 {
-			PostfixExpressionField($1, $3)
+			$$ = PostfixExpressionField($1, $3)
                 }
-        // |       postfix_expression PERIOD IDENTIFIER LBRACE struct_literal_fields RBRACE
-        //         {
-	// 		$$ = PrimaryStructLiteralExternal($1[0].Outputs[0].Name, $3, $5)
-        //         }
                 ;
 
 argument_expression_list:
@@ -989,10 +999,14 @@ conditional_expression:
                 ;
 
 struct_literal_expression:
-                conditional_expression
+		conditional_expression
 	|       IDENTIFIER LBRACE struct_literal_fields RBRACE
                 {
 			$$ = PrimaryStructLiteral($1, $3)
+                }
+	|       unary_operator IDENTIFIER LBRACE struct_literal_fields RBRACE
+                {
+			$$ = UnaryExpression($1, PrimaryStructLiteral($2, $4))
                 }
         |       postfix_expression PERIOD IDENTIFIER LBRACE struct_literal_fields RBRACE
                 {
@@ -1001,7 +1015,6 @@ struct_literal_expression:
                 ;
 
 assignment_expression:
-                /* conditional_expression */
                 struct_literal_expression
 	|       unary_expression assignment_operator assignment_expression
                 {
@@ -1137,7 +1150,7 @@ expression_statement:
                 { $$ = nil }
 	|       expression SEMICOLON
                 {
-			if $1[len($1) - 1].Operator == nil && !$1[len($1) - 1].IsMethodCall {
+			if len($1) > 0 && $1[len($1) - 1].Operator == nil && !$1[len($1) - 1].IsMethodCall {
 				outs := $1[len($1) - 1].Outputs
 				if len(outs) > 0 {
 					println(CompilationError(outs[0].FileName, outs[0].FileLine), "invalid expression")
@@ -1223,6 +1236,21 @@ iteration_statement:
                 }
                 ;
 
+return_expression:
+		struct_literal_expression
+		{
+			retExprs := ReturnExpressions{Expressions: AssociateReturnExpressions(0, $1)}
+			retExprs.Size++
+			$$ = retExprs
+		}
+	|	return_expression COMMA struct_literal_expression
+		{
+			$1.Expressions = append($1.Expressions, AssociateReturnExpressions($1.Size, $3)...)
+			$1.Size++
+			$$ = $1
+		}
+		;
+
 jump_statement: GOTO IDENTIFIER SEMICOLON
                 {
 			if pkg, err := PRGRM.GetCurrentPackage(); err == nil {
@@ -1250,27 +1278,11 @@ jump_statement: GOTO IDENTIFIER SEMICOLON
 		}
 	|       RETURN SEMICOLON
                 {
-			if pkg, err := PRGRM.GetCurrentPackage(); err == nil {
-				expr := MakeExpression(Natives[OP_JMP], CurrentFile, LineNo)
-
-				// simulating a label so it gets executed without evaluating a predicate
-				expr.Label = MakeGenSym(LABEL_PREFIX)
-				expr.ThenLines = MAX_INT32
-				expr.Package = pkg
-
-				arg := MakeArgument("", CurrentFile, LineNo).AddType("bool")
-				arg.Package = pkg
-
-				expr.AddInput(arg)
-
-				$$ = []*CXExpression{expr}
-			} else {
-				panic(err)
-			}
+			$$ = AddJmpToReturnExpressions(ReturnExpressions{})
                 }
-	|       RETURN expression SEMICOLON
+	|       RETURN return_expression SEMICOLON
                 {
-			$$ = nil
+			$$ = AddJmpToReturnExpressions($2)
                 }
                 ;
 %%

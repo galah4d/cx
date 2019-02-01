@@ -1,10 +1,20 @@
 package actions
 
 import (
+	"errors"
 	"fmt"
+	"os"
+	
 	. "github.com/skycoin/cx/cx"
 )
 
+// FunctionHeader takes a function name ('ident') and either creates the
+// function if it's not known before or returns the already existing function
+// if it is.
+//
+// If the function is a method (isMethod = true), then it adds the object that
+// it's called on as the first argument.
+//
 func FunctionHeader(ident string, receiver []*CXArgument, isMethod bool) *CXFunction {
 	if isMethod {
 		if len(receiver) > 1 {
@@ -15,6 +25,7 @@ func FunctionHeader(ident string, receiver []*CXArgument, isMethod bool) *CXFunc
 
 			if fn, err := PRGRM.GetFunction(fnName, pkg.Name); err == nil {
 				fn.AddInput(receiver[0])
+				pkg.CurrentFunction = fn
 				return fn
 			} else {
 				fn := MakeFunction(fnName)
@@ -28,6 +39,7 @@ func FunctionHeader(ident string, receiver []*CXArgument, isMethod bool) *CXFunc
 	} else {
 		if pkg, err := PRGRM.GetCurrentPackage(); err == nil {
 			if fn, err := PRGRM.GetFunction(ident, pkg.Name); err == nil {
+				pkg.CurrentFunction = fn
 				return fn
 			} else {
 				fn := MakeFunction(ident)
@@ -102,6 +114,7 @@ func FunctionDeclaration(fn *CXFunction, inputs, outputs []*CXArgument, exprs []
 		ProcessTempVariable(expr)
 		ProcessSliceAssignment(expr)
 		ProcessStringAssignment(expr)
+		ProcessReferenceAssignment(expr)
 
 		// process short declaration
 		if len(expr.Outputs) > 0 && len(expr.Inputs) > 0 && expr.Outputs[0].IsShortDeclaration && !expr.IsStructLiteral {
@@ -202,7 +215,55 @@ func undOutputSize(expr *CXExpression) int {
 	}
 }
 
+// checkSameNativeType checks if all the inputs of an expression are of the same type.
+// It is used mainly to prevent implicit castings in arithmetic operations
+func checkSameNativeType (expr *CXExpression) error {
+	if len(expr.Inputs) < 1 {
+		return errors.New("cannot perform arithmetic without operands")
+	}
+	var typ int = expr.Inputs[0].Type
+	for _, inp := range expr.Inputs {
+		if inp.Type != typ {
+			return errors.New("operands are not of the same type")
+		}
+		typ = inp.Type
+	}
+	return nil
+}
+
+// isUndOpSameInputTypes checks if the received operator belongs to a list of OP_UND_***
+// where its inputs' types must be of the same type
+func isUndOpSameInputTypes (op *CXFunction) bool {
+	switch op.OpCode {
+	case
+		OP_UND_EQUAL,
+		OP_UND_UNEQUAL,
+		OP_UND_BITAND,
+		OP_UND_BITXOR,
+		OP_UND_BITOR,
+		OP_UND_BITCLEAR,
+		OP_UND_MUL,
+		OP_UND_DIV,
+		OP_UND_MOD,
+		OP_UND_ADD,
+		OP_UND_SUB,
+		OP_UND_NEG,
+		OP_UND_LT,
+		OP_UND_GT,
+		OP_UND_LTEQ,
+		OP_UND_GTEQ,
+		OP_UND_BITSHL, OP_UND_BITSHR:
+		return true
+	}
+	return false
+}
+
 func ProcessUndExpression(expr *CXExpression) {
+	if expr.Operator != nil && isUndOpSameInputTypes(expr.Operator) {
+		if err := checkSameNativeType(expr); err != nil {
+			println(CompilationError(CurrentFile, LineNo), err.Error())
+		}
+	}
 	if expr.IsUndType {
 		for _, out := range expr.Outputs {
 			out.Size = undOutputSize(expr)
@@ -361,6 +422,38 @@ func GetFormattedType (arg *CXArgument) string {
 	return typ
 }
 
+func checkMatchParamTypes (expr *CXExpression, expected, received []*CXArgument, isInputs bool) {
+	for i, inp := range expected {
+		expectedType := GetFormattedType(expected[i])
+		receivedType := GetFormattedType(received[i])
+
+		if expr.IsMethodCall && expected[i].IsPointer && i == 0 {
+			// if method receiver is pointer, remove *
+			if expectedType[0] == '*' {
+				// we need to check if it's not an `str`
+				// otherwise we end up removing the `s` instead of a `*`
+				expectedType = expectedType[1:]
+			}
+		}
+
+		if expectedType != receivedType && inp.Type != TYPE_UNDEFINED {
+			var opName string
+			if expr.Operator.IsNative {
+				opName = OpNames[expr.Operator.OpCode]
+			} else {
+				opName = expr.Operator.Name
+			}
+
+			if isInputs {
+				println(CompilationError(received[i].FileName, received[i].FileLine), fmt.Sprintf("function '%s' expected input argument of type '%s'; '%s' was provided", opName, expectedType, receivedType))
+			} else {
+				println(CompilationError(expr.Outputs[i].FileName, expr.Outputs[i].FileLine), fmt.Sprintf("function '%s' expected receiving variable of type '%s'; '%s' was provided", opName, expectedType, receivedType))
+			}
+			
+		}
+	}
+}
+
 func CheckTypes(expr *CXExpression) {
 	if expr.Operator != nil {
 		opName := ExprOpName(expr)
@@ -387,7 +480,7 @@ func CheckTypes(expr *CXExpression) {
 			}
 		}
 
-		// checking if number of expr.Outputs match number of Operator.Outputs
+		// checking if number of expr.Outputs matches number of Operator.Outputs
 		if len(expr.Outputs) != len(expr.Operator.Outputs) {
 			var plural1 string
 			var plural2 string = "s"
@@ -399,7 +492,9 @@ func CheckTypes(expr *CXExpression) {
 				plural2 = ""
 				plural3 = "was"
 			}
+			
 			println(CompilationError(expr.FileName, expr.FileLine), fmt.Sprintf("operator '%s' expects to return %d output%s, but %d receiving argument%s %s provided", opName, len(expr.Operator.Outputs), plural1, len(expr.Outputs), plural2, plural3))
+			os.Exit(CX_COMPILATION_ERROR)
 		}
 	}
 
@@ -435,29 +530,13 @@ func CheckTypes(expr *CXExpression) {
 		}
 	}
 
-	// checking inputs matching operator's inputs
+	// then it's a function call and not a declaration
 	if expr.Operator != nil {
-		// then it's a function call and not a declaration
-		for i, inp := range expr.Operator.Inputs {
-			expectedType := GetFormattedType(expr.Operator.Inputs[i])
-			receivedType := GetFormattedType(expr.Inputs[i])
+		// checking inputs matching operator's inputs
+		checkMatchParamTypes(expr, expr.Operator.Inputs, expr.Inputs, true)
 
-			if expr.IsMethodCall && expr.Operator.Inputs[i].IsPointer && i == 0 {
-				// if method receiver is pointer, remove *
-				expectedType = expectedType[1:]
-			}
-
-			if expectedType != receivedType && inp.Type != TYPE_UNDEFINED {
-				var opName string
-				if expr.Operator.IsNative {
-					opName = OpNames[expr.Operator.OpCode]
-				} else {
-					opName = expr.Operator.Name
-				}
-
-				println(CompilationError(expr.Inputs[i].FileName, expr.Inputs[i].FileLine), fmt.Sprintf("function '%s' expected input argument of type '%s'; '%s' was provided", opName, expectedType, receivedType))
-			}
-		}
+		// checking outputs matching operator's outputs
+		checkMatchParamTypes(expr, expr.Operator.Outputs, expr.Outputs, false)
 	}
 }
 
@@ -475,6 +554,19 @@ func ProcessStringAssignment(expr *CXExpression) {
 			}
 		}
 	}
+}
+
+// ProcessReferenceAssignment checks if the reference of a symbol can be assigned to the expression's output.
+// For example: `var foo i32; var bar i32; bar = &foo` is not valid.
+func ProcessReferenceAssignment (expr *CXExpression) {
+	for _, out := range expr.Outputs {
+		if out.PassBy == PASSBY_REFERENCE &&
+			!hasDeclSpec(out, DECL_POINTER) &&
+			out.Type != TYPE_STR && !out.IsSlice {
+			println(CompilationError(CurrentFile, LineNo), "invalid reference assignment", out.Name)
+		}
+	}
+	
 }
 
 func ProcessSlice(inp *CXArgument) {
@@ -512,7 +604,9 @@ func ProcessSliceAssignment(expr *CXExpression) {
 		for _, inp := range expr.Inputs {
 			assignElt := GetAssignmentElement(inp)
 
-			if assignElt.IsSlice && len(assignElt.Indexes) == 0 {
+			// we want to pass by value if we're sending the slice as a whole (no indexing)
+			// unless it's a pointer to the slice
+			if assignElt.IsSlice && len(assignElt.Indexes) == 0 && !hasDeclSpec(assignElt, DECL_POINTER) {
 				assignElt.PassBy = PASSBY_VALUE
 			}
 		}
@@ -733,6 +827,11 @@ func CopyArgFields(sym *CXArgument, arg *CXArgument) {
 	sym.Package = arg.Package
 	sym.DoesEscape = arg.DoesEscape
 	sym.Size = arg.Size
+
+	// for example, var foo *i32; ***foo = 5 // error
+	if sym.DereferenceLevels > arg.IndirectionLevels {
+		println(CompilationError(sym.FileName, sym.FileLine), "invalid indirection")
+	}
 
 	if arg.Type == TYPE_STR {
 		sym.IsPointer = true

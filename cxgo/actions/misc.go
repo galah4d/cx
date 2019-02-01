@@ -12,9 +12,6 @@ func SetCorrectArithmeticOp(expr *CXExpression) {
 	typ := expr.Outputs[0].Type
 
 	if CheckArithmeticOp(expr) {
-		// if !CheckSameNativeType(expr) {
-		//      panic("wrong types")
-		// }
 		switch op.OpCode {
 		case OP_I32_MUL:
 			switch typ {
@@ -161,6 +158,17 @@ func SetCorrectArithmeticOp(expr *CXExpression) {
 			}
 		}
 	}
+}
+
+// hasDeclSpec determines if an argument has certain declaration specifier
+func hasDeclSpec (arg *CXArgument, spec int) bool {
+	found := false
+	for _, s := range arg.DeclarationSpecifiers {
+		if s == spec {
+			found = true
+		}
+	}
+	return found
 }
 
 // This function writes those bytes to PRGRM.Data

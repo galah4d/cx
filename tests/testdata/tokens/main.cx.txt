@@ -687,7 +687,8 @@ SCOLON
  IDENT flags
  REFOP &
 LPAREN 
-INTLIT -1
+ SUBOP -
+INTLIT 1
 BXOROP 
  IDENT flag
 RPAREN 
@@ -1825,7 +1826,8 @@ LPAREN
 RPAREN 
  REFOP &
 LPAREN 
-INTLIT -1
+ SUBOP -
+INTLIT 1
 BXOROP 
  IDENT disabledTests
 RPAREN 
@@ -2427,7 +2429,7 @@ PERIOD
 STRLIT No compilation error when using an using an invalid identifier
 RPAREN 
 SCOLON 
- IDENT runTestEx
+ IDENT runTest
 LPAREN 
 STRLIT issue-51a.cx issue-51.cx
  COMMA 
@@ -2436,13 +2438,9 @@ PERIOD
  IDENT SUCCESS
  COMMA 
 STRLIT Silent name clash between packages
- COMMA 
- IDENT TEST_ISSUE
- COMMA 
-INTLIT 0
 RPAREN 
 SCOLON 
- IDENT runTestEx
+ IDENT runTest
 LPAREN 
 STRLIT issue-51.cx issue-51a.cx
  COMMA 
@@ -2451,13 +2449,9 @@ PERIOD
  IDENT SUCCESS
  COMMA 
 STRLIT Silent name clash between packages
- COMMA 
- IDENT TEST_ISSUE
- COMMA 
-INTLIT 0
 RPAREN 
 SCOLON 
- IDENT runTestEx
+ IDENT runTest
 LPAREN 
 STRLIT issue-52.cx
  COMMA 
@@ -2466,28 +2460,20 @@ PERIOD
  IDENT COMPILATION_ERROR
  COMMA 
 STRLIT Invalid implicit cast.
- COMMA 
- IDENT TEST_ISSUE
- COMMA 
-INTLIT 0
 RPAREN 
 SCOLON 
- IDENT runTestEx
+ IDENT runTest
 LPAREN 
 STRLIT issue-53.cx
  COMMA 
  IDENT cx
 PERIOD 
- IDENT SUCCESS
+ IDENT COMPILATION_ERROR
  COMMA 
 STRLIT Panic when using +* in an expression
- COMMA 
- IDENT TEST_ISSUE
- COMMA 
-INTLIT 0
 RPAREN 
 SCOLON 
- IDENT runTestEx
+ IDENT runTest
 LPAREN 
 STRLIT issue-54.cx
  COMMA 
@@ -2496,13 +2482,9 @@ PERIOD
  IDENT COMPILATION_ERROR
  COMMA 
 STRLIT No compilation error when defining a struct with duplicate fields.
- COMMA 
- IDENT TEST_ISSUE
- COMMA 
-INTLIT 0
 RPAREN 
 SCOLON 
- IDENT runTestEx
+ IDENT runTest
 LPAREN 
 STRLIT issue-55.cx
  COMMA 
@@ -2511,10 +2493,6 @@ PERIOD
  IDENT SUCCESS
  COMMA 
 STRLIT Can't define struct with a single character identifier.
- COMMA 
- IDENT TEST_ISSUE
- COMMA 
-INTLIT 0
 RPAREN 
 SCOLON 
  IDENT runTest
@@ -2554,19 +2532,26 @@ STRLIT No compilation error when indexing an array with a non integral var.
 INTLIT 0
 RPAREN 
 SCOLON 
- IDENT runTestEx
+ IDENT runTest
 LPAREN 
-STRLIT issue-59.cx
+STRLIT issue-59a.cx
  COMMA 
  IDENT cx
 PERIOD 
  IDENT SUCCESS
  COMMA 
 STRLIT Panic when a field of a struct returned by a function is used in an expression
+RPAREN 
+SCOLON 
+ IDENT runTest
+LPAREN 
+STRLIT issue-59b.cx
  COMMA 
- IDENT TEST_ISSUE
+ IDENT cx
+PERIOD 
+ IDENT SUCCESS
  COMMA 
-INTLIT 0
+STRLIT Panic when a field of a struct returned by a function is used in an expression
 RPAREN 
 SCOLON 
  IDENT runTest
@@ -2591,7 +2576,7 @@ PERIOD
 STRLIT No compilation error when passing *i32 as an i32 arg and conversely
 RPAREN 
 SCOLON 
- IDENT runTestEx
+ IDENT runTest
 LPAREN 
 STRLIT issue-61a.cx
  COMMA 
@@ -2600,13 +2585,9 @@ PERIOD
  IDENT COMPILATION_ERROR
  COMMA 
 STRLIT No compilation error when passing *i32 as an i32 arg and conversely
- COMMA 
- IDENT TEST_ISSUE
- COMMA 
-INTLIT 0
 RPAREN 
 SCOLON 
- IDENT runTestEx
+ IDENT runTest
 LPAREN 
 STRLIT issue-62.cx
  COMMA 
@@ -2615,13 +2596,9 @@ PERIOD
  IDENT COMPILATION_ERROR
  COMMA 
 STRLIT No compilation error when dereferencing an i32 var.
- COMMA 
- IDENT TEST_ISSUE
- COMMA 
-INTLIT 0
 RPAREN 
 SCOLON 
- IDENT runTestEx
+ IDENT runTest
 LPAREN 
 STRLIT issue-63.cx
  COMMA 
@@ -2630,13 +2607,9 @@ PERIOD
  IDENT SUCCESS
  COMMA 
 STRLIT Wrong pointer behaviour.
- COMMA 
- IDENT TEST_ISSUE
- COMMA 
-INTLIT 0
 RPAREN 
 SCOLON 
- IDENT runTestEx
+ IDENT runTest
 LPAREN 
 STRLIT issue-65.cx
  COMMA 
@@ -2645,10 +2618,17 @@ PERIOD
  IDENT SUCCESS
  COMMA 
 STRLIT Return from a function doesnt work
+RPAREN 
+SCOLON 
+ IDENT runTest
+LPAREN 
+STRLIT issue-65b.cx
  COMMA 
- IDENT TEST_ISSUE
+ IDENT cx
+PERIOD 
+ IDENT COMPILATION_ERROR
  COMMA 
-INTLIT 0
+STRLIT Mismatched number of returning arguments is not throwing an error
 RPAREN 
 SCOLON 
  IDENT runTestEx
@@ -2728,9 +2708,31 @@ PERIOD
  COMMA 
 STRLIT can't prefix a (f32) variable with minus to flip it's signedness
  COMMA 
- IDENT TEST_ISSUE
+ IDENT TEST_STABLE
  COMMA 
 INTLIT 0
+RPAREN 
+SCOLON 
+ IDENT runTest
+LPAREN 
+STRLIT issue-77.cx
+ COMMA 
+ IDENT cx
+PERIOD 
+ IDENT SUCCESS
+ COMMA 
+STRLIT error with sending references of structs to functions
+RPAREN 
+SCOLON 
+ IDENT runTest
+LPAREN 
+STRLIT issue-77b.cx
+ COMMA 
+ IDENT cx
+PERIOD 
+ IDENT SUCCESS
+ COMMA 
+STRLIT error with references to struct literals
 RPAREN 
 SCOLON 
  IDENT runTest
@@ -2879,19 +2881,15 @@ STRLIT Short variable declarations are not working with calls to methods or func
 INTLIT 0
 RPAREN 
 SCOLON 
- IDENT runTestEx
+ IDENT runTest
 LPAREN 
 STRLIT issue-101.cx
  COMMA 
  IDENT cx
 PERIOD 
- IDENT SUCCESS
+ IDENT COMPILATION_ERROR
  COMMA 
 STRLIT Panic when using equality operator between a bool and an i32
- COMMA 
- IDENT TEST_ISSUE
- COMMA 
-INTLIT 0
 RPAREN 
 SCOLON 
  IDENT runTestEx
@@ -2920,7 +2918,7 @@ PERIOD
 STRLIT Argument list is not parsed correctly
 RPAREN 
 SCOLON 
- IDENT runTestEx
+ IDENT runTest
 LPAREN 
 STRLIT issue-104.cx
  COMMA 
@@ -2929,13 +2927,9 @@ PERIOD
  IDENT SUCCESS
  COMMA 
 STRLIT Dubious error message when indexing an array with a substraction expression
- COMMA 
- IDENT TEST_ISSUE
- COMMA 
-INTLIT 0
 RPAREN 
 SCOLON 
- IDENT runTestEx
+ IDENT runTest
 LPAREN 
 STRLIT issue-105.cx
  COMMA 
@@ -2944,10 +2938,6 @@ PERIOD
  IDENT SUCCESS
  COMMA 
 STRLIT Dubious error message when inline initializing a slice
- COMMA 
- IDENT TEST_ISSUE
- COMMA 
-INTLIT 0
 RPAREN 
 SCOLON 
  IDENT runTest
@@ -2961,7 +2951,7 @@ PERIOD
 STRLIT Troubles when accessing a global var from another package
 RPAREN 
 SCOLON 
- IDENT runTestEx
+ IDENT runTest
 LPAREN 
 STRLIT issue-108.cx
  COMMA 
@@ -2970,10 +2960,6 @@ PERIOD
  IDENT SUCCESS
  COMMA 
 STRLIT same func names (but in different packages) collide
- COMMA 
- IDENT TEST_ISSUE
- COMMA 
-INTLIT 0
 RPAREN 
 SCOLON 
  IDENT runTest
@@ -3039,7 +3025,7 @@ PERIOD
 STRLIT Problem with struct literals in short variable declarations
 RPAREN 
 SCOLON 
- IDENT runTestEx
+ IDENT runTest
 LPAREN 
 STRLIT issue-132.cx
  COMMA 
@@ -3048,10 +3034,6 @@ PERIOD
  IDENT SUCCESS
  COMMA 
 STRLIT Panic when using the return value of a function in a short declaration
- COMMA 
- IDENT TEST_ISSUE
- COMMA 
-INTLIT 0
 RPAREN 
 SCOLON 
  IDENT runTestEx
@@ -3105,7 +3087,7 @@ PERIOD
  COMMA 
 STRLIT Parser gets confused with `2 -2`
  COMMA 
- IDENT TEST_ISSUE
+ IDENT TEST_STABLE
  COMMA 
 INTLIT 0
 RPAREN 
@@ -3125,7 +3107,7 @@ STRLIT Panic in when assigning an empty initializer list to a []i32 variable
 INTLIT 0
 RPAREN 
 SCOLON 
- IDENT runTestEx
+ IDENT runTest
 LPAREN 
 STRLIT issue-154.cx
  COMMA 
@@ -3134,10 +3116,6 @@ PERIOD
  IDENT SUCCESS
  COMMA 
 STRLIT Cx stack overflow when appending to a slice passed by address
- COMMA 
- IDENT TEST_ISSUE
- COMMA 
-INTLIT 0
 RPAREN 
 SCOLON 
  IDENT runTestEx
@@ -3203,7 +3181,7 @@ STRLIT Panic when calling a function from another package where the package name
 INTLIT 0
 RPAREN 
 SCOLON 
- IDENT runTestEx
+ IDENT runTest
 LPAREN 
 STRLIT issue-167.cx
  COMMA 
@@ -3212,10 +3190,6 @@ PERIOD
  IDENT SUCCESS
  COMMA 
 STRLIT Garbage memory when passing the address of slice element to a function
- COMMA 
- IDENT TEST_ISSUE
- COMMA 
-INTLIT 0
 RPAREN 
 SCOLON 
  IDENT runTestEx
@@ -3285,7 +3259,7 @@ PERIOD
 STRLIT No heap exhausted error
 RPAREN 
 SCOLON 
- IDENT runTestEx
+ IDENT runTest
 LPAREN 
 STRLIT issue-214.cx
  COMMA 
@@ -3294,10 +3268,17 @@ PERIOD
  IDENT SUCCESS
  COMMA 
 STRLIT Argument type deduction failed when passing address of an i32 struct field to a function accepting *i32 argument.
+RPAREN 
+SCOLON 
+ IDENT runTest
+LPAREN 
+STRLIT issue-218.cx
  COMMA 
- IDENT TEST_ISSUE
+ IDENT cx
+PERIOD 
+ IDENT COMPILATION_ERROR
  COMMA 
-INTLIT 0
+STRLIT Type checking is not working with receiving variables of unexpected types
 RPAREN 
 SCOLON 
    VAR 

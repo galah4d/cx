@@ -15,9 +15,8 @@ func Debug(args ...interface{}) {
 	fmt.Println(args...)
 }
 
-// IsUndOp It returns true if the operator receives undefined types as input parameters but also an operator that needs to mimic its input's type. For example, == should not return its input type, as it is always going to return a boolean
+// IsUndOp returns true if the operator receives undefined types as input parameters but also an operator that needs to mimic its input's type. For example, == should not return its input type, as it is always going to return a boolean
 func IsUndOp(fn *CXFunction) bool {
-	res := false
 	switch fn.OpCode {
 	case
 		OP_UND_BITAND,
@@ -29,11 +28,11 @@ func IsUndOp(fn *CXFunction) bool {
 		OP_UND_MOD,
 		OP_UND_ADD,
 		OP_UND_SUB,
+		OP_UND_NEG,
 		OP_UND_BITSHL, OP_UND_BITSHR:
-		res = true
+		return true
 	}
-
-	return res
+	return false
 }
 
 // ExprOpName ...
@@ -54,15 +53,15 @@ func stackValueHeader(fileName string, fileLine int) string {
 }
 
 // PrintStack ...
-func (cxt *CXProgram) PrintStack() {
+func (prgrm *CXProgram) PrintStack() {
 	fmt.Println()
 	fmt.Println("===Callstack===")
 
 	// we're going backwards in the stack
-	fp := cxt.StackPointer
+	fp := prgrm.StackPointer
 
-	for c := cxt.CallCounter; c >= 0; c-- {
-		op := cxt.CallStack[c].Operator
+	for c := prgrm.CallCounter; c >= 0; c-- {
+		op := prgrm.CallStack[c].Operator
 		fp -= op.Size
 
 		var dupNames []string
@@ -140,7 +139,7 @@ func (cxt *CXProgram) PrintStack() {
 }
 
 // PrintProgram ...
-func (cxt *CXProgram) PrintProgram() {
+func (prgrm *CXProgram) PrintProgram() {
 	fmt.Println("Program")
 
 	var currentFunction *CXFunction
@@ -150,16 +149,17 @@ func (cxt *CXProgram) PrintProgram() {
 	_ = currentPackage
 
 	// saving current program state because PrintProgram uses SelectXXX
-	if pkg, err := cxt.GetCurrentPackage(); err == nil {
+	if pkg, err := prgrm.GetCurrentPackage(); err == nil {
 		currentPackage = pkg
 	}
 
-	if fn, err := cxt.GetCurrentFunction(); err == nil {
+	if fn, err := prgrm.GetCurrentFunction(); err == nil {
 		currentFunction = fn
 	}
 
 	i := 0
-	for _, mod := range cxt.Packages {
+
+	for _, mod := range prgrm.Packages {
 		if IsCorePackage(mod.Name) {
 			continue
 		}
@@ -294,7 +294,7 @@ func (cxt *CXProgram) PrintProgram() {
 					var dat []byte
 
 					if arg.Offset > STACK_SIZE {
-						dat = cxt.Memory[arg.Offset : arg.Offset+arg.Size]
+						dat = prgrm.Memory[arg.Offset : arg.Offset+arg.Size]
 					} else {
 						name = arg.Name
 					}
@@ -441,27 +441,30 @@ func (cxt *CXProgram) PrintProgram() {
 						)
 					} else {
 						if len(expr.Outputs) > 0 {
-							var typs string
+							var typ string
 
-							for i, out := range expr.Outputs {
-								if GetAssignmentElement(out).CustomType != nil {
-									// then it's custom type
-									typs += GetAssignmentElement(out).CustomType.Name
-								} else {
-									// then it's native type
-									typs += TypeNames[GetAssignmentElement(out).Type]
-								}
+							out := expr.Outputs[len(expr.Outputs)-1]
 
-								if i != len(expr.Outputs) {
-									typs += ", "
-								}
+							// NOTE: this only adds a single *, regardless of how many
+							// dereferences we have. won't be fixed atm, as the whole
+							// PrintProgram needs to be refactored soon.
+							if out.IsPointer {
+								typ = "*"
+							}
+
+							if GetAssignmentElement(out).CustomType != nil {
+								// then it's custom type
+								typ += GetAssignmentElement(out).CustomType.Name
+							} else {
+								// then it's native type
+								typ += TypeNames[GetAssignmentElement(out).Type]
 							}
 
 							fmt.Printf("\t\t\t%d.- Declaration%s: %s %s\n",
 								k,
 								lbl,
 								expr.Outputs[0].Name,
-								typs)
+								typ)
 						}
 					}
 
@@ -489,13 +492,13 @@ func (cxt *CXProgram) PrintProgram() {
 	}
 
 	if currentPackage != nil {
-		cxt.SelectPackage(currentPackage.Name)
+		prgrm.SelectPackage(currentPackage.Name)
 	}
 	if currentFunction != nil {
-		cxt.SelectFunction(currentFunction.Name)
+		prgrm.SelectFunction(currentFunction.Name)
 	}
 
-	cxt.CurrentPackage = currentPackage
+	prgrm.CurrentPackage = currentPackage
 	currentPackage.CurrentFunction = currentFunction
 }
 
@@ -504,7 +507,7 @@ func CheckArithmeticOp(expr *CXExpression) bool {
 	if expr.Operator.IsNative {
 		switch expr.Operator.OpCode {
 		case OP_I32_MUL, OP_I32_DIV, OP_I32_MOD, OP_I32_ADD,
-			OP_I32_SUB, OP_I32_BITSHL, OP_I32_BITSHR, OP_I32_LT,
+			OP_I32_SUB, OP_I32_NEG, OP_I32_BITSHL, OP_I32_BITSHR, OP_I32_LT,
 			OP_I32_GT, OP_I32_LTEQ, OP_I32_GTEQ, OP_I32_EQ, OP_I32_UNEQ,
 			OP_I32_BITAND, OP_I32_BITXOR, OP_I32_BITOR, OP_STR_EQ:
 			return true
@@ -591,6 +594,7 @@ func IsValidSliceIndex(offset int, index int, sizeofElement int) bool {
 	sliceLen := GetSliceLen(int32(offset))
 	bytesLen := sliceLen * int32(sizeofElement)
 	index -= OBJECT_HEADER_SIZE + SLICE_HEADER_SIZE + offset
+
 	if index >= 0 && index < int(bytesLen) && (index%sizeofElement) == 0 {
 		return true
 	}

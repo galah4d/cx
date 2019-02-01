@@ -4,7 +4,7 @@ import (
 	"os"
 )
 
-const DBG_GOLANG_STACK_TRACE = false
+const DBG_GOLANG_STACK_TRACE = true
 
 // global reference to our program
 var PROGRAM *CXProgram
@@ -110,10 +110,10 @@ const (
 )
 
 const (
-	DEREF_ARRAY = iota
-	DEREF_FIELD
-	DEREF_POINTER
-	DEREF_DEREF
+	DEREF_ARRAY   = iota // 0
+	DEREF_FIELD          // 1
+	DEREF_POINTER        // 2
+	DEREF_DEREF          // 3
 )
 
 const (

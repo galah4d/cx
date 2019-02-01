@@ -144,6 +144,8 @@
                         /* Pointers */
                         ADDR
 
+%type   <i32>           int_value
+
 %type   <tok>           unary_operator
 %type   <i>             type_specifier
 %type   <argument>      declaration_specifiers
@@ -180,8 +182,8 @@ external_declaration:
         |       stepping
         ;
 
-stepping:       TSTEP INT_LITERAL INT_LITERAL
-        |       STEP INT_LITERAL
+stepping:       TSTEP int_value int_value
+        |       STEP int_value
         ;
 
 global_declaration:
@@ -235,35 +237,6 @@ struct_declaration:
                 TYPE IDENTIFIER STRUCT struct_fields
                 {
 			DeclareStruct($2, $4)
-			// if pkg, err := PRGRM0.GetCurrentPackage(); err == nil {
-			// 	if strct, err := PRGRM0.GetStruct($2, pkg.Name); err == nil {
-			// 		// strct := MakeStruct($2)
-
-			// 		var size int
-			// 		for _, fld := range $4 {
-			// 			strct.AddField(fld)
-			// 			size += fld.TotalSize
-			// 		}
-			// 		strct.Size = size
-			// 		pkg.AddStruct(strct)
-			// 	} else {
-			// 		panic(err)
-			// 	}
-				
-			// 	// if _, err := PRGRM0.GetStruct($2, pkg.Name); err == nil {
-			// 	// 	strct := MakeStruct($2)
-			// 	// 	pkg.AddStruct(strct)
-
-			// 	// 	var size int
-			// 	// 	for _, fld := range $4 {
-			// 	// 		strct.AddField(fld)
-			// 	// 		size += fld.TotalSize
-			// 	// 	}
-			// 	// 	strct.Size = size
-			// 	// }
-			// } else {
-			// 	panic(err)
-			// }
                 }
                 ;
 
@@ -707,7 +680,15 @@ infer_clauses:
         /* |       infer_targets */
                 ;
 
-
+int_value:
+		INT_LITERAL
+		{
+			$$ = $1
+		}
+        |       SUB_OP INT_LITERAL
+		{
+			$$ = -$2
+		}
 
 primary_expression:
                 IDENTIFIER
@@ -827,6 +808,7 @@ conditional_expression:
 struct_literal_expression:
                 conditional_expression
 	|       IDENTIFIER LBRACE struct_literal_fields RBRACE
+	|       unary_operator IDENTIFIER LBRACE struct_literal_fields RBRACE
         |       postfix_expression PERIOD IDENTIFIER LBRACE struct_literal_fields RBRACE
         ;
 

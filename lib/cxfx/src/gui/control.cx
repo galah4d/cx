@@ -474,8 +474,8 @@ func controlResize(id ControlId, pixelBounds mat.v2, autoBounds mat.v2) () {
 	  printf("MINY %f, MAXY %f, MAXHEIGHT %f, PADDINGY %f\n", minY, maxY, maxHeight, paddingY)
 	  }*/
 
-			var scaleW f32 = scale.x
-			var scaleH f32 = scale.y
+	var scaleW f32 = scale.x
+	var scaleH f32 = scale.y
 	if (autoscale == AUTOSCALE || autoscale == AUTOSCALE_X || autoscale == AUTOSCALE_Y) {
 		if (autoBounds.x > 0.0 && autoBounds.y > 0.0) {
 			//ControlPrint("AUTOSCALE : ", id, false)
@@ -484,14 +484,18 @@ func controlResize(id ControlId, pixelBounds mat.v2, autoBounds mat.v2) () {
 				panicIfNot((autosize & AUTOSIZE_X) == 0, "AUTOSCALE_X is not compatible with AUTOSIZE_X")
 				var tmp f32 = scaleW
 				scaleW = newWidth / autoBounds.x
-				scaleH = scaleW * scaleH / tmp
+				if autoscale == AUTOSCALE_X {
+					scaleH = scaleW * scaleH / tmp
+				}
 			}
 
 			if ((autoscale & AUTOSCALE_Y) == AUTOSCALE_Y) {
 				panicIfNot((autosize & AUTOSIZE_Y) == 0, "AUTOSCALE_Y is not compatible with AUTOSCALE_Y")
 				var tmp f32 = scaleH
 				scaleH = newHeight / autoBounds.y
-				scaleW = scaleH * scaleW / tmp
+				if autoscale == AUTOSCALE_Y {
+					scaleW = scaleH * scaleW / tmp
+				}
 			}
 
 			if (autoscale == AUTOSCALE) {

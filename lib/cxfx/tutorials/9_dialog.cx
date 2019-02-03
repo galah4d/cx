@@ -127,7 +127,6 @@ func gameOnUpdate(controlIndex i32, controlAction i32) {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func gameOnRender(controlIndex i32, controlAction i32) {
-	var id gui.ControlId = gui.NewControlId(controlIndex)
 	gfx.DisableBlending()
 	gfx.DepthState(true, gfx.LESS, true)
 	gfx.Clear(gfx.COLOR_BUFFER_BIT | gfx.DEPTH_BUFFER_BIT, mat.v4_(0.3, 0.5, 0.6, 1.0), 1.0D, 0)
@@ -182,7 +181,7 @@ func gameOnRender(controlIndex i32, controlAction i32) {
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-func skycoinOnUpdate(controlIndex i32, action i32) {
+func skycoinOnUpdate(controlIndex i32, controlAction i32) {
 	if snd.VoiceState(voiceId) == snd.VOICE_STOPPED {
 		snd.VoicePlay(voiceId)
 	}
@@ -190,54 +189,50 @@ func skycoinOnUpdate(controlIndex i32, action i32) {
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-func onPlayButton(controlIndex i32, action i32) {
-	if action == app.KEY_PRESS {
+func onPlayButton(controlIndex i32, controlAction i32) {
+	if controlAction == app.KEY_PRESS {
 		gui.ScreenShow(gameScreen)
-	} else if action != app.KEY_RELEASE && action != app.KEY_REPEAT {
+	} else if controlAction != app.KEY_RELEASE && controlAction != app.KEY_REPEAT {
 		panicIfNot(false, "invalid action")
 	}
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-func onExitButton(controlIndex i32, action i32) {
-	if action == app.KEY_PRESS {
+func onExitButton(controlIndex i32, controlAction i32) {
+	if controlAction == app.KEY_PRESS {
 		gui.ScreenShow(exitScreen)
-	} else if action != app.KEY_RELEASE && action != app.KEY_REPEAT {
+	} else if controlAction != app.KEY_RELEASE && controlAction != app.KEY_REPEAT {
 		panicIfNot(false, "invalid action")
 	}
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-func onExitDialogNo(controlIndex i32, action i32) {
-	var id gui.ControlId = gui.NewControlId(controlIndex)
-
-	if (action == app.KEY_PRESS) {
+func onExitDialogNo(controlIndex i32, controlAction i32) {
+	if (controlAction == app.KEY_PRESS) {
 		printf("NO PRESSED\n")
-	} else if (action == app.KEY_RELEASE) {
+	} else if (controlAction == app.KEY_RELEASE) {
 		printf("NO RELEASED\n")
 		gui.ScreenHideModal(exitScreen)
 		printf("HERE\n")
-	} else if (action == app.KEY_REPEAT) {
+	} else if (controlAction == app.KEY_REPEAT) {
 		printf("NO REPEAT\n")
 	} else {
-		panicIfNot(false, "invalid action")
+		panicIfNot(false, "invalid controlAction")
 	}
 }
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-func onExitDialogYes(controlIndex i32, action i32) {
-	var id gui.ControlId = gui.NewControlId(controlIndex)
-
-	if (action == app.KEY_PRESS) {
+func onExitDialogYes(controlIndex i32, controlAction i32) {
+	if (controlAction == app.KEY_PRESS) {
 		printf("YES PRESSED\n")
-	} else if (action == app.KEY_RELEASE) {
+	} else if (controlAction == app.KEY_RELEASE) {
 		printf("YES RELEASED\n")
 		gui.ScreenHideModal(exitScreen)
 		app.Exit()
-	} else if (action == app.KEY_REPEAT) {
+	} else if (controlAction == app.KEY_REPEAT) {
 		printf("YES REPEAT\n")
 	} else {
 		panicIfNot(false, "invalid action")

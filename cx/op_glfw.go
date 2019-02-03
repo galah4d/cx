@@ -118,7 +118,7 @@ func op_glfw_SetKeyCallbackEx(expr *CXExpression, fp int) {
 func GetWindowName(w *glfw.Window) []byte {
 	for key, win := range windows {
 		if w == win {
-			return FromStr(key)
+			return FromI32(int32(writeObj(FromStr(key))))
 		}
 	}
 
@@ -145,6 +145,20 @@ func op_glfw_SetCursorPosCallback(expr *CXExpression, fp int) {
 func op_glfw_SetCursorPosCallbackEx(expr *CXExpression, fp int) {
 	inp0, inp1, inp2 := expr.Inputs[0], expr.Inputs[1], expr.Inputs[2]
 	glfw_SetCursorPosCallback(expr, ReadStr(fp, inp0), ReadStr(fp, inp1), ReadStr(fp, inp2))
+}
+
+func op_glfw_SetFramebufferSizeCallback(expr *CXExpression, fp int) {
+	functionName := ReadStr(fp, expr.Inputs[1])
+	packageName := ReadStr(fp, expr.Inputs[2])
+	callback := func(w *glfw.Window, width int, height int) {
+		var inps [][]byte = make([][]byte, 3)
+		inps[0] = GetWindowName(w)
+		inps[1] = FromI32(int32(width))
+		inps[2] = FromI32(int32(height))
+		PROGRAM.ccallback(expr, functionName, packageName, inps)
+	}
+	window := ReadStr(fp, expr.Inputs[0])
+	windows[window].SetFramebufferSizeCallback(callback)
 }
 
 func op_glfw_SetShouldClose(expr *CXExpression, fp int) {

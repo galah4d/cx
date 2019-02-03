@@ -152,6 +152,7 @@ const (
 	OP_GLFW_SET_MOUSE_BUTTON_CALLBACK_EX
 	OP_GLFW_SET_CURSOR_POS_CALLBACK
 	OP_GLFW_SET_CURSOR_POS_CALLBACK_EX
+	OP_GLFW_SET_FRAMEBUFFER_SIZE_CALLBACK
 	OP_GLFW_GET_CURSOR_POS
 	OP_GLFW_SET_INPUT_MODE
 	OP_GLFW_SET_WINDOW_POS
@@ -608,6 +609,9 @@ func init() {
 	AddOpCode(OP_GLFW_SET_CURSOR_POS_CALLBACK_EX, "glfw.SetCursorPosCallbackEx",
 		[]*CXArgument{newOpPar(TYPE_STR, false), newOpPar(TYPE_STR, false), newOpPar(TYPE_STR, false)},
 		[]*CXArgument{})
+	AddOpCode(OP_GLFW_SET_FRAMEBUFFER_SIZE_CALLBACK, "glfw.SetFramebufferSizeCallback",
+		[]*CXArgument{newOpPar(TYPE_STR, false), newOpPar(TYPE_STR, false), newOpPar(TYPE_STR, false)},
+		[]*CXArgument{})
 	AddOpCode(OP_GLFW_GET_CURSOR_POS, "glfw.GetCursorPos",
 		[]*CXArgument{newOpPar(TYPE_STR, false)},
 		[]*CXArgument{newOpPar(TYPE_F64, false), newOpPar(TYPE_F64, false)})
@@ -1019,6 +1023,8 @@ func init() {
 				op_glfw_SetCursorPosCallback(expr, fp)
 			case OP_GLFW_SET_CURSOR_POS_CALLBACK_EX:
 				op_glfw_SetCursorPosCallbackEx(expr, fp)
+			case OP_GLFW_SET_FRAMEBUFFER_SIZE_CALLBACK:
+				op_glfw_SetFramebufferSizeCallback(expr, fp)
 			case OP_GLFW_GET_CURSOR_POS:
 				op_glfw_GetCursorPos(expr, fp)
 			case OP_GLFW_SET_INPUT_MODE:

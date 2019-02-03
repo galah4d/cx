@@ -1,89 +1,6 @@
 ## TODO : can't order files alphabetically without breaking tuto 7->14
 
-0_arguments:
-	cx\
-		../src/arg/argv.cx\
-		../src/app/application.cx\
-		0_arguments.cx ++data=../resources
-
-1_framerate:
-	cx\
-		../src/arg/argv.cx\
-		../src/mat/math.cx\
-		../src/app/application.cx\
-		../src/fps/profiler.cx\
-		../src/fps/framerate.cx\
-		1_framerate.cx ++data=../resources
-
-2_profiler:
-	cx\
-		../src/arg/argv.cx\
-		../src/mat/math.cx\
-		../src/app/application.cx\
-		../src/fps/profiler.cx\
-		../src/fps/framerate.cx\
-		2_profiler.cx ++data=../resources
-
-3_window:
-	cx\
-		../src/arg/argv.cx\
-		../src/mat/math.cx\
-		../src/app/application.cx\
-		../src/app/event.cx\
-		../src/fps/profiler.cx\
-		../src/fps/framerate.cx\
-		3_window.cx ++data=../resources
-
-4_colored_quad:
-	cx\
-		../src/arg/argv.cx\
-		../src/mat/math.cx\
-		../src/app/application.cx\
-		../src/app/event.cx\
-		../src/fps/profiler.cx\
-		../src/fps/framerate.cx\
-		../src/gfx/graphics.cx\
-		../src/gfx/effect.cx\
-		../src/gfx/program.cx\
-		../src/gfx/mesh.cx\
-		../src/gfx/texture.cx\
-		../src/gfx/target.cx\
-		4_colored_quad.cx ++data=../resources
-
-5_textured_quad:
-	cx\
-		../src/arg/argv.cx\
-		../src/mat/math.cx\
-		../src/app/application.cx\
-		../src/app/event.cx\
-		../src/fps/profiler.cx\
-		../src/fps/framerate.cx\
-		../src/gfx/graphics.cx\
-		../src/gfx/effect.cx\
-		../src/gfx/program.cx\
-		../src/gfx/mesh.cx\
-		../src/gfx/texture.cx\
-		../src/gfx/target.cx\
-		5_textured_quad.cx ++data=../resources
-
-6_text:
-	cx\
-		../src/arg/argv.cx\
-		../src/mat/math.cx\
-		../src/app/application.cx\
-		../src/app/event.cx\
-		../src/fps/profiler.cx\
-		../src/fps/framerate.cx\
-		../src/gfx/graphics.cx\
-		../src/gfx/effect.cx\
-		../src/gfx/program.cx\
-		../src/gfx/mesh.cx\
-		../src/gfx/texture.cx\
-		../src/gfx/text.cx\
-		../src/gfx/target.cx\
-		6_text.cx ++data=../resources
-
-7_menu:
+0_colored_quad:
 	cx\
 		../src/arg/argv.cx\
 		../src/mat/math.cx\
@@ -93,6 +10,7 @@
 		../src/fps/framerate.cx\
 		../src/gfx/batch.cx\
 		../src/gfx/graphics.cx\
+		../src/gfx/state.cx\
 		../src/gfx/effect.cx\
 		../src/gfx/program.cx\
 		../src/gfx/mesh.cx\
@@ -121,7 +39,334 @@
 		../src/gui/scroller.cx\
 		../src/gui/binder.cx\
 		../src/gui/combo.cx\
-		7_menu.cx ++data=../resources
+		../src/snd/sounds.cx\
+		../src/snd/audio.cx\
+		../src/snd/voice.cx\
+		../src/gam/camera.cx\
+		../src/gam/game.cx\
+		0_colored_quad.cx ++data=../resources
+
+1_textured_quad:
+	cx\
+		../src/arg/argv.cx\
+		../src/mat/math.cx\
+		../src/app/application.cx\
+		../src/app/event.cx\
+		../src/fps/profiler.cx\
+		../src/fps/framerate.cx\
+		../src/gfx/batch.cx\
+		../src/gfx/graphics.cx\
+		../src/gfx/state.cx\
+		../src/gfx/effect.cx\
+		../src/gfx/program.cx\
+		../src/gfx/mesh.cx\
+		../src/gfx/texture.cx\
+		../src/gfx/text.cx\
+		../src/gfx/target.cx\
+		../src/gfx/scissor.cx\
+		../src/gui/callback.cx\
+		../src/gui/layer.cx\
+		../src/gui/skin.cx\
+		../src/gui/scope.cx\
+		../src/gui/font.cx\
+		../src/gui/animation.cx\
+		../src/gui/control.cx\
+		../src/gui/label.cx\
+		../src/gui/picture.cx\
+		../src/gui/screen.cx\
+		../src/gui/interface.cx\
+		../src/gui/focus.cx\
+		../src/gui/splitter.cx\
+		../src/gui/window.cx\
+		../src/gui/keyboard.cx\
+		../src/gui/list.cx\
+		../src/gui/graph.cx\
+		../src/gui/lifter.cx\
+		../src/gui/scroller.cx\
+		../src/gui/binder.cx\
+		../src/gui/combo.cx\
+		../src/snd/sounds.cx\
+		../src/snd/audio.cx\
+		../src/snd/voice.cx\
+		../src/gam/camera.cx\
+		../src/gam/game.cx\
+		1_textured_quad.cx ++data=../resources
+
+2_text:
+	cx\
+		../src/arg/argv.cx\
+		../src/mat/math.cx\
+		../src/app/application.cx\
+		../src/app/event.cx\
+		../src/fps/profiler.cx\
+		../src/fps/framerate.cx\
+		../src/gfx/batch.cx\
+		../src/gfx/graphics.cx\
+		../src/gfx/state.cx\
+		../src/gfx/effect.cx\
+		../src/gfx/program.cx\
+		../src/gfx/mesh.cx\
+		../src/gfx/texture.cx\
+		../src/gfx/text.cx\
+		../src/gfx/target.cx\
+		../src/gfx/scissor.cx\
+		../src/gui/callback.cx\
+		../src/gui/layer.cx\
+		../src/gui/skin.cx\
+		../src/gui/scope.cx\
+		../src/gui/font.cx\
+		../src/gui/animation.cx\
+		../src/gui/control.cx\
+		../src/gui/label.cx\
+		../src/gui/picture.cx\
+		../src/gui/screen.cx\
+		../src/gui/interface.cx\
+		../src/gui/focus.cx\
+		../src/gui/splitter.cx\
+		../src/gui/window.cx\
+		../src/gui/keyboard.cx\
+		../src/gui/list.cx\
+		../src/gui/graph.cx\
+		../src/gui/lifter.cx\
+		../src/gui/scroller.cx\
+		../src/gui/binder.cx\
+		../src/gui/combo.cx\
+		../src/snd/sounds.cx\
+		../src/snd/audio.cx\
+		../src/snd/voice.cx\
+		../src/gam/camera.cx\
+		../src/gam/game.cx\
+		2_text.cx ++data=../resources
+
+3_perspective:
+	cx\
+		../src/arg/argv.cx\
+		../src/mat/math.cx\
+		../src/app/application.cx\
+		../src/app/event.cx\
+		../src/fps/profiler.cx\
+		../src/fps/framerate.cx\
+		../src/gfx/batch.cx\
+		../src/gfx/graphics.cx\
+		../src/gfx/state.cx\
+		../src/gfx/effect.cx\
+		../src/gfx/program.cx\
+		../src/gfx/mesh.cx\
+		../src/gfx/texture.cx\
+		../src/gfx/text.cx\
+		../src/gfx/target.cx\
+		../src/gfx/scissor.cx\
+		../src/gui/callback.cx\
+		../src/gui/layer.cx\
+		../src/gui/skin.cx\
+		../src/gui/scope.cx\
+		../src/gui/font.cx\
+		../src/gui/animation.cx\
+		../src/gui/control.cx\
+		../src/gui/label.cx\
+		../src/gui/picture.cx\
+		../src/gui/screen.cx\
+		../src/gui/interface.cx\
+		../src/gui/focus.cx\
+		../src/gui/splitter.cx\
+		../src/gui/window.cx\
+		../src/gui/keyboard.cx\
+		../src/gui/list.cx\
+		../src/gui/graph.cx\
+		../src/gui/lifter.cx\
+		../src/gui/scroller.cx\
+		../src/gui/binder.cx\
+		../src/gui/combo.cx\
+		../src/snd/sounds.cx\
+		../src/snd/audio.cx\
+		../src/snd/voice.cx\
+		../src/gam/camera.cx\
+		../src/gam/game.cx\
+		3_perspective.cx ++data=../resources
+
+4_camera:
+	cx\
+		../src/arg/argv.cx\
+		../src/mat/math.cx\
+		../src/app/application.cx\
+		../src/app/event.cx\
+		../src/fps/profiler.cx\
+		../src/fps/framerate.cx\
+		../src/gfx/batch.cx\
+		../src/gfx/graphics.cx\
+		../src/gfx/state.cx\
+		../src/gfx/effect.cx\
+		../src/gfx/program.cx\
+		../src/gfx/mesh.cx\
+		../src/gfx/texture.cx\
+		../src/gfx/text.cx\
+		../src/gfx/target.cx\
+		../src/gfx/scissor.cx\
+		../src/gui/callback.cx\
+		../src/gui/layer.cx\
+		../src/gui/skin.cx\
+		../src/gui/scope.cx\
+		../src/gui/font.cx\
+		../src/gui/animation.cx\
+		../src/gui/control.cx\
+		../src/gui/label.cx\
+		../src/gui/picture.cx\
+		../src/gui/screen.cx\
+		../src/gui/interface.cx\
+		../src/gui/focus.cx\
+		../src/gui/splitter.cx\
+		../src/gui/window.cx\
+		../src/gui/keyboard.cx\
+		../src/gui/list.cx\
+		../src/gui/graph.cx\
+		../src/gui/lifter.cx\
+		../src/gui/scroller.cx\
+		../src/gui/binder.cx\
+		../src/gui/combo.cx\
+		../src/snd/sounds.cx\
+		../src/snd/audio.cx\
+		../src/snd/voice.cx\
+		../src/gam/camera.cx\
+		../src/gam/game.cx\
+		4_camera.cx ++data=../resources
+
+5_batch:
+	cx\
+		../src/arg/argv.cx\
+		../src/mat/math.cx\
+		../src/app/application.cx\
+		../src/app/event.cx\
+		../src/fps/profiler.cx\
+		../src/fps/framerate.cx\
+		../src/gfx/batch.cx\
+		../src/gfx/graphics.cx\
+		../src/gfx/state.cx\
+		../src/gfx/effect.cx\
+		../src/gfx/program.cx\
+		../src/gfx/mesh.cx\
+		../src/gfx/texture.cx\
+		../src/gfx/text.cx\
+		../src/gfx/target.cx\
+		../src/gfx/scissor.cx\
+		../src/gui/callback.cx\
+		../src/gui/layer.cx\
+		../src/gui/skin.cx\
+		../src/gui/scope.cx\
+		../src/gui/font.cx\
+		../src/gui/animation.cx\
+		../src/gui/control.cx\
+		../src/gui/label.cx\
+		../src/gui/picture.cx\
+		../src/gui/screen.cx\
+		../src/gui/interface.cx\
+		../src/gui/focus.cx\
+		../src/gui/splitter.cx\
+		../src/gui/window.cx\
+		../src/gui/keyboard.cx\
+		../src/gui/list.cx\
+		../src/gui/graph.cx\
+		../src/gui/lifter.cx\
+		../src/gui/scroller.cx\
+		../src/gui/binder.cx\
+		../src/gui/combo.cx\
+		../src/snd/sounds.cx\
+		../src/snd/audio.cx\
+		../src/snd/voice.cx\
+		../src/gam/camera.cx\
+		../src/gam/game.cx\
+		5_batch.cx ++data=../resources
+
+6_menu:
+	cx\
+		../src/arg/argv.cx\
+		../src/mat/math.cx\
+		../src/app/application.cx\
+		../src/app/event.cx\
+		../src/fps/profiler.cx\
+		../src/fps/framerate.cx\
+		../src/gfx/batch.cx\
+		../src/gfx/graphics.cx\
+		../src/gfx/state.cx\
+		../src/gfx/effect.cx\
+		../src/gfx/program.cx\
+		../src/gfx/mesh.cx\
+		../src/gfx/texture.cx\
+		../src/gfx/text.cx\
+		../src/gfx/target.cx\
+		../src/gfx/scissor.cx\
+		../src/gui/callback.cx\
+		../src/gui/layer.cx\
+		../src/gui/skin.cx\
+		../src/gui/scope.cx\
+		../src/gui/font.cx\
+		../src/gui/animation.cx\
+		../src/gui/control.cx\
+		../src/gui/label.cx\
+		../src/gui/picture.cx\
+		../src/gui/screen.cx\
+		../src/gui/interface.cx\
+		../src/gui/focus.cx\
+		../src/gui/splitter.cx\
+		../src/gui/window.cx\
+		../src/gui/keyboard.cx\
+		../src/gui/list.cx\
+		../src/gui/graph.cx\
+		../src/gui/lifter.cx\
+		../src/gui/scroller.cx\
+		../src/gui/binder.cx\
+		../src/gui/combo.cx\
+		../src/snd/sounds.cx\
+		../src/snd/audio.cx\
+		../src/snd/voice.cx\
+		../src/gam/camera.cx\
+		../src/gam/game.cx\
+		6_menu.cx ++data=../resources
+
+7_sound:
+	cx\
+		../src/arg/argv.cx\
+		../src/mat/math.cx\
+		../src/app/application.cx\
+		../src/app/event.cx\
+		../src/fps/profiler.cx\
+		../src/fps/framerate.cx\
+		../src/gfx/batch.cx\
+		../src/gfx/graphics.cx\
+		../src/gfx/state.cx\
+		../src/gfx/effect.cx\
+		../src/gfx/program.cx\
+		../src/gfx/mesh.cx\
+		../src/gfx/texture.cx\
+		../src/gfx/text.cx\
+		../src/gfx/target.cx\
+		../src/gfx/scissor.cx\
+		../src/gui/callback.cx\
+		../src/gui/layer.cx\
+		../src/gui/skin.cx\
+		../src/gui/scope.cx\
+		../src/gui/font.cx\
+		../src/gui/animation.cx\
+		../src/gui/control.cx\
+		../src/gui/label.cx\
+		../src/gui/picture.cx\
+		../src/gui/screen.cx\
+		../src/gui/interface.cx\
+		../src/gui/focus.cx\
+		../src/gui/splitter.cx\
+		../src/gui/window.cx\
+		../src/gui/keyboard.cx\
+		../src/gui/list.cx\
+		../src/gui/graph.cx\
+		../src/gui/lifter.cx\
+		../src/gui/scroller.cx\
+		../src/gui/binder.cx\
+		../src/gui/combo.cx\
+		../src/snd/sounds.cx\
+		../src/snd/audio.cx\
+		../src/snd/voice.cx\
+		../src/gam/camera.cx\
+		../src/gam/game.cx\
+		7_sound.cx ++data=../resources
 
 8_button:
 	cx\
@@ -133,6 +378,7 @@
 		../src/fps/framerate.cx\
 		../src/gfx/batch.cx\
 		../src/gfx/graphics.cx\
+		../src/gfx/state.cx\
 		../src/gfx/effect.cx\
 		../src/gfx/program.cx\
 		../src/gfx/mesh.cx\
@@ -161,6 +407,11 @@
 		../src/gui/scroller.cx\
 		../src/gui/binder.cx\
 		../src/gui/combo.cx\
+		../src/snd/sounds.cx\
+		../src/snd/audio.cx\
+		../src/snd/voice.cx\
+		../src/gam/camera.cx\
+		../src/gam/game.cx\
 		8_button.cx ++data=../resources
 
 9_dialog:
@@ -173,6 +424,7 @@
 		../src/fps/framerate.cx\
 		../src/gfx/batch.cx\
 		../src/gfx/graphics.cx\
+		../src/gfx/state.cx\
 		../src/gfx/effect.cx\
 		../src/gfx/program.cx\
 		../src/gfx/mesh.cx\
@@ -201,218 +453,10 @@
 		../src/gui/scroller.cx\
 		../src/gui/binder.cx\
 		../src/gui/combo.cx\
+		../src/snd/sounds.cx\
+		../src/snd/audio.cx\
+		../src/snd/voice.cx\
+		../src/gam/camera.cx\
+		../src/gam/game.cx\
 		9_dialog.cx ++data=../resources
-
-10_custom_menu:
-	cx\
-		../src/arg/argv.cx\
-		../src/mat/math.cx\
-		../src/app/application.cx\
-		../src/app/event.cx\
-		../src/fps/profiler.cx\
-		../src/fps/framerate.cx\
-		../src/gfx/batch.cx\
-		../src/gfx/graphics.cx\
-		../src/gfx/effect.cx\
-		../src/gfx/program.cx\
-		../src/gfx/mesh.cx\
-		../src/gfx/texture.cx\
-		../src/gfx/text.cx\
-		../src/gfx/target.cx\
-		../src/gfx/scissor.cx\
-		../src/gui/callback.cx\
-		../src/gui/layer.cx\
-		../src/gui/skin.cx\
-		../src/gui/scope.cx\
-		../src/gui/font.cx\
-		../src/gui/animation.cx\
-		../src/gui/control.cx\
-		../src/gui/label.cx\
-		../src/gui/picture.cx\
-		../src/gui/screen.cx\
-		../src/gui/interface.cx\
-		../src/gui/focus.cx\
-		../src/gui/splitter.cx\
-		../src/gui/window.cx\
-		../src/gui/keyboard.cx\
-		../src/gui/list.cx\
-		../src/gui/graph.cx\
-		../src/gui/lifter.cx\
-		../src/gui/scroller.cx\
-		../src/gui/binder.cx\
-		../src/gui/combo.cx\
-		10_custom_menu.cx ++data=../resources
-
-11_perspective:
-	cx\
-		../src/arg/argv.cx\
-		../src/mat/math.cx\
-		../src/app/application.cx\
-		../src/app/event.cx\
-		../src/fps/profiler.cx\
-		../src/fps/framerate.cx\
-		../src/gfx/batch.cx\
-		../src/gfx/graphics.cx\
-		../src/gfx/effect.cx\
-		../src/gfx/program.cx\
-		../src/gfx/mesh.cx\
-		../src/gfx/texture.cx\
-		../src/gfx/text.cx\
-		../src/gfx/target.cx\
-		../src/gfx/scissor.cx\
-		../src/gui/callback.cx\
-		../src/gui/layer.cx\
-		../src/gui/skin.cx\
-		../src/gui/scope.cx\
-		../src/gui/font.cx\
-		../src/gui/animation.cx\
-		../src/gui/control.cx\
-		../src/gui/label.cx\
-		../src/gui/picture.cx\
-		../src/gui/screen.cx\
-		../src/gui/interface.cx\
-		../src/gui/focus.cx\
-		../src/gui/splitter.cx\
-		../src/gui/window.cx\
-		../src/gui/keyboard.cx\
-		../src/gui/list.cx\
-		../src/gui/graph.cx\
-		../src/gui/lifter.cx\
-		../src/gui/scroller.cx\
-		../src/gui/binder.cx\
-		../src/gui/combo.cx\
-		11_perspective.cx ++data=../resources
-
-12_sound:
-	cx\
-		../src/arg/argv.cx\
-		../src/mat/math.cx\
-		../src/app/application.cx\
-		../src/app/event.cx\
-		../src/fps/profiler.cx\
-		../src/fps/framerate.cx\
-		../src/gfx/batch.cx\
-		../src/gfx/graphics.cx\
-		../src/gfx/effect.cx\
-		../src/gfx/program.cx\
-		../src/gfx/mesh.cx\
-		../src/gfx/texture.cx\
-		../src/gfx/text.cx\
-		../src/gfx/target.cx\
-		../src/gfx/scissor.cx\
-		../src/gui/callback.cx\
-		../src/gui/layer.cx\
-		../src/gui/skin.cx\
-		../src/gui/scope.cx\
-		../src/gui/font.cx\
-		../src/gui/animation.cx\
-		../src/gui/control.cx\
-		../src/gui/label.cx\
-		../src/gui/picture.cx\
-		../src/gui/screen.cx\
-		../src/gui/interface.cx\
-		../src/gui/focus.cx\
-		../src/gui/splitter.cx\
-		../src/gui/window.cx\
-		../src/gui/keyboard.cx\
-		../src/gui/list.cx\
-		../src/gui/graph.cx\
-		../src/gui/lifter.cx\
-		../src/gui/scroller.cx\
-		../src/gui/binder.cx\
-		../src/gui/combo.cx\
-		../src/snd/sounds.cx\
-		../src/snd/audio.cx\
-		../src/snd/voice.cx\
-		12_sound.cx ++data=../resources
-
-13_camera:
-	cx\
-		../src/arg/argv.cx\
-		../src/mat/math.cx\
-		../src/app/application.cx\
-		../src/app/event.cx\
-		../src/fps/profiler.cx\
-		../src/fps/framerate.cx\
-		../src/gfx/batch.cx\
-		../src/gfx/graphics.cx\
-		../src/gfx/state.cx\
-		../src/gfx/effect.cx\
-		../src/gfx/program.cx\
-		../src/gfx/mesh.cx\
-		../src/gfx/texture.cx\
-		../src/gfx/text.cx\
-		../src/gfx/target.cx\
-		../src/gfx/scissor.cx\
-		../src/gui/callback.cx\
-		../src/gui/layer.cx\
-		../src/gui/skin.cx\
-		../src/gui/scope.cx\
-		../src/gui/font.cx\
-		../src/gui/animation.cx\
-		../src/gui/control.cx\
-		../src/gui/label.cx\
-		../src/gui/picture.cx\
-		../src/gui/screen.cx\
-		../src/gui/interface.cx\
-		../src/gui/focus.cx\
-		../src/gui/splitter.cx\
-		../src/gui/window.cx\
-		../src/gui/keyboard.cx\
-		../src/gui/list.cx\
-		../src/gui/graph.cx\
-		../src/gui/lifter.cx\
-		../src/gui/scroller.cx\
-		../src/gui/binder.cx\
-		../src/gui/combo.cx\
-		../src/snd/sounds.cx\
-		../src/snd/audio.cx\
-		../src/snd/voice.cx\
-		../src/gam/camera.cx\
-		13_camera.cx ++data=../resources
-
-14_batch:
-	cx\
-		../src/arg/argv.cx\
-		../src/mat/math.cx\
-		../src/app/application.cx\
-		../src/app/event.cx\
-		../src/fps/profiler.cx\
-		../src/fps/framerate.cx\
-		../src/gfx/batch.cx\
-		../src/gfx/graphics.cx\
-		../src/gfx/state.cx\
-		../src/gfx/effect.cx\
-		../src/gfx/program.cx\
-		../src/gfx/mesh.cx\
-		../src/gfx/texture.cx\
-		../src/gfx/text.cx\
-		../src/gfx/target.cx\
-		../src/gfx/scissor.cx\
-		../src/gui/callback.cx\
-		../src/gui/layer.cx\
-		../src/gui/skin.cx\
-		../src/gui/scope.cx\
-		../src/gui/font.cx\
-		../src/gui/animation.cx\
-		../src/gui/control.cx\
-		../src/gui/label.cx\
-		../src/gui/picture.cx\
-		../src/gui/screen.cx\
-		../src/gui/interface.cx\
-		../src/gui/focus.cx\
-		../src/gui/splitter.cx\
-		../src/gui/window.cx\
-		../src/gui/keyboard.cx\
-		../src/gui/list.cx\
-		../src/gui/graph.cx\
-		../src/gui/lifter.cx\
-		../src/gui/scroller.cx\
-		../src/gui/binder.cx\
-		../src/gui/combo.cx\
-		../src/snd/sounds.cx\
-		../src/snd/audio.cx\
-		../src/snd/voice.cx\
-		../src/gam/camera.cx\
-		14_batch.cx ++data=../resources ++fps=0
 

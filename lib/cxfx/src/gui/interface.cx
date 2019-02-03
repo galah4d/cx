@@ -208,13 +208,13 @@ var g_profileControlRenderChild fps.ProfileId
 var g_profileRenderControlFull fps.ProfileId
 
 // Init ...
-func Init(a *app.Application, width i32, height i32, dataDir str) {
+func Init(width i32, height i32, dataDir str) {
 	g_width = width
 	g_height = height
 
-	(*a).SetKeyboardCallback("gui", "ProcessKeyboard")
-	(*a).SetMouseButtonCallback("gui", "ProcessButton")
-	(*a).SetMousePositionCallback("gui", "ProcessCursor")
+	app.SetKeyboardCallback("gui", "ProcessKeyboard")
+	app.SetMouseButtonCallback("gui", "ProcessButton")
+	app.SetMousePositionCallback("gui", "ProcessCursor")
 
 	// meshes
 	var attributes []i32

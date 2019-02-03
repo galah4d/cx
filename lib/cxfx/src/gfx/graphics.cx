@@ -6,6 +6,15 @@ import "os"
 
 // TODO : print gl extensions on init
 
+// Constants ...
+var TRIANGLES i32 = gl.TRIANGLES
+var LINEAR i32 = gl.LINEAR
+var CLAMP_TO_EDGE i32 = gl.CLAMP_TO_EDGE
+var REPEAT i32 = gl.REPEAT
+var COLOR_BUFFER_BIT i32 = gl.COLOR_BUFFER_BIT
+var DEPTH_BUFFER_BIT i32 = gl.DEPTH_BUFFER_BIT
+var LESS i32 = gl.LESS
+
 // Globals ...
 var g_sizeofFloat i32 = 4
 

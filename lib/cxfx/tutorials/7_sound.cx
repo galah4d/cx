@@ -53,6 +53,13 @@ type Synth struct {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func gameOnEvent(controlIndex i32, controlAction i32) {
+	var key i32 = gui.CurrentEvent.keyboard.key
+	var action i32 = gui.CurrentEvent.keyboard.action
+
+	if key == app.KEYCODE_ESCAPE && action == app.KEY_PRESS {
+		app.Exit()
+	}
+
 	gam.FpsCameraProcess(camera, &gui.CurrentEvent)
 }
 
@@ -189,29 +196,9 @@ func skycoinOnUpdate(controlIndex i32, action i32) {
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-func onPlayButton(controlIndex i32, action i32) {
-	if action == app.KEY_PRESS {
-		gui.ScreenShow(gameScreen)
-	} else if action != app.KEY_RELEASE && action != app.KEY_REPEAT {
-		panicIfNot(false, "invalid action")
-	}
-}
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-func onExitButton(controlIndex i32, action i32) {
-	if action == app.KEY_PRESS {
-		app.Exit()
-	} else if action != app.KEY_RELEASE && action != app.KEY_REPEAT {
-		panicIfNot(false, "invalid action")
-	}
-}
-
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
 func main()() {
 	// init
-	gam.Init("Button Tutorial", 800, 600, 60, "")
+	gam.Init("Sound Tutorial", 800, 600, 60, "")
 	cubeMesh = gfx.MeshLock(gfx.TRIANGLES, gfx.g_vertexColorAttributes, 36 * 1024)
 	groundMesh = gfx.MeshLock(gfx.TRIANGLES, gfx.g_vertexColorAttributes, 6 * 64 * 64)
 	texture = gfx.TextureCreate(sprintf("%s/textures/Skycoin-Cloud-BW-Vertical-on_black@2x.png", app.DataDir()),
@@ -222,47 +209,10 @@ func main()() {
 	var audioId snd.AudioId = snd.AudioCreate(sprintf("%s/audios/skycoin_baby.wav", app.DataDir()))
 	voiceId = snd.VoiceCreate(audioId)
 
-	// mainScreen
-	var mainScreen gui.ScreenId = gui.ScreenCreate("mainScreen")
-	gui.ControlSetSkin(mainScreen.base, gui.g_blackSkin)
-	gui.ControlSetSize(mainScreen.base, gfx.gfx_viewportSize)
-	gui.ControlSetPadding(mainScreen.base, mat.v4_(200.0, 150.0, 200.0, 150.0))
-	gui.ScreenSetDuration(mainScreen, -1.0D)
-	{
-		var playButton gui.LabelId = gui.LabelCreate("playButton")
-		gui.ControlAddChild(mainScreen.base, playButton.base)
-		gui.ControlSetSkin(playButton.base, gui.g_blueSkin)
-		gui.ControlSetDock(playButton.base, gui.DOCK_TOP)
-		gui.ControlSetFocusable(playButton.base, 1)
-		gui.ControlSetPadding(playButton.base, mat.v4_(5.0, 5.0, 5.0, 5.0))
-		gui.ControlSetAutosize(playButton.base, gui.AUTOSIZE_Y)
-		gui.LabelSetFont(playButton, gui.g_boldFont)
-		gui.LabelSetText(playButton, "Play")
-		gui.LabelSetOnState(playButton, "main", "onPlayButton")
-		gui.LabelSetSize(playButton, gui.g_fontSizeButton)
-		gui.LabelSetColor(playButton, gui.g_white)
-		gui.LabelSetAlign(playButton, gui.ALIGN_CENTER)
-
-		var exitButton gui.LabelId = gui.LabelCreate("exitButton")
-		gui.ControlAddChild(mainScreen.base, exitButton.base)
-		gui.ControlSetSkin(exitButton.base, gui.g_blueSkin)
-		gui.ControlSetDock(exitButton.base, gui.DOCK_TOP)
-		gui.ControlSetFocusable(exitButton.base, 1)
-		gui.ControlSetPadding(exitButton.base, mat.v4_(5.0, 5.0, 5.0, 5.0))
-		gui.ControlSetAutosize(exitButton.base, gui.AUTOSIZE_Y)
-		gui.LabelSetFont(exitButton, gui.g_boldFont)
-		gui.LabelSetText(exitButton, "Exit")
-		gui.LabelSetOnState(exitButton, "main", "onExitButton")
-		gui.LabelSetSize(exitButton, gui.g_fontSizeButton)
-		gui.LabelSetColor(exitButton, gui.g_white)
-		gui.LabelSetAlign(exitButton, gui.ALIGN_CENTER)
-	}
-
 	// gameScreen
-	gameScreen = gui.ScreenCreate("gameScreen")
+	var gameScreen gui.ScreenId = gui.ScreenCreate("gameScreen")
 	gui.ControlSetSize(gameScreen.base, gfx.gfx_viewportSize)
 	gui.ScreenSetDuration(gameScreen, -1.0D)
-	gui.ScreenSetOnExit(gameScreen, mainScreen)
 	gui.ScreenSetOnEvent(gameScreen, "main", "gameOnEvent")
 	gui.ScreenSetOnUpdate(gameScreen, "main", "gameOnUpdate")
 	gui.ScreenSetOnRender(gameScreen, "main", "gameOnRender")
@@ -272,7 +222,7 @@ func main()() {
 	gui.ControlSetSkin(titleScreen.base, gui.g_blackSkin)
 	gui.ControlSetBounds(titleScreen.base, gfx.gfx_viewportBounds)
 	gui.ScreenSetDuration(titleScreen, 2.0D)
-	gui.ScreenSetOnNext(titleScreen, mainScreen)
+	gui.ScreenSetOnNext(titleScreen, gameScreen)
 	{
 		var label gui.LabelId= gui.LabelCreate("titleLabel")
 		gui.ControlAddChild(titleScreen.base, label.base)

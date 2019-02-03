@@ -93,7 +93,7 @@ func MeshAppendText(id MeshId, texture Texture, name str, position mat.v2, scale
 
 	var tw f32 = i32.f32(texture.width)
 	var th f32 = i32.f32(texture.height)
-	var index i32 = 0 // ISSUE : can redeclare index without error
+	var index i32 = 0 // ISSUE #247 : can redeclare index without error
 	var dummyIndex i32 = 0
 	var debugColor mat.v4
 
@@ -175,7 +175,7 @@ func MeshAppendGlyph(id MeshId, texture Texture, name str, position mat.v2, scal
 
 	var tw f32 = i32.f32(texture.width)
 	var th f32 = i32.f32(texture.height)
-	var index i32 = 0 // ISSUE : can redeclare index without error
+	var index i32 = 0 // ISSUE #247 : can redeclare index without error
 	var dummyIndex i32 = 0
 	var debugColor mat.v4
 

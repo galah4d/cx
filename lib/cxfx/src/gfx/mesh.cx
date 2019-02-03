@@ -513,7 +513,7 @@ func MeshAppendPlane(id MeshId, position mat.v3, width mat.v3, height mat.v3, re
 			var t2 f32 = uv.y + uv.w * dy1
 
 			var s3 f32 = uv.x + uv.z * dx1
-			var t3 f32 = uv.y + uv.w * dy1 // ISSUE : can redeclare v3 with another type
+			var t3 f32 = uv.y + uv.w * dy1 // ISSUE #247 : can redeclare v3 with another type
 
 			var r f32 = color.x
 			var g f32 = color.y

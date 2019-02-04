@@ -1479,6 +1479,17 @@ RPAREN
 SCOLON 
  IDENT runTest
 LPAREN 
+STRLIT test-scopes.cx
+ COMMA 
+ IDENT cx
+PERIOD 
+ IDENT SUCCESS
+ COMMA 
+STRLIT Error in scopes.
+RPAREN 
+SCOLON 
+ IDENT runTest
+LPAREN 
 STRLIT issue-14.cx
  COMMA 
  IDENT cx
@@ -1950,7 +1961,7 @@ PERIOD
 STRLIT Mismatched number of returning arguments is not throwing an error
 RPAREN 
 SCOLON 
- IDENT runTestEx
+ IDENT runTest
 LPAREN 
 STRLIT issue-67.cx
  COMMA 
@@ -1959,10 +1970,6 @@ PERIOD
  IDENT COMPILATION_ERROR
  COMMA 
 STRLIT No compilation error when var is accessed outside of its declaring scope
- COMMA 
- IDENT TEST_ISSUE
- COMMA 
-INTLIT 0
 RPAREN 
 SCOLON 
  IDENT runTest
@@ -2615,7 +2622,7 @@ STRLIT Crash when using a constant expression in a slice literal expression
 INTLIT 0
 RPAREN 
 SCOLON 
- IDENT runTestEx
+ IDENT runTest
 LPAREN 
 STRLIT issue-247-a.cx
  COMMA 
@@ -2624,13 +2631,9 @@ PERIOD
  IDENT COMPILATION_ERROR
  COMMA 
 STRLIT Can redeclare variables if they are inline initialized
- COMMA 
- IDENT TEST_ISSUE
- COMMA 
-INTLIT 0
 RPAREN 
 SCOLON 
- IDENT runTestEx
+ IDENT runTest
 LPAREN 
 STRLIT issue-247-b.cx
  COMMA 
@@ -2639,10 +2642,6 @@ PERIOD
  IDENT COMPILATION_ERROR
  COMMA 
 STRLIT Can redeclare variables if they are inline initialized
- COMMA 
- IDENT TEST_ISSUE
- COMMA 
-INTLIT 0
 RPAREN 
 SCOLON 
    VAR 

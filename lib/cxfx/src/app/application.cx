@@ -5,6 +5,9 @@ import "cx"
 import "glfw"
 import "os"
 
+// TODO : handle position in options
+// TODO : handle fullscreen in options
+
 // Globals ...
 var g_application Application
 
@@ -31,6 +34,11 @@ type Application struct {
 	window str
 	major i32
 	minor i32
+	x i32
+	y i32
+	width i32
+	height i32
+	fullscreen bool
 }
 
 // Help ...
@@ -48,12 +56,12 @@ func Help(message str, exitCode i32) {
 
 // Width ...
 func Width()(out i32) {
-	out = g_application.options.width
+	out = g_application.width
 }
 
 // Height ...
 func Height()(out i32) {
-	out = g_application.options.height
+	out = g_application.height
 }
 
 // DataDir ...
@@ -69,6 +77,11 @@ func Fps()(out i32) {
 // Name ...
 func Name()(out str) {
 	out = g_application.name
+}
+
+// WindowName ...
+func WindowName()(out str) {
+	out = g_application.window
 }
 
 // Parse ...
@@ -162,6 +175,11 @@ func Init(name str, window str, major i32, minor i32) {
 	glfw.WindowHint(glfw.ContextVersionMinor, g_application.minor)
 	glfw.CreateWindow(g_application.window, g_application.options.width, g_application.options.height, g_application.name)
 	glfw.MakeContextCurrent(g_application.window)
+	glfw.SetWindowPosCallback(g_application.window, "windowPosCallback", "app")
+	glfw.SetWindowSizeCallback(g_application.window, "windowSizeCallback", "app")
+
+	g_application.x, g_application.y = glfw.GetWindowPos(g_application.window)
+	g_application.width, g_application.height = glfw.GetWindowSize(g_application.window)
 
 	var swapInterval i32 = 0
 	if g_application.options.fps > 0 {
@@ -170,14 +188,25 @@ func Init(name str, window str, major i32, minor i32) {
 
 	glfw.SwapInterval(swapInterval)
 
-	//glfw.SetWindowPos(window, 100, 100) //1500, 100)
-	// xPos, yPos := glfw.GetCursorPos("window")
+	if (g_application.options.hints & APP_HINT_FULLSCREEN) == APP_HINT_FULLSCREEN {
+		ToggleFullscreen()
+	}
 }
 
 // Exit ...
 func Exit() {
 	printf("exiting %s...\n", g_application.name)
 	g_application.exit = true
+}
+
+// ToggleFullscreen ...
+func ToggleFullscreen() {
+	var fullscreen bool = g_application.fullscreen == false
+	if fullscreen {
+		g_application.fullscreen = fullscreen
+	}
+	glfw.Fullscreen(g_application.window, fullscreen, g_application.x, g_application.y, g_application.options.width, g_application.options.height)
+	g_application.fullscreen = fullscreen
 }
 
 // Running ...
@@ -187,8 +216,13 @@ func Running()(out bool) { // ISSUE : member function does not contain expressio
 
 // Resize ...
 func Resize(width i32, height i32) {
-	g_application.options.width = width
-	g_application.options.height = height
+	/*if g_application.fullscreen == false {
+		g_application.options.width = width
+		g_application.options.height = height
+	}*/
+
+	g_application.width = width
+	g_application.height = height
 }
 
 // BeginFrame ...
@@ -221,3 +255,18 @@ func SetMousePositionCallback(packageName str, functionName str) {
 func SetWindowResizeCallback(packageName str, functionName str) {
 	glfw.SetFramebufferSizeCallback(g_application.window, functionName, packageName)
 }
+
+func windowPosCallback(window str, x i32, y i32) {
+	if g_application.fullscreen == false {
+		g_application.x = x
+		g_application.y = y
+	}
+}
+
+func windowSizeCallback(window str, w i32, h i32) {
+	if g_application.fullscreen == false {
+		g_application.options.width = w
+		g_application.options.height = h
+	}
+}
+

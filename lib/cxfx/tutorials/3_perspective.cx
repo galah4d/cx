@@ -31,8 +31,10 @@ func gameOnEvent(controlIndex i32, controlAction i32) {
 	var key i32 = gui.CurrentEvent.keyboard.key
 	var action i32 = gui.CurrentEvent.keyboard.action
 	var mods i32 = gui.CurrentEvent.keyboard.mods
-	if key == app.KEYCODE_ESCAPE && action == app.KEY_PRESS {
-		app.Exit()
+	if mods == app.MOD_NONE {
+		if key == app.KEYCODE_ESCAPE && action == app.KEY_PRESS {
+			app.Exit()
+		}
 	}
 
 	if key == app.KEYCODE_LEFT {

@@ -416,13 +416,12 @@ func ProcessEvent(event *app.Event) () {
 	} else if (IsValidScreen(g_currentScreen)) {
 		g_hotScreen = g_currentScreen
 		if (ScreenProcessEvent(g_currentScreen, event) == app.EVENT_UNUSED) {
-		//printf("ProcessKeyboard : app.EVENT_UNUSED 0\n")
 			var screen i32 = g_currentScreen.screen
 			var state i32 = g_screens[screen].state
 			//if (g_screens[g_currentScreen.screen].state == STATE_OPENED) { // ##pending
 			//} else if (g_screens[g_currentScreen.screen].state == STATE_SHOWING) { // ##pending
 			if (state == STATE_OPENED || state == STATE_SHOWING) {
-				if (key == app.KEYCODE_ESCAPE && action == app.KEY_PRESS) {
+				if (key == app.KEYCODE_ESCAPE && action == app.KEY_PRESS && mods == app.MOD_NONE) {
 					g_screens[screen].paused = true
 					var onExit ScreenId = g_screens[screen].on_exit
 					if (IsValidScreen(onExit) == true) {
@@ -430,20 +429,19 @@ func ProcessEvent(event *app.Event) () {
 					} else {
 						printf("INVALID ON EXIT SCREEN %d, %d\n", onExit.screen, onExit.base)
 					}
-				} else if (key == app.KEYCODE_ENTER && action == app.KEY_PRESS) {
+				} else if (key == app.KEYCODE_ENTER && action == app.KEY_PRESS && mods == app.MOD_NONE) {
 					g_screens[screen].paused = true
 					var onEnter ScreenId = g_screens[screen].on_enter
 					if (IsValidScreen(onEnter) == true) {
 						ScreenShow(onEnter)
 					}
-				} else if (key == app.KEYCODE_MENU && action == app.KEY_PRESS) {
+				} else if (key == app.KEYCODE_MENU && action == app.KEY_PRESS && mods == app.MOD_NONE) {
 					g_screens[screen].paused = true
 					var onMenu ScreenId = g_screens[screen].on_menu
 					if (IsValidScreen(onMenu) == true) {
 						ScreenShow(onMenu)
 					}
 				} else {
-	//printf("ProcessKeyboard : app.EVENT_UNUSED 1\n")
 					currentScreen = g_currentScreen
 					g_hotScreen = g_currentScreen
 				}
@@ -451,12 +449,10 @@ func ProcessEvent(event *app.Event) () {
 		}
 	} else {
 		g_hotScreen = InvalidScreen()
-		//printf("----------------------------------------------->\n")
 	}
 
 	if (IsValidScreen(currentScreen)) {
-	//printf("ProcessKeyboard : app.EVENT_UNUSED 2\n")
-		if (action == app.KEY_PRESS) {
+		if action == app.KEY_PRESS {
 			if (mods == app.MOD_NONE || mods == app.MOD_CTRL) {
 				if (key == app.KEYCODE_LEFT ||
 					key == app.KEYCODE_UP) {
@@ -470,7 +466,11 @@ func ProcessEvent(event *app.Event) () {
 				if (key == app.KEYCODE_TAB) {
 					SetPreviousFocus(g_hotScreen)
 				}
-			}
+			} else if (mods == app.MOD_ALT) {
+                if key == app.KEYCODE_ENTER {
+                    app.ToggleFullscreen()
+                }
+            }
 		}
 	}
 }

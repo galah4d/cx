@@ -9,6 +9,25 @@ import (
 // declared in func_glfw.go
 var windows map[string]*glfw.Window = make(map[string]*glfw.Window, 0)
 
+func op_glfw_Fullscreen(expr *CXExpression, fp int) {
+	window := windows[ReadStr(fp, expr.Inputs[0])]
+	fullscreen := ReadBool(fp, expr.Inputs[1])
+	x := ReadI32(fp, expr.Inputs[2])
+	y := ReadI32(fp, expr.Inputs[3])
+	w := ReadI32(fp, expr.Inputs[4])
+	h := ReadI32(fp, expr.Inputs[5])
+
+	monitor := glfw.GetPrimaryMonitor()
+	mode := monitor.GetVideoMode()
+
+	if fullscreen {
+		window.SetMonitor(monitor, 0, 0, mode.Width, mode.Height, mode.RefreshRate)
+	} else {
+		window.SetMonitor(nil, int(x), int(y), int(w), int(h), mode.RefreshRate)
+	}
+	window.MakeContextCurrent()
+}
+
 func op_glfw_Init(expr *CXExpression, fp int) {
 	glfw.Init()
 }
@@ -70,6 +89,18 @@ func op_glfw_GetFramebufferSize(expr *CXExpression, fp int) {
 	width, height := windows[ReadStr(fp, inp1)].GetFramebufferSize()
 	WriteMemory(GetFinalOffset(fp, out1), FromI32(int32(width)))
 	WriteMemory(GetFinalOffset(fp, out2), FromI32(int32(height)))
+}
+
+func op_glfw_GetWindowPos(expr *CXExpression, fp int) {
+	x, y := windows[ReadStr(fp, expr.Inputs[0])].GetPos()
+	WriteMemory(GetFinalOffset(fp, expr.Outputs[0]), FromI32(int32(x)))
+	WriteMemory(GetFinalOffset(fp, expr.Outputs[1]), FromI32(int32(y)))
+}
+
+func op_glfw_GetWindowSize(expr *CXExpression, fp int) {
+	width, height := windows[ReadStr(fp, expr.Inputs[0])].GetSize()
+	WriteMemory(GetFinalOffset(fp, expr.Outputs[0]), FromI32(int32(width)))
+	WriteMemory(GetFinalOffset(fp, expr.Outputs[1]), FromI32(int32(height)))
 }
 
 func op_glfw_SwapInterval(expr *CXExpression, fp int) {
@@ -159,6 +190,34 @@ func op_glfw_SetFramebufferSizeCallback(expr *CXExpression, fp int) {
 	}
 	window := ReadStr(fp, expr.Inputs[0])
 	windows[window].SetFramebufferSizeCallback(callback)
+}
+
+func op_glfw_SetWindowPosCallback(expr *CXExpression, fp int) {
+	functionName := ReadStr(fp, expr.Inputs[1])
+	packageName := ReadStr(fp, expr.Inputs[2])
+	callback := func(w *glfw.Window, x int, y int) {
+		var inps [][]byte = make([][]byte, 3)
+		inps[0] = GetWindowName(w)
+		inps[1] = FromI32(int32(x))
+		inps[2] = FromI32(int32(y))
+		PROGRAM.ccallback(expr, functionName, packageName, inps)
+	}
+	window := ReadStr(fp, expr.Inputs[0])
+	windows[window].SetPosCallback(callback)
+}
+
+func op_glfw_SetWindowSizeCallback(expr *CXExpression, fp int) {
+	functionName := ReadStr(fp, expr.Inputs[1])
+	packageName := ReadStr(fp, expr.Inputs[2])
+	callback := func(w *glfw.Window, width int, height int) {
+		var inps [][]byte = make([][]byte, 3)
+		inps[0] = GetWindowName(w)
+		inps[1] = FromI32(int32(width))
+		inps[2] = FromI32(int32(height))
+		PROGRAM.ccallback(expr, functionName, packageName, inps)
+	}
+	window := ReadStr(fp, expr.Inputs[0])
+	windows[window].SetSizeCallback(callback)
 }
 
 func op_glfw_SetShouldClose(expr *CXExpression, fp int) {

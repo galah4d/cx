@@ -161,13 +161,9 @@ func GraphResize(id GraphId) () {
 	var graphIndex i32 = id.graph
 	g_graphs[graphIndex].coord = mat.v2_(32.0, 32.0)
 
-	var controlIndex i32 = id.base.control
-
 	g_graphs[graphIndex].horz = resize(g_graphs[graphIndex].horz, 0)
 	g_graphs[graphIndex].vert = resize(g_graphs[graphIndex].vert, 0)
 	g_graphs[graphIndex].labelCount = 0
-
-	var graphIndex i32 = id.graph
 
 	var offset mat.v2 = g_graphs[graphIndex].offset
 	var unit mat.v2 = g_graphs[graphIndex].unit

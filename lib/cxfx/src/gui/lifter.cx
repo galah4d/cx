@@ -213,13 +213,13 @@ func LifterProcessEvent(id LifterId, event *app.Event) (out i32) {
 	//ControlPrint("LIFTER", id.base, false)
 	if (out == app.EVENT_UNUSED) {
 		var focused i32 = g_controls[id.base.control].childFocused
+		var direction i32 = g_lifters[id.lifter].direction
 		if (focused > 0) {
 			var mods i32 = ((*event).keyboard).mods
 			if (mods == app.MOD_NONE) {
 				var action i32 = ((*event).keyboard).action
 				if (action == app.KEY_PRESS) {
 					var key i32 = ((*event).keyboard).key
-					var direction i32 = g_lifters[id.lifter].direction
 					var carret ControlId = g_lifters[id.lifter].carret
 					var offset f32 = LifterGetOffset(id)
 					if (key == app.KEYCODE_LEFT ||

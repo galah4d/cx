@@ -8,7 +8,7 @@ import "mat"
 
 // Globals ...
 var mesh gfx.MeshId
-var texture gfx.Texture
+var texture gfx.TextureId
 var font str = "skycoinRegular"
 
 //-----------------------------------------------------------------------------
@@ -16,7 +16,6 @@ var font str = "skycoinRegular"
 func gameOnEvent(controlIndex i32, controlAction i32) {
 	var key i32 = gui.CurrentEvent.keyboard.key
 	var action i32 = gui.CurrentEvent.keyboard.action
-
 	if key == app.KEYCODE_ESCAPE && action == app.KEY_PRESS {
 		app.Exit()
 	}
@@ -49,9 +48,8 @@ func gameOnUpdate(controlIndex i32, controlAction i32) {
 //-----------------------------------------------------------------------------
 func gameOnRender(controlIndex i32, controlAction i32) {
 	gfx.EffectUse(gfx.g_fxTexture)
-	gfx.EffectAssignTexture(gfx.g_fxTexture, 0, texture.name)
+	gfx.EffectAssignTexture(gfx.g_fxTexture, 0, texture)
 	gfx.MeshRender(mesh)
-	gfx.MeshUnlock(mesh)
 }
 
 //-----------------------------------------------------------------------------
@@ -60,11 +58,12 @@ func main()() {
 	// init
 	gam.Init("Text Tutorial", 800, 600, 60, "")
 	mesh = gfx.MeshLock(gfx.TRIANGLES, gfx.g_vertexColorAttributes, len(app.Name()) * 6)
-	texture = gfx.TextureCreateFont(font, sprintf("%s/fonts/Skycoin-Regular.ttf", app.DataDir()), 64, 32, 127, gfx.TEXT_LEFT_TO_RIGHT, false)
+	texture = gfx.TextureCreateFont(font, sprintf("%s/fonts/Skycoin-Regular.ttf", app.DataDir()),
+		64, 32, 127, gfx.TEXT_LEFT_TO_RIGHT, -1)
 
 	// gameScreen
 	var gameScreen gui.ScreenId = gui.ScreenCreate("gameScreen")
-	gui.ControlSetSize(gameScreen.base, gfx.gfx_viewportSize)
+	gui.ControlSetDock(gameScreen.base, gui.DOCK_FILL)
 	gui.ScreenSetDuration(gameScreen, -1.0D)
 	gui.ScreenSetOnEvent(gameScreen, "main", "gameOnEvent")
 	gui.ScreenSetOnUpdate(gameScreen, "main", "gameOnUpdate")

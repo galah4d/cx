@@ -13,8 +13,9 @@ type BatchId struct {
 type Batch struct {
 	effect EffectId
 	mesh MeshId
-	texture Texture
 	slot i32
+	texture TextureId
+	sampler SamplerState
 	alpha bool
 }
 
@@ -35,17 +36,23 @@ func BatchGetMesh(id BatchId) (out MeshId) {
 }
 
 // GetBatch ...
-func GetBatch(effect EffectId, texture Texture, slot i32, alpha bool, vertexCount i32) (out BatchId) {
+func GetBatch(effect EffectId, texture TextureId, slot i32, sampler SamplerState, alpha bool, vertexCount i32) (out BatchId) {
 
 	out.batch = -1
 	var i i32 = 0
 	var batchCount i32 = len(g_batches)
 	for i >= 0 {
-
 		if (i < batchCount) {
-			var textureName i32 = g_batches[i].texture.name
+			var textureName i32 = TextureName(g_batches[i].texture)
 			var textureAlpha bool = g_batches[i].alpha
-			if (textureName == texture.name && textureAlpha == alpha) {
+			var textureSampler SamplerState = g_batches[i].sampler
+			if (textureName == TextureName(texture) &&
+				textureAlpha == alpha &&
+				textureSampler.min == sampler.min &&
+				textureSampler.mag == sampler.mag &&
+				textureSampler.s == sampler.s &&
+				textureSampler.t == sampler.t &&
+				textureSampler.r == sampler.r) {
 				out.batch = i
 			}
 			i = i + 1
@@ -65,6 +72,7 @@ func GetBatch(effect EffectId, texture Texture, slot i32, alpha bool, vertexCoun
 		batch.mesh = MeshLock(gl.TRIANGLES, attributes, vertexCount)
 		batch.texture = texture
 		batch.slot = slot
+		batch.sampler = sampler
 		batch.alpha = alpha
 		g_batches = append(g_batches, batch)
 	}
@@ -146,10 +154,10 @@ func RenderBatches(alpha bool) {
 					DisableBlending()
 				}
 				var effect EffectId = g_batches[batch].effect
+				var texture TextureId = g_batches[batch].texture
 				EffectUse(effect)
-				EffectAssignTexture(effect, g_batches[batch].slot, g_batches[batch].texture.name)
-				TextureFilter(gl.LINEAR, gl.LINEAR)
-				TextureWrap(gl.REPEAT, gl.REPEAT, gl.REPEAT)
+				EffectAssignTexture(effect, g_batches[batch].slot, texture)
+				TextureSamplerState(texture, g_batches[batch].sampler)
 				MeshRender(meshId)
 			}
 		}

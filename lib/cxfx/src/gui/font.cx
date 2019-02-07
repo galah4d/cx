@@ -17,13 +17,13 @@ type Font struct {
 	id FontId
 	name str
 	path str
-    //range bool
-    //runes []ui32
+	//range bool
+	//runes []ui32
 	min i32
 	max i32
 	direction i32
 	textureCount i32
-	textures []gfx.Texture
+	textures []gfx.TextureId
 	names []str
 	sizes []i32
 }
@@ -49,8 +49,8 @@ func FontCreate(name str, path str, min i32, max i32, direction i32) (out FontId
 	font.name = name
 	font.path = path
 
-    //font.range = range
-    //font.runes = runes
+	//font.range = range
+	//font.runes = runes
 	font.direction = direction
 	font.textureCount = 0
 
@@ -69,8 +69,8 @@ func FontAddSize(id FontId, size i32) {
 	var path str
 	path = g_fonts[index].path
 
-    //var range bool = g_fonts[index].range
-    //var runes []ui32 = g_fonts[index].runes
+	//var range bool = g_fonts[index].range
+	//var runes []ui32 = g_fonts[index].runes
 	var dir i32 = g_fonts[index].direction
 	var min i32 = g_fonts[index].min
 	var max i32 = g_fonts[index].max
@@ -78,7 +78,7 @@ func FontAddSize(id FontId, size i32) {
 	textureName = sprintf("%s_%d", name, size)
 
 	var textureCount i32 = g_fonts[index].textureCount
-	g_fonts[index].textures = append(g_fonts[index].textures, gfx.TextureCreateFont(textureName, path, size, min, max, dir, false))
+	g_fonts[index].textures = append(g_fonts[index].textures, gfx.TextureCreateFont(textureName, path, size, min, max, dir, -1))
 	g_fonts[index].names = append(g_fonts[index].names, textureName)
 	g_fonts[index].sizes = append(g_fonts[index].sizes, size)
 

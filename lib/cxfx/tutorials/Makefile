@@ -44,7 +44,7 @@
 		../src/snd/voice.cx\
 		../src/gam/camera.cx\
 		../src/gam/game.cx\
-		0_colored_quad.cx ++data=../resources
+		0_colored_quad.cx ++data=../resources ++hints=resizable
 
 1_textured_quad:
 	cx\

@@ -151,7 +151,13 @@ func Init(name str, window str, major i32, minor i32) {
 	printf("starting %s...\n", g_application.name)
 
 	glfw.Init() // ##0 terminate
-	glfw.WindowHint(glfw.Resizable, glfw.False)
+
+	var resizable i32 = glfw.False
+	if (g_application.options.hints & APP_HINT_RESIZABLE) == APP_HINT_RESIZABLE {
+		resizable = glfw.True
+	}
+
+	glfw.WindowHint(glfw.Resizable, resizable)
 	glfw.WindowHint(glfw.ContextVersionMajor, g_application.major)
 	glfw.WindowHint(glfw.ContextVersionMinor, g_application.minor)
 	glfw.CreateWindow(g_application.window, g_application.options.width, g_application.options.height, g_application.name)
@@ -177,6 +183,12 @@ func Exit() {
 // Running ...
 func Running()(out bool) { // ISSUE : member function does not contain expressions
 	out = (glfw.ShouldClose(g_application.window) == false && g_application.exit == false)
+}
+
+// Resize ...
+func Resize(width i32, height i32) {
+	g_application.options.width = width
+	g_application.options.height = height
 }
 
 // BeginFrame ...
@@ -205,3 +217,7 @@ func SetMousePositionCallback(packageName str, functionName str) {
 	glfw.SetCursorPosCallbackEx(g_application.window, functionName, packageName)
 }
 
+// SetWindowResizeCallback ...
+func SetWindowResizeCallback(packageName str, functionName str) {
+	glfw.SetFramebufferSizeCallback(g_application.window, functionName, packageName)
+}

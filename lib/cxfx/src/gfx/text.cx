@@ -45,30 +45,17 @@ func NextGlyph(name str, text str, index i32) (r i32, s i32, x i32, y i32, w i32
 }
 
 // TextureCreateFont ...
-func TextureCreateFont(name str, path str, scale i32, min i32, max i32, dir i32, mipmap bool) (texture Texture) {
-	texture.name = LoadTrueType(name, path, scale, min, max, dir)
+func TextureCreateFont(name str, path str, scale i32, min i32, max i32, dir i32, mipmap i32) (out TextureId) {
 
-	gl.BindTexture(gl.TEXTURE_2D, texture.name)
-	panicIf(GlError(), "gl.BindTexture")
-
-	texture.width = gl.GetTexLevelParameteriv(gl.TEXTURE_2D, 0, gl.TEXTURE_WIDTH)
-	panicIf(GlError(), "gl.GetTexLevelParameteriv")
-
-	texture.height = gl.GetTexLevelParameteriv(gl.TEXTURE_2D, 0, gl.TEXTURE_HEIGHT)
-	panicIf(GlError(), "gl.GetTexLevelParameteriv")
-
-	if mipmap {
-		gl.GenerateMipmap(gl.TEXTURE_2D)
-		panicIf(GlError(), "gl.GenerateMipmap")
-	}
+	var glName i32 = LoadTrueType(name, path, scale, min, max, dir)
+	out = textureCreate(glName, FORMAT_R8_G8_B8_A8, 0, 0, mipmap, false)
 }
 
 // MeshAppendText ...
-func MeshAppendText(id MeshId, texture Texture, name str, position mat.v2, scale mat.v2, color mat.v4, text str, debug bool, color0 mat.v4, color1 mat.v4, clip mat.v4, depth f32) {
+func MeshAppendText(id MeshId, texture TextureId, name str, position mat.v2, scale mat.v2, color mat.v4, text str, debug bool, color0 mat.v4, color1 mat.v4, clip mat.v4, depth f32) {
 //	printf("NAME %s\n", name)
 //	if (name == "awesomeBold_25") {
 	panicIfNot(IsValidMesh(id), "invalid id")
-	var index i32 = 0
 	var size i32 = 0
 
 	var maxGlyphW i32 = 0;
@@ -91,14 +78,14 @@ func MeshAppendText(id MeshId, texture Texture, name str, position mat.v2, scale
 	//	quadY =  0.0 - textHeight / (gfx_height * 2.0) // / gfx_height
 	//}
 
-	var tw f32 = i32.f32(texture.width)
-	var th f32 = i32.f32(texture.height)
-	var index i32 = 0 // ISSUE #247 : can redeclare index without error
+	var tw f32 = TextureWidthF32(texture)
+	var th f32 = TextureHeightF32(texture)
 	var dummyIndex i32 = 0
 	var debugColor mat.v4
 
 //	printf("TEXT : %s\n", text)
 
+	var index i32 = 0
 	for (size >= 0) {
 
 		var rune i32
@@ -145,10 +132,9 @@ func MeshAppendText(id MeshId, texture Texture, name str, position mat.v2, scale
 }
 
 // MeshAppendGlyph ...
-func MeshAppendGlyph(id MeshId, texture Texture, name str, position mat.v2, scale mat.v2, color mat.v4, glyph i32, debug bool, color0 mat.v4, color1 mat.v4, clip mat.v4, depth f32) {
+func MeshAppendGlyph(id MeshId, texture TextureId, name str, position mat.v2, scale mat.v2, color mat.v4, glyph i32, debug bool, color0 mat.v4, color1 mat.v4, clip mat.v4, depth f32) {
 //	printf("NAME %s\n", name)
 	panicIfNot(IsValidMesh(id), "invalid id")
-	//var index i32 = 0
 	var size i32 = 0
 
 	var maxGlyphW i32 = 0;
@@ -173,9 +159,8 @@ func MeshAppendGlyph(id MeshId, texture Texture, name str, position mat.v2, scal
 	//	quadY =  0.0 - textHeight / (gfx_height * 2.0) // / gfx_height
 	//}
 
-	var tw f32 = i32.f32(texture.width)
-	var th f32 = i32.f32(texture.height)
-	var index i32 = 0 // ISSUE #247 : can redeclare index without error
+	var tw f32 = TextureWidthF32(texture)
+	var th f32 = TextureHeightF32(texture)
 	var dummyIndex i32 = 0
 	var debugColor mat.v4
 
@@ -209,7 +194,6 @@ func MeshAppendGlyph(id MeshId, texture Texture, name str, position mat.v2, scal
 
 	//MeshAppendOrthoQuad(g_debugMesh, mat.v4_(quadX, quadY, quadAdvance, quadHeight), mat.v4_(qu0, qv0, qu1, qv1), red, clip, depth)
 	MeshAppendOrthoQuad(id, mat.v4_(quadX, quadY, quadAdvance, quadHeight), mat.v4_(qu0, qv0, qu1, qv1),  color, clip, depth)
-	index = index + size
 	quadX = quadX + quadAdvance
 	dummyIndex = dummyIndex + 1
 }

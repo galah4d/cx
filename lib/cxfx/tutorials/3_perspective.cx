@@ -17,7 +17,7 @@ var dz f32 = -50.0
 var ry f32 = 0.0
 
 var mesh gfx.MeshId
-var texture gfx.Texture
+var texture gfx.TextureId
 
 var rotate []f32
 var translate []f32
@@ -31,7 +31,6 @@ func gameOnEvent(controlIndex i32, controlAction i32) {
 	var key i32 = gui.CurrentEvent.keyboard.key
 	var action i32 = gui.CurrentEvent.keyboard.action
 	var mods i32 = gui.CurrentEvent.keyboard.mods
-
 	if key == app.KEYCODE_ESCAPE && action == app.KEY_PRESS {
 		app.Exit()
 	}
@@ -61,6 +60,11 @@ func gameOnEvent(controlIndex i32, controlAction i32) {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func gameOnUpdate(controlIndex i32, controlAction i32) {
+	var width f32 = gfx.gfx_viewportSize.x
+	var height f32 = gfx.gfx_viewportSize.y
+	projection = resize(projection, 0)
+	projection = mat.ProjectionMatrix(projection, 0.1, 10000.0, 0.5, width, height)
+
 	ry = ry + f64.f32(fps.DeltaTime())
 
 	rotate = resize(rotate, 0)
@@ -87,7 +91,7 @@ func gameOnRender(controlIndex i32, controlAction i32) {
 	gfx.DepthState(true, gfx.LESS, true)
 	gfx.Clear(gfx.COLOR_BUFFER_BIT | gfx.DEPTH_BUFFER_BIT, mat.v4_(0.3, 0.5, 0.6, 1.0), 1.0D, 0)
 	gfx.EffectUse(gfx.g_fxPerspectiveTexture)
-	gfx.EffectAssignTexture(gfx.g_fxPerspectiveTexture, 0, texture.name)
+	gfx.EffectAssignTexture(gfx.g_fxPerspectiveTexture, 0, texture)
 	gfx.EffectAssignMatrix4(gfx.g_fxPerspectiveTexture, 0, world, false)
 	gfx.EffectAssignMatrix4(gfx.g_fxPerspectiveTexture, 1, view, false)
 	gfx.EffectAssignMatrix4(gfx.g_fxPerspectiveTexture, 2, projection, false)
@@ -101,16 +105,13 @@ func main()() {
 	gam.Init("Perspective Tutorial", 800, 600, 60, "")
 	mesh = gfx.MeshLock(gfx.TRIANGLES, gfx.g_vertexColorAttributes, 36)
 	texture = gfx.TextureCreate(sprintf("%s/textures/Skycoin-Cloud-BW-Vertical-on_black@2x.png", app.DataDir()),
-		gfx.LINEAR, gfx.LINEAR, gfx.CLAMP_TO_EDGE, gfx.CLAMP_TO_EDGE, gfx.CLAMP_TO_EDGE, 0, 0, true)
+		gfx.FORMAT_R8_G8_B8_A8, 0, 0, -1, false)
 
 	view = mat.Identity(view)
-	var width f32 = gfx.gfx_viewportSize.x
-	var height f32 = gfx.gfx_viewportSize.y
-	projection = mat.ProjectionMatrix(projection, 0.1, 10000.0, 0.5, height / width)
 
 	// gameScreen
 	gameScreen = gui.ScreenCreate("gameScreen")
-	gui.ControlSetSize(gameScreen.base, gfx.gfx_viewportSize)
+	gui.ControlSetDock(gameScreen.base, gui.DOCK_FILL)
 	gui.ScreenSetDuration(gameScreen, -1.0D)
 	gui.ScreenSetOnEvent(gameScreen, "main", "gameOnEvent")
 	gui.ScreenSetOnUpdate(gameScreen, "main", "gameOnUpdate")
@@ -124,3 +125,4 @@ func main()() {
 	gfx.MeshUnlock(mesh)
 	gam.Destroy()
 }
+

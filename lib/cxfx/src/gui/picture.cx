@@ -120,8 +120,8 @@ func PictureResize(id PictureId) () {
 	g_pictures[id.picture].picturePosition = position
 
 	var frame i32 = g_pictures[id.picture].frame
-	var texture gfx.Texture = g_animations[animation.index].textures[frame]
-	g_pictures[id.picture].batch = gfx.GetBatch(gfx.g_fxTexture, texture, 0, g_pictures[id.picture].alpha, 4096 * 30)
+	var texture gfx.TextureId = g_animations[animation.index].textures[frame]
+	g_pictures[id.picture].batch = gfx.GetBatch(gfx.g_fxTexture, texture, 0, gfx.g_linearWrap, g_pictures[id.picture].alpha, 4096 * 30)
 	//ControlPrint("PictureResize : AFTER", id.base, false)
 }
 
@@ -153,7 +153,7 @@ func PictureRender(id PictureId, clip mat.v4, stack i32) () {
 	var frameCount i32 = g_animations[animation.index].frameCount
 
 	var frame i32 = g_pictures[id.picture].frame
-	var texture gfx.Texture = g_animations[animation.index].textures[frame]
+	var texture gfx.TextureId = g_animations[animation.index].textures[frame]
 	var frameDelta i32 = frameCount / 8
 	if (frameDelta <= 0) {
 		frameDelta = 1
@@ -164,7 +164,7 @@ func PictureRender(id PictureId, clip mat.v4, stack i32) () {
 	}
 	g_pictures[id.picture].frame = frame
 
-	if texture.name > 0 {
+	if gfx.TextureName(texture) > 0 {
 		//printf("RENDER_BOUNDS %f, %f, %f, %f\n",
 		//  g_controls[id.control].renderBounds.x,
 		//g_controls[id.control].renderBounds.y,

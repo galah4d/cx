@@ -14,6 +14,7 @@ var REPEAT i32 = gl.REPEAT
 var COLOR_BUFFER_BIT i32 = gl.COLOR_BUFFER_BIT
 var DEPTH_BUFFER_BIT i32 = gl.DEPTH_BUFFER_BIT
 var LESS i32 = gl.LESS
+var RGBA i32 = gl.RGBA
 
 // Globals ...
 var g_sizeofFloat i32 = 4
@@ -43,6 +44,9 @@ var g_stencilOpDepthPass i32 = gl.KEEP
 var g_clearColor mat.v4
 var g_clearDepth f64
 var g_clearStencil i32
+
+var g_texture2D i32 = -1
+var g_framebuffer i32 = -1
 
 var gfx_width f32 = 0.0
 var gfx_height f32 = 0.0
@@ -76,6 +80,10 @@ var g_fxTexture	 EffectId = InvalidEffect()
 var g_fxTrans_0	 EffectId = InvalidEffect()
 var g_fxTrans_1	 EffectId = InvalidEffect()
 var g_fxPerspectiveTexture EffectId = InvalidEffect()
+
+var g_linearWrap SamplerState = SamplerStateCreate(gl.LINEAR_MIPMAP_NEAREST, gl.LINEAR, gl.REPEAT, gl.REPEAT, gl.REPEAT)
+var g_linearClamp SamplerState = SamplerStateCreate(gl.LINEAR_MIPMAP_NEAREST, gl.LINEAR, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE)
+var g_nearestClamp SamplerState = SamplerStateCreate(gl.NEAREST, gl.NEAREST, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE, gl.CLAMP_TO_EDGE)
 
 // GlError ...
 func GlError() (error bool) {
@@ -140,6 +148,21 @@ func GlStatus() (error bool) {
 	}
 }
 
+// GlString ...
+func GlString(value i32) (out str) {
+	if value == gl.RGBA {
+		out = "RGBA"
+	} else if value == gl.DEPTH_COMPONENT {
+		out = "DEPTH_COMPONENT"
+	} else if value == gl.DEPTH_COMPONENT24 {
+		out = "DEPTH_COMPONENT24"
+	} else if value == gl.UNSIGNED_BYTE {
+		out = "UNSIGNED_BYTE"
+	} else {
+		out = "unknown gl enum"
+	}
+}
+
 // NoGlStatus ...
 func NoGlStatus() (nostatus bool) { // ISSUE : typo in function name GlStatus instaed of NoGlStatus : error: /home/reash/go/src/github.com/skycoin/cx/lib/cxfx/src/graphics.cx:123 identifier 'error' does not exist
 	var status bool = GlStatus()
@@ -183,12 +206,11 @@ func NewUniform(location i32, name str) (out Uniform) {
 	out.name = name
 }
 
-func assignTexture(slot i32, sampler i32, texture i32) () {
+func assignTexture(slot i32, sampler i32, name i32) () {
 	gl.ActiveTexture(gl.TEXTURE0 + slot)
 	panicIf(GlError(), "gl.ActiveTexture")
 
-	gl.BindTexture(gl.TEXTURE_2D, texture)
-	panicIf(GlError(), "gl.BindTexture")
+	bindTexture(name)
 
 	gl.Uniform1i(sampler, slot)
 	panicIf(GlError(), "gl.Uniform1i")
@@ -208,6 +230,23 @@ func assignMatrix4(slot i32, value []f32, transpose bool) {
 	panicIf(len(value) % 16 != 0, "invalid stride")
 	gl.UniformMatrix4fv(slot, len(value) / 16, transpose, value)
 	panicIf(GlError(), "gl.UniformMatrix4vf")
+}
+
+func bindTexture(name i32) {
+	if g_texture2D != name  {
+		gl.BindTexture(gl.TEXTURE_2D, name)
+		panicIf(GlError(), "gl.BindTexture")
+		g_texture2D = name
+	}
+}
+
+func bindFramebuffer(name i32) {
+	if g_framebuffer != name {
+		gl.BindFramebuffer(gl.FRAMEBUFFER, name)
+		SetViewport(gfx_viewportBounds)
+		SetScissor(gfx_viewportBounds)
+		panicIf(GlError(), "gl.BindFramebuffer")
+	}
 }
 
 // EnableBlending ...
@@ -393,6 +432,54 @@ func ColorWrite(red bool, green bool, blue bool, alpha bool) {
 	}
 }
 
+// SetViewport ...
+func SetViewport(bounds mat.v4) {
+
+	var x i32 = f32.i32(bounds.x)
+	var y i32 = f32.i32(bounds.y)
+	var width i32 = f32.i32(bounds.z)
+	var height i32 = f32.i32(bounds.w)
+
+	if (gfx_viewportX != x ||
+		gfx_viewportY != y ||
+		gfx_viewportWidth != width ||
+		gfx_viewportHeight != height) {
+		gfx_viewportX = x
+		gfx_viewportY = y
+		gfx_viewportWidth = width
+		gfx_viewportHeight = height
+		gl.Viewport(x, y, width, height)
+		panicIf(GlError(), "gl.Viewport")
+	}
+}
+
+// SetScissor ...
+func SetScissor(bounds mat.v4) {
+	if (gfx_scissor == false) {
+		gfx_scissor = true
+		gl.Enable(gl.SCISSOR_TEST)
+		panicIf(GlError(), "gl.Scissor")
+	}
+
+	var x i32 = f32.i32(bounds.x)
+	var y i32 = f32.i32(bounds.y)
+	var width i32 = f32.i32(bounds.z)
+	var height i32 = f32.i32(bounds.w)
+
+	if (gfx_scissorX != x ||
+		gfx_scissorY != y ||
+		gfx_scissorWidth != width ||
+		gfx_scissorHeight != height) {
+		gfx_scissorX = x
+		gfx_scissorY = y
+		gfx_scissorWidth = width
+		gfx_scissorHeight = height
+		gl.Scissor(x, y, width, height)
+		panicIf(GlError(), "gl.Scissor")
+	}
+}
+
+
 // Init ...
 func Init(width i32, height i32, dataDir str)() {
 	/*var view []f32
@@ -405,13 +492,6 @@ func Init(width i32, height i32, dataDir str)() {
 
 	g_vertexColorAttributes = []i32{3, 4, 2}
 
-	gfx_width = i32.f32(width)
-	gfx_height = i32.f32(height)
-	gfx_viewportSize = mat.v2_(gfx_width, gfx_height)
-	gfx_viewportBounds = mat.v4_(0.0, 0.0, gfx_width, gfx_height)
-
-	gfx_ratio_y = gfx_width / gfx_height
-	gfx_ratio_x = gfx_height / gfx_width
 
 	gfx_red   = mat.v4_(1.0, 0.0, 0.0, 1.0)
 	gfx_green = mat.v4_(0.0, 1.0, 0.0, 1.0)
@@ -457,7 +537,7 @@ func Init(width i32, height i32, dataDir str)() {
 	gl.ClearColor(g_clearColor.x, g_clearColor.y, g_clearColor.z, g_clearColor.w)
 	panicIf(GlError(), "gl.ClearColor")
 
-	SetViewport(gfx_viewportBounds)
+	resizeViewport(width, height)
 
 	g_fxVertexColor = CreateEffect("vsPassThrough", "psVertexColor")
 	EffectBindAttribute(g_fxVertexColor, 0, "i_v3Position")
@@ -494,8 +574,26 @@ func Init(width i32, height i32, dataDir str)() {
 	EffectBindUniform(g_fxPerspectiveTexture, "DEBUG_0")
 }
 
-// Free ...
-func Free()() {
+// Resize ...
+func Resize(width i32, height i32)() {
+	resizeViewport(width, height)
+	ResizeTargets(width, height)
+	//ResizeTextures(width, height)
+}
+
+func resizeViewport(width i32, height i32) {
+	gfx_width = i32.f32(width)
+	gfx_height = i32.f32(height)
+	gfx_viewportSize = mat.v2_(gfx_width, gfx_height)
+	gfx_viewportBounds = mat.v4_(0.0, 0.0, gfx_width, gfx_height)
+	gfx_ratio_y = gfx_width / gfx_height
+	gfx_ratio_x = gfx_height / gfx_width
+	SetViewport(gfx_viewportBounds)
+	SetScissor(gfx_viewportBounds)
+}
+
+// Destroy ...
+func Destroy()() {
 
 	//PopScissor()
 
@@ -537,84 +635,9 @@ func Free()() {
 		panicIf(GlError(), "g_DeleteVertexArrays")
 	}
 
-	for i = 0; i < len(g_framebuffers); i = i + 1 {
-		//printf("gl.DeleteFramebuffers(%d)\n", g_framebuffers[i])
-		gl.DeleteFramebuffers(1, g_framebuffers[i])
-		panicIf(GlError(), "g.DeleteFramebuffers")
-	}
 
-	for i = 0; i < len(g_textures); i = i + 1 {
-		//printf("gl.DeleteTextures(%d)\n", g_textures[i])
-		gl.DeleteTextures(1, g_textures[i])
-		panicIf(GlError(), "g.DeleteTextures")
-	}
+	DestroyTargets()
+	DestroyTextures()
 }
 
-// SetViewport ...
-func SetViewport(bounds mat.v4) {
-
-	var x i32 = f32.i32(bounds.x)
-	var y i32 = f32.i32(bounds.y)
-	var width i32 = f32.i32(bounds.z)
-	var height i32 = f32.i32(bounds.w)
-
-	if (gfx_viewportX != x ||
-		gfx_viewportY != y ||
-		gfx_viewportWidth != width ||
-		gfx_viewportHeight != height) {
-		gfx_viewportX = x
-		gfx_viewportY = y
-		gfx_viewportWidth = width
-		gfx_viewportHeight = height
-		gl.Viewport(x, y, width, height)
-		panicIf(GlError(), "gl.Viewport")
-	}
-}
-
-// SetScissor ...
-func SetScissor(bounds mat.v4) {
-
-	if (gfx_scissor == false) {
-		gfx_scissor = true
-		//printf("ENABLE SCISSOR %d\n", gl.SCISSOR_TEST)
-		gl.Enable(gl.SCISSOR_TEST)
-		panicIf(GlError(), "gl.Scissor")
-	}
-
-	var x i32 = f32.i32(bounds.x)
-	var y i32 = f32.i32(bounds.y)
-	var width i32 = f32.i32(bounds.z)
-	var height i32 = f32.i32(bounds.w)
-
-	if (gfx_scissorX != x ||
-		gfx_scissorY != y ||
-		gfx_scissorWidth != width ||
-		gfx_scissorHeight != height) {
-		gfx_scissorX = x
-		gfx_scissorY = y
-		gfx_scissorWidth = width
-		gfx_scissorHeight = height
-		//printf("#####################################################gl.Scissor %d, %d, %d, %d\n", x, y, width, height)
-		gl.Scissor(x, y, width, height)
-		panicIf(GlError(), "gl.Scissor")
-	}
-}
-
-// BindDepthBuffer ...
-func BindDepthBuffer(depthbuffer i32) {
-	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthbuffer)
-	panicIf(GlError(), "gl.FramebufferRenderbuffer")
-}
-
-// BindStencilBuffer ...
-func BindStencilBuffer(stencilbuffer i32) {
-	gl.FramebufferRenderbuffer(gl.FRAMEBUFFER, gl.STENCIL_ATTACHMENT, gl.RENDERBUFFER, stencilbuffer)
-	panicIf(GlError(), "glFramebufferRenderbuffer")
-}
-
-// BindFrameBuffer ...
-func BindFrameBuffer(framebuffer i32) {
-	gl.BindFramebuffer(gl.FRAMEBUFFER, framebuffer)
-	panicIf(GlError(), "gl.BindFramebuffer")
-}
 

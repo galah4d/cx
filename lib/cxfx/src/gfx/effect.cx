@@ -78,16 +78,24 @@ func EffectBindSampler(id EffectId, name str) {
 
 // EffectBindUniform ...
 func EffectBindUniform(id EffectId, name str) {
-	panicIfNot(IsValidEffect(id), "invalid_id")
+	panicIfNot(IsValidEffect(id), "invalid id")
 	var location i32 = BindUniform(g_effects[id.effect].program, name)
 	g_effects[id.effect].uniforms = append(g_effects[id.effect].uniforms, NewUniform(location, name))
 }
 
 // EffectAssignTexture ...
-func EffectAssignTexture(id EffectId, slot i32, texture i32) () {
+func EffectAssignTexture(id EffectId, slot i32, texture TextureId) () {
+	panicIfNot(IsValidEffect(id), "invalid effect")
+	panicIfNot(EffectIsValidSamplerSlot(id, slot), "invalid sampler slot")
+	panicIfNot(IsValidTexture(texture), "invalid texture")
+	assignTexture(slot, g_effects[id.effect].samplers[slot].location, TextureName(texture))
+}
+
+// EffectRemoveTexture ...
+func EffectRemoveTexture(id EffectId, slot i32) {
 	panicIfNot(IsValidEffect(id), "invalid id")
 	panicIfNot(EffectIsValidSamplerSlot(id, slot), "invalid sampler slot")
-	assignTexture(slot, g_effects[id.effect].samplers[slot].location, texture)
+	assignTexture(slot, g_effects[id.effect].samplers[slot].location, 0)
 }
 
 // EffectAssignFloat ...

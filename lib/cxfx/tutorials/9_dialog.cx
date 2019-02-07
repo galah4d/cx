@@ -8,6 +8,9 @@ import "gui"
 import "mat"
 import "snd"
 
+// TODO : can't navigate with keyboard at startup
+// TODO : dialog disapear if exit button is pushed with keyboard
+
 // Globals ...
 var gameScreen gui.ScreenId
 var exitScreen gui.ScreenId
@@ -16,7 +19,7 @@ var ry f32 = 0.0
 
 var groundMesh gfx.MeshId
 var cubeMesh gfx.MeshId
-var texture gfx.Texture
+var texture gfx.TextureId
 
 var rotate []f32
 var translate []f32
@@ -60,7 +63,7 @@ func gameOnEvent(controlIndex i32, controlAction i32) {
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 func gameOnUpdate(controlIndex i32, controlAction i32) {
-	gam.FpsCameraUpdate(camera, fps.DeltaTime())
+	gam.FpsCameraUpdate(camera, fps.DeltaTime(), 0.1, 10000.0, 0.5, gfx.gfx_viewportSize.x, gfx.gfx_viewportSize.y)
 	gam.FpsCameraApply(camera, &gfx.State)
 
 	var dt f32 = f64.f32(fps.DeltaTime())
@@ -116,9 +119,9 @@ func gameOnUpdate(controlIndex i32, controlAction i32) {
 			ty = ty - 20.0 * dt + f32.rand() * 10.0 * dt
 		}
 
-		//var texture gfx.Texture = gui.AnimationGetFrame(animation, frame)
-		//var batch gfx.BatchId = gfx.GetBatch(gfx.g_fxPerspectiveTexture, texture, 0, false, 4096 * 30)
-		//g_synths[i].batch = batch
+		var textureId gfx.TextureId = gui.AnimationGetFrame(animation, frame)
+		var batch gfx.BatchId = gfx.GetBatch(gfx.g_fxPerspectiveTexture, texture, 0, gfx.g_linearClamp, false, 4096 * 30)
+		g_synths[i].batch = batch
 		g_synths[i].frame = frame
 		g_synths[i].ty = ty
 	}
@@ -135,17 +138,14 @@ func gameOnRender(controlIndex i32, controlAction i32) {
 	gfx.EffectAssignMatrix4(gfx.g_fxPerspectiveTexture, 2, gam.FpsCameraGetProjection(camera), false)
 
 	// cubeMesh
-	gfx.EffectAssignTexture(gfx.g_fxPerspectiveTexture, 0, texture.name)
-	gfx.TextureWrap(gfx.REPEAT, gfx.REPEAT, gfx.REPEAT)
-	gfx.TextureFilter(gfx.LINEAR, gfx.LINEAR)
+	gfx.EffectAssignTexture(gfx.g_fxPerspectiveTexture, 0, texture)
+	gfx.TextureSamplerState(texture, gfx.g_linearWrap)
 	gfx.EffectAssignMatrix4(gfx.g_fxPerspectiveTexture, 0, world, false)
 	// ISSUE : can't use gfx.State.View : error: 13_camera.cx:154 function 'EffectAssignMatrix4' expected input argument of type '[]f32'; 'f32' was provided
 	gfx.MeshRender(cubeMesh)
 
 	// groundMesh
-	gfx.EffectAssignTexture(gfx.g_fxPerspectiveTexture, 0, texture.name)
-	gfx.TextureWrap(gfx.REPEAT, gfx.REPEAT, gfx.REPEAT)
-	gfx.TextureFilter(gfx.LINEAR, gfx.LINEAR)
+	gfx.EffectAssignTexture(gfx.g_fxPerspectiveTexture, 0, texture)
 	gfx.EffectAssignMatrix4(gfx.g_fxPerspectiveTexture, 0, identity, false)
 	DEBUG_0 = resize(DEBUG_0, 4)
 	DEBUG_0[0] = 0.0
@@ -158,13 +158,13 @@ func gameOnRender(controlIndex i32, controlAction i32) {
 	for i := 0; i < g_synthCount; i++ {
 		var frame i32 = g_synths[i].frame
 		var animation gui.AnimationId = g_synths[i].animation
-		var t gfx.Texture = gui.AnimationGetFrame(animation, frame) // ISSUE : can't be named texture : silently clash with global variable
-		var batch gfx.BatchId = gfx.GetBatch(gfx.g_fxPerspectiveTexture, t, 0, false, 4096 * 30)
+		var t gfx.TextureId = gui.AnimationGetFrame(animation, frame) // ISSUE : can't be named texture : silently clash with global variable
+		var batch gfx.BatchId = gfx.GetBatch(gfx.g_fxPerspectiveTexture, t, 0, gfx.g_linearClamp, false, 4096 * 30)
 		g_synths[i].batch = batch
 	}
 
 	gfx.BeginBatches()
-	for i = 0; i < g_synthCount; i++ { // ISSUE : can't use i := 0, Error: 14_synth.cx:250 'i' redeclared
+	for i := 0; i < g_synthCount; i++ {
 		var batch gfx.BatchId = g_synths[i].batch
 		var mesh gfx.MeshId = gfx.BatchGetMesh(batch)
 		var tx f32 = g_synths[i].tx
@@ -247,8 +247,8 @@ func main()() {
 	cubeMesh = gfx.MeshLock(gfx.TRIANGLES, gfx.g_vertexColorAttributes, 36 * 1024)
 	groundMesh = gfx.MeshLock(gfx.TRIANGLES, gfx.g_vertexColorAttributes, 6 * 64 * 64)
 	texture = gfx.TextureCreate(sprintf("%s/textures/Skycoin-Cloud-BW-Vertical-on_black@2x.png", app.DataDir()),
-		gfx.LINEAR, gfx.LINEAR, gfx.CLAMP_TO_EDGE, gfx.CLAMP_TO_EDGE, gfx.CLAMP_TO_EDGE, 0, 0, true)
-	camera = gam.FpsCameraCreate(0.1, 10000.0, 0.5, gfx.gfx_viewportSize.x, gfx.gfx_viewportSize.y)
+		gfx.FORMAT_R8_G8_B8_A8, 0, 0, -1, false)
+	camera = gam.FpsCameraCreate()
 	identity = mat.Identity(identity)
 	g_synths = resize(g_synths, g_synthCount)
 	var audioId snd.AudioId = snd.AudioCreate(sprintf("%s/audios/skycoin_baby.wav", app.DataDir()))
@@ -257,7 +257,7 @@ func main()() {
    	// exitScreen
 	exitScreen  = gui.ScreenCreate("exitScreen")
 	gui.ControlSetSkin(exitScreen.base, gui.g_modalSkin)
-	gui.ControlSetBounds(exitScreen.base, gfx.gfx_viewportBounds)
+	gui.ControlSetDock(exitScreen.base, gui.DOCK_FILL)
 	gui.ScreenSetDuration(exitScreen, -2.0D)
 	gui.ScreenSetModal(exitScreen, true)
 
@@ -286,7 +286,7 @@ func main()() {
 	// mainScreen
 	var mainScreen gui.ScreenId = gui.ScreenCreate("mainScreen")
 	gui.ControlSetSkin(mainScreen.base, gui.g_blackSkin)
-	gui.ControlSetSize(mainScreen.base, gfx.gfx_viewportSize)
+	gui.ControlSetDock(mainScreen.base, gui.DOCK_FILL)
 	gui.ControlSetPadding(mainScreen.base, mat.v4_(200.0, 150.0, 200.0, 150.0))
 	gui.ScreenSetDuration(mainScreen, -1.0D)
 	gui.ScreenSetOnExit(mainScreen, exitScreen)
@@ -322,7 +322,7 @@ func main()() {
 
 	// gameScreen
 	gameScreen = gui.ScreenCreate("gameScreen")
-	gui.ControlSetSize(gameScreen.base, gfx.gfx_viewportSize)
+	gui.ControlSetDock(gameScreen.base, gui.DOCK_FILL)
 	gui.ScreenSetDuration(gameScreen, -1.0D)
 	gui.ScreenSetOnExit(gameScreen, mainScreen)
 	gui.ScreenSetOnEvent(gameScreen, "main", "gameOnEvent")
@@ -332,7 +332,7 @@ func main()() {
 	// titleScreen
 	var titleScreen gui.ScreenId = gui.ScreenCreate("titleScreen")
 	gui.ControlSetSkin(titleScreen.base, gui.g_blackSkin)
-	gui.ControlSetBounds(titleScreen.base, gfx.gfx_viewportBounds)
+	gui.ControlSetDock(titleScreen.base, gui.DOCK_FILL)
 	gui.ScreenSetDuration(titleScreen, 2.0D)
 	gui.ScreenSetOnNext(titleScreen, mainScreen)
 	{
@@ -350,7 +350,7 @@ func main()() {
 	// skycoinScreen
 	var skycoinScreen gui.ScreenId = gui.ScreenCreate("skycoinSceen")
 	gui.ControlSetSkin(skycoinScreen.base, gui.g_blackSkin)
-	gui.ControlSetBounds(skycoinScreen.base, gfx.gfx_viewportBounds)
+	gui.ControlSetDock(skycoinScreen.base, gui.DOCK_FILL)
 	gui.ScreenSetDuration(skycoinScreen, 2.0D)
 	gui.ScreenSetOnUpdate(skycoinScreen, "main", "skycoinOnUpdate")
 	gui.ScreenSetOnNext(skycoinScreen, titleScreen)
@@ -367,7 +367,7 @@ func main()() {
 	// bootScreen
 	var bootScreen gui.ScreenId = gui.ScreenCreate("bootScreen")
 	gui.ControlSetSkin(bootScreen.base, gui.g_bootSkin)
-	gui.ControlSetSize(bootScreen.base, gfx.gfx_viewportSize)
+	gui.ControlSetDock(bootScreen.base, gui.DOCK_FILL)
 	gui.ScreenSetDuration(bootScreen, 2.0D)
 	gui.ScreenSetOnNext(bootScreen, skycoinScreen)
 
@@ -376,6 +376,8 @@ func main()() {
 	gam.Run()
 
 	// destroy
+	gfx.MeshUnlock(cubeMesh)
+	gfx.MeshUnlock(groundMesh)
 	gam.Destroy()
 }
 

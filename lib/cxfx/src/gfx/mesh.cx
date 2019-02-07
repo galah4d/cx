@@ -395,7 +395,7 @@ func MeshAppendOrthoQuad(id MeshId, rect mat.v4, uv mat.v4, color mat.v4, clip m
 			u0 = u0 + du * deltaLeft / w
 			u1 = u1 + du * deltaRight / w
 			v1 = v1 + dv * deltaBottom / h
-			v0 = v0 + dv * deltaTop /h
+			v0 = v0 + dv * deltaTop / h
 
 			x = 2.0 * i32.f32(f32.i32(x)) / gfx_width - 1.0
 			y = 2.0 * i32.f32(f32.i32(y)) / gfx_height - 1.0
@@ -469,7 +469,7 @@ func MeshAppendOrthoQuad(id MeshId, rect mat.v4, uv mat.v4, color mat.v4, clip m
 	}
 }
 
-// MeshAppendOrthoQuad
+// MeshAppendPlane
 func MeshAppendPlane(id MeshId, position mat.v3, width mat.v3, height mat.v3, resx i32, resy i32, uv mat.v4, color mat.v4) {
 	panicIfNot(IsValidMesh(id), "invalid id")
 

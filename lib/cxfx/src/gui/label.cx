@@ -163,8 +163,6 @@ func LabelProcessEvent(id LabelId, event *app.Event) (out i32) {
 func LabelMeasure(id LabelId) (width f32, height f32) { // ##1 factorize with LabelResize
 	panicIfNot(IsValidLabel(id), "invalid id")
 	//ControlPrint("LabelResize : ", id.base, false)
-	var i32Width i32
-	var i32Hheight i32
 	var text str = g_labels[id.label].text
 
 	var fontId FontId = g_labels[id.label].font
@@ -203,8 +201,6 @@ func LabelMeasure(id LabelId) (width f32, height f32) { // ##1 factorize with La
 func LabelResize(id LabelId) () {
 	panicIfNot(IsValidLabel(id), "invalid id")
 	//ControlPrint("LabelResize : ", id.base, false)
-	var i32Width i32
-	var i32Hheight i32
 	var text str = g_labels[id.label].text
 
 	var fontId FontId = g_labels[id.label].font
@@ -244,7 +240,6 @@ func LabelResize(id LabelId) () {
 	//var size mat.v2 = g_controls[controlIndex].renderSize
 	var size mat.v2 = g_controls[controlIndex].size
 	var scale mat.v2 = g_controls[controlIndex].scale
-	var padding mat.v4 = g_controls[controlIndex].padding
 	//printf("LABEL_SCALE %f, %f, width %f, height %f, scale.x * width %f, scale.y * height %f\n", scale.x, scale.y, width, height, scale.x * width, scale.y * height)
 
 	var newSize mat.v2 = mat.v2_mul(scale, pixelBounds)
@@ -256,8 +251,8 @@ func LabelResize(id LabelId) () {
 	//position.y = position.y - newSize.y / 2.0
 	g_labels[id.label].textPosition = position
 	//printf("LABEL_TEXT_POSITION %f, %f\n", position.x, position.y)
-	var fontTexture gfx.Texture = g_fonts[fontIndex].textures[textureIndex]
-	g_labels[id.label].batch = gfx.GetBatch(gfx.g_fxTexture, fontTexture, 0, true, 4096 * 30) // ##0 panic if g_fonts[fontIndex].textures[textureIndex] is used as arg0
+	var fontTexture gfx.TextureId = g_fonts[fontIndex].textures[textureIndex]
+	g_labels[id.label].batch = gfx.GetBatch(gfx.g_fxTexture, fontTexture, 0, gfx.g_linearWrap, true, 4096 * 30) // ##0 panic if g_fonts[fontIndex].textures[textureIndex] is used as arg0
 	//ControlPrint("LabelResize :", id.base, false)
 }
 
@@ -273,7 +268,7 @@ func LabelRender(id LabelId, clip mat.v4, stack i32) () {
 	var fontSize i32 = g_labels[id.label].textSize
 	var textureIndex i32 = FontGetTextureIndex(fontId, fontSize)
 
-	var fontTexture gfx.Texture = g_fonts[fontId.font].textures[textureIndex] // ##0 auto select best size
+	var fontTexture gfx.TextureId = g_fonts[fontId.font].textures[textureIndex] // ##0 auto select best size
 	var fontName str = g_fonts[fontId.font].names[textureIndex]
 
 	//printf("LabelRender : using font %s - %d, %d, %d\n", fontName, fontTexture.name, fontTexture.width, fontTexture.height)

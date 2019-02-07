@@ -72,5 +72,5 @@ func Run()() {
 // Destroy ...
 func Destroy() {
 	snd.Destroy()
-	gfx.Free()
+	gfx.Destroy()
 }

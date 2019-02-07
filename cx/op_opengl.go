@@ -283,8 +283,10 @@ func op_gl_TexParameteri(expr *CXExpression, fp int) {
 }
 
 func op_gl_TexImage2D(expr *CXExpression, fp int) {
-	inp1, inp2, inp3, inp4, inp5, inp6, inp7, inp8 := expr.Inputs[0], expr.Inputs[1], expr.Inputs[2], expr.Inputs[3], expr.Inputs[4], expr.Inputs[5], expr.Inputs[6], expr.Inputs[7]
-	gl.TexImage2D(uint32(ReadI32(fp, inp1)), ReadI32(fp, inp2), ReadI32(fp, inp3), ReadI32(fp, inp4), ReadI32(fp, inp5), ReadI32(fp, inp6), uint32(ReadI32(fp, inp7)), uint32(ReadI32(fp, inp8)), nil)
+	gl.TexImage2D(uint32(ReadI32(fp, expr.Inputs[0])), ReadI32(fp, expr.Inputs[1]), ReadI32(fp, expr.Inputs[2]),
+		ReadI32(fp, expr.Inputs[3]), ReadI32(fp, expr.Inputs[4]), ReadI32(fp, expr.Inputs[5]),
+		uint32(ReadI32(fp, expr.Inputs[6])), uint32(ReadI32(fp, expr.Inputs[7])),
+		gl.Ptr(ReadData(fp, expr.Inputs[8], -1)))
 }
 
 func op_gl_Clear(expr *CXExpression, fp int) {
